@@ -4,7 +4,6 @@ import style from '../utils/style.module.css'
 import NavBarCustom from '../../NavBarCustom/views'
 import { MainContext } from '../../../context/MainContext'
 import Footer from '../components/Footer'
-import { userPermisos } from '../utils/js/PermisosUser'
 import Swal from 'sweetalert2'
 import { storage } from '../../../storage/storage'
 import { getData, removeData } from '../../../storage/cookies-store'
@@ -22,10 +21,10 @@ const MainContent = () => {
 			navigate('/login')
 			return
 		}
-		if (userPermisos.find((perm) => perm.path == location.pathname && perm.status == 0)) {
-			Swal.fire({ title: 'Atención!', icon: 'warning', text: 'No tenes accesso para esta vista', timer: 2000 })
-			navigate('/Home')
-		}
+		// if (userPermisos.find((perm) => perm.path == location.pathname && perm.status == 0)) {
+		// 	Swal.fire({ title: 'Atención!', icon: 'warning', text: 'No tenes accesso para esta vista', timer: 2000 })
+		// 	navigate('/Home')
+		// }
 		if (!location.pathname.includes('/Abm/') && !location.pathname.includes('/AbmDevice/')) {
 			setInfoNav('')
 		}

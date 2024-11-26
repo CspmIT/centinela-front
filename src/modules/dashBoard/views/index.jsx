@@ -28,10 +28,6 @@ const componentMap = [
 		name: 'TableDashboar',
 		link: () => import('../../core/components/GraficodePrueba/TableDashboar'),
 	},
-	{
-		name: 'MapPrueba',
-		link: () => import('../../map/components/MapCustom'),
-	},
 ]
 
 function DashBoard() {
