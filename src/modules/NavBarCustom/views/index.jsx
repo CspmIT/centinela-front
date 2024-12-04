@@ -31,7 +31,7 @@ import { front } from '../../../utils/routes/app.routes'
 import styles from '../utils/css/styles.module.css'
 import { io } from 'socket.io-client'
 import Cookies from 'js-cookie'
-import Logo from '/src/assets/img/Logo/LogoText.png'
+import Logo from '/src/assets/img/Logo/LogoTextAgua.png'
 function NavBarCustom({ setLoading }) {
 	const [open, setOpen] = useState(false)
 	const [nameCoop, setNameCoop] = useState('')
@@ -62,14 +62,14 @@ function NavBarCustom({ setLoading }) {
 	}, [])
 	const [newEvent, setNewEvent] = useState(false)
 
-	useEffect(() => {
-		const socket = io(front.Reconecta, { path: '/api/socket.io', query: { token: Cookies.get('token') } })
+	// useEffect(() => {
+	// 	const socket = io(front['Mas Agua'], { path: '/api/socket.io', query: { token: Cookies.get('token') } })
 
-		socket.on('alert-active', (data) => {
-			setNewEvent(data.active)
-		})
-		return () => socket.disconnect()
-	}, [])
+	// 	socket.on('alert-active', (data) => {
+	// 		setNewEvent(data.active)
+	// 	})
+	// 	return () => socket.disconnect()
+	// }, [])
 
 	useEffect(() => {
 		setButtonActive(location)

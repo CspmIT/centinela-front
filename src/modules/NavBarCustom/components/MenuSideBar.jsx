@@ -18,27 +18,27 @@ const MenuSideBar = (tabActive, infoNav) => [
 		link: '/Diagram',
 		icon: <FaProjectDiagram className=' text-3xl' />,
 	},
-	{
-		name: 'Bitácora',
-		link: '/bitacora',
-		icon: <MdContentPaste className=' text-3xl' />,
-	},
-	{
-		name: 'Configuración',
-		icon: <FaCogs className='dark:text-white text-3xl' />,
-		submenus: [
-			{
-				name: 'Accesos',
-				link: '/config/menu',
-				icon: <BsFillMenuButtonWideFill className='dark:text-white text-2xl my-1' />,
-			},
-			{
-				name: 'Notificaciones',
-				link: '/config/notifications',
-				icon: <MdNotificationsActive className='dark:text-white text-2xl my-1' />,
-			},
-		],
-	},
+	// {
+	// 	name: 'Bitácora',
+	// 	link: '/bitacora',
+	// 	icon: <MdContentPaste className=' text-3xl' />,
+	// },
+	// {
+	// 	name: 'Configuración',
+	// 	icon: <FaCogs className='dark:text-white text-3xl' />,
+	// 	submenus: [
+	// 		{
+	// 			name: 'Accesos',
+	// 			link: '/config/menu',
+	// 			icon: <BsFillMenuButtonWideFill className='dark:text-white text-2xl my-1' />,
+	// 		},
+	// 		{
+	// 			name: 'Notificaciones',
+	// 			link: '/config/notifications',
+	// 			icon: <MdNotificationsActive className='dark:text-white text-2xl my-1' />,
+	// 		},
+	// 	],
+	// },
 
 	// {
 	// 	name: 'Paginas',

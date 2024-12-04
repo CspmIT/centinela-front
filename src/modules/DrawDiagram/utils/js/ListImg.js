@@ -1,0 +1,21 @@
+const urlBase = 'src/modules/DrawDiagram/utils/assets/img/newDiagram'
+export const ListImg = () => [
+	{ id: 1, name: 'Cisterna enterrada', src: `${urlBase}/Cisterna.png` },
+	{ id: 2, name: 'Cisterna horizontal', src: `${urlBase}/tanque_horizontal.png` },
+	{ id: 3, name: 'Cisterna Vertical Simple', src: `${urlBase}/Tanques_agua_simple.png` },
+	{ id: 4, name: 'Cisterna Vertical Multiple', src: `${urlBase}/Tanques_agua_multiple.png` },
+	{ id: 5, name: 'Tanque elevado', src: `${urlBase}/tanque_elevado2.png` },
+	{ id: 6, name: 'Caudalímetro', src: `${urlBase}/Caudalimetro.png` },
+	{ id: 7, name: 'Dosificador', src: `${urlBase}/Dosificador_quimicos.png` },
+	{ id: 8, name: 'Barómetro', src: `${urlBase}/Barometro.png` },
+	{ id: 9, name: 'Presostato', src: `${urlBase}/Presostato_rojo.png` },
+	{ id: 10, name: 'Bidón', src: `${urlBase}/Estanque_cloro.png` },
+	{ id: 11, name: 'Llave de paso', src: `${urlBase}/Valvula.png` },
+	{ id: 12, name: 'Bomba presurizadora', src: `${urlBase}/Bomba_presurizadora.png` },
+	{ id: 13, name: 'Bomba sumergible', src: `${urlBase}/Bomba_sumergible.png` },
+	{ id: 14, name: 'Ósmosis', src: `${urlBase}/ósmosis.png` },
+	{ id: 15, name: 'Filtro multimedia', src: `${urlBase}/Filtro_Multimedia.png` },
+	{ id: 16, name: 'Filtro cartucho', src: `${urlBase}/Filtro_cartucho.png` },
+	{ id: 17, name: 'Filtro de manga', src: `${urlBase}/Tubos_osmosis.png` },
+	{ id: 18, name: 'Instrumento', src: `${urlBase}/Sonda_conductimetro.png` },
+]

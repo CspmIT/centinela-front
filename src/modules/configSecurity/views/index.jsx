@@ -37,7 +37,7 @@ function ConfigSecurity() {
 			}
 		>
 			<div className=' w-2/3 mt-4'>
-				<h1 className='text-2xl mb-3'>Usuarios Reconecta</h1>
+				<h1 className='text-2xl mb-3'>Usuarios Mas Agua</h1>
 				<TableCustom
 					data={listUsers.filter((usr) => usr.id_profile !== 1)}
 					columns={ColumnsUser(editUserRecloser)}

@@ -48,7 +48,7 @@ export const generateSources = async (data, dataModify, cantReg) => {
 }
 
 const routesDevice = {
-	Reconectador: { getAll: 'getAllReclosers', topic: 'coop/energia/Reconectadores/' },
+	// Reconectador: { getAll: 'getAllReclosers', topic: 'coop/energia/Reconectadores/' },
 }
 
 export const sendConfigMqtt = async (sources, device, version) => {

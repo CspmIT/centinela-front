@@ -20,26 +20,26 @@ function ConfigNotifications() {
 		setLoading(false)
 	}
 
-	useEffect(() => {
-		getConfig()
-		const socket = io(front.Reconecta, { path: '/api/socket.io' })
-		socket.on('connect', () => {
-			console.log('Conectado al servidor de sockets')
-		})
+	// useEffect(() => {
+	// 	getConfig()
+	// 	const socket = io(front['Mas Agua'], { path: '/api/socket.io' })
+	// 	socket.on('connect', () => {
+	// 		console.log('Conectado al servidor de sockets')
+	// 	})
 
-		// Solicitar acceso al conectar
-		socket.emit('access-config', user, (response) => {
-			setHasAccess(response)
-			if (!response) {
-				socket.disconnect()
-			}
-		})
+	// 	// Solicitar acceso al conectar
+	// 	socket.emit('access-config', user, (response) => {
+	// 		setHasAccess(response)
+	// 		if (!response) {
+	// 			socket.disconnect()
+	// 		}
+	// 	})
 
-		// Limpiar al desmontar el componente
-		return () => {
-			socket.disconnect()
-		}
-	}, [])
+	// 	// Limpiar al desmontar el componente
+	// 	return () => {
+	// 		socket.disconnect()
+	// 	}
+	// }, [])
 
 	if (loading)
 		return (

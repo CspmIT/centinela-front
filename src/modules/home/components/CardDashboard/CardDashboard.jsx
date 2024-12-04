@@ -11,9 +11,10 @@ function CardDashboard() {
 	useEffect(() => {
 		const dataDashboard = async () => {
 			const [dataRecloser, dataAlarm] = await Promise.all([
-				request(`${backend.Reconecta}/getAllReclosers`, 'GET'),
-				request(`${backend.Reconecta}/recloserAlarm`, 'GET'),
+				// request(`${backend['Mas Agua']}/getAllReclosers`, 'GET'),
+				// request(`${backend['Mas Agua']}/recloserAlarm`, 'GET'),
 			])
+			if (!dataRecloser) return false
 			const recloserIds = dataRecloser.data.map((item) => item.id)
 
 			// Limitar el número de solicitudes simultáneas
@@ -22,7 +23,7 @@ function CardDashboard() {
 			for (let i = 0; i < recloserIds.length; i += maxConcurrentRequests) {
 				const chunk = recloserIds.slice(i, i + maxConcurrentRequests)
 				const responses = await Promise.all(
-					chunk.map((id) => request(`${backend.Reconecta}/getAcRecloser?id=${id}`, 'GET'))
+					chunk.map((id) => request(`${backend['Mas Agua']}/getAcRecloser?id=${id}`, 'GET'))
 				)
 				recloserACStatuses.push(...responses)
 			}

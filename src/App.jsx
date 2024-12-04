@@ -17,6 +17,8 @@ import Notifications from './modules/ConfigNotifications/views/index'
 import ConfigSecurity from './modules/configSecurity/views'
 import LoginCooptech from './modules/LoginApp/view/LoginCooptech'
 import AddMenu from './modules/ConfigMenu/components/AddMenu'
+import ListDrawDiagram from './modules/DrawDiagram/views/ListDrawDiagram'
+import DrawDiagram from './modules/DrawDiagram/components/DrawDiagram'
 
 function App() {
 	const { darkMode } = useContext(MainContext)
@@ -35,6 +37,8 @@ function App() {
 		{ path: '/notificaciones', element: <Notification /> },
 		{ path: '/profile', element: <Profile /> },
 		{ path: '/config/notifications', element: <Notifications /> },
+		{ path: '/config/diagram', element: <ListDrawDiagram /> },
+		{ path: '/newDiagram', element: <DrawDiagram /> },
 		{ path: '/AddMenu', element: <AddMenu /> },
 	]
 	//Incorporo el theme de mui

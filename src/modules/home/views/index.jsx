@@ -30,7 +30,7 @@ const Home = () => {
 	const tabsHome = [
 		{
 			id: 1,
-			title: 'Reconectadores',
+			title: 'Sensores',
 			component: (
 				<>
 					<h1>Hola</h1>
@@ -40,11 +40,11 @@ const Home = () => {
 	]
 	return (
 		<div className='flex flex-col w-full pt-4'>
-			{!isMobile ? (
+			{/* {!isMobile ? (
 				<div className='flex flex-wrap gap-3 mb-5 px-3 max-sm:hidden'>
 					<CardDashboard />
 				</div>
-			) : null}
+			) : null} */}
 			<TabsHome tabs={tabsHome} />
 		</div>
 	)

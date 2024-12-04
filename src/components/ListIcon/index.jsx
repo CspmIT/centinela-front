@@ -1,4 +1,4 @@
-import { BsFillMenuButtonWideFill } from 'react-icons/bs'
+import { BsFillDiagram3Fill, BsFillMenuButtonWideFill } from 'react-icons/bs'
 import { FaCogs, FaFile, FaMapMarkedAlt, FaProjectDiagram } from 'react-icons/fa'
 import { MdContentPaste, MdNotificationsActive } from 'react-icons/md'
 import { RiAlertFill, RiDashboardFill } from 'react-icons/ri'
@@ -9,6 +9,7 @@ const ListIcon = () => [
 	{ title: 'Bitacora', name: 'MdContentPaste', icon: <MdContentPaste className=' text-3xl' /> },
 	{ title: 'Configuración', name: 'FaCogs', icon: <FaCogs className=' text-3xl' /> },
 	{ title: 'Access', name: 'BsFillMenuButtonWideFill', icon: <BsFillMenuButtonWideFill className=' text-3xl' /> },
+	{ title: 'Diagrama', name: 'BsFillDiagram3Fill', icon: <BsFillDiagram3Fill className=' text-3xl' /> },
 	{ title: 'Notificación', name: 'MdNotificationsActive', icon: <MdNotificationsActive className=' text-3xl' /> },
 	{ title: 'Dashboard', name: 'RiDashboardFill', icon: <RiDashboardFill className=' text-3xl' /> },
 	{ title: 'Alerta', name: 'RiAlertFill', icon: <RiAlertFill className=' text-3xl' /> },

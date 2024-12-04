@@ -1,0 +1,7 @@
+.hscreenCustom {
+	height: calc(100vh - 7rem);
+}
+.hMaxListImg {
+	max-height: calc(100vh - 15rem) !important;
+	overflow-y: scroll;
+}
