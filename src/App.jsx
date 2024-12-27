@@ -19,6 +19,8 @@ import LoginCooptech from './modules/LoginApp/view/LoginCooptech'
 import AddMenu from './modules/ConfigMenu/components/AddMenu'
 import ListDrawDiagram from './modules/DrawDiagram/views/ListDrawDiagram'
 import DrawDiagram from './modules/DrawDiagram/components/DrawDiagram'
+import SelectType from './modules/Charts/views/SelectType'
+import ConfigGraphic from './modules/Charts/views/ConfigGraphic'
 
 function App() {
 	const { darkMode } = useContext(MainContext)
@@ -40,6 +42,8 @@ function App() {
 		{ path: '/config/diagram', element: <ListDrawDiagram /> },
 		{ path: '/newDiagram', element: <DrawDiagram /> },
 		{ path: '/AddMenu', element: <AddMenu /> },
+        {path: '/config/graphic', element: <SelectType />},
+        {path: '/config/graphic/:id', element: <ConfigGraphic/>},
 	]
 	//Incorporo el theme de mui
 	const lightTheme = createTheme({
