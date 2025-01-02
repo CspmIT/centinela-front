@@ -1,22 +1,41 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Chip, Paper, Typography } from '@mui/material'
+import { Button, Card, IconButton, Modal, Paper, Typography } from '@mui/material'
 import { useVars } from './ProviderVars'
+import ChipCustom from '../ChipCustom/ChipCustom'
+import CalculatorVars from './ClculatorVars'
+import { Close } from '@mui/icons-material'
+import Swal from 'sweetalert2'
 
 const Calculadora = ({ display, setDisplay, showNumbers }) => {
 	const [state, dispatch] = useVars()
-
+	const [modalInfo, setModalInfo] = useState(false)
+	const [dataVariable, setDataVariable] = useState({})
 	const calculatorRef = useRef(null)
 	const inputRef = useRef(null)
 
 	const [newDisplay, setNewDisplay] = useState(display)
 
 	const handleDeleteVar = (variable) => {
-		dispatch({ type: 'REMOVE_CALC_VAR', payload: variable })
-		const newValue = newDisplay.filter((item) => item != `{{${variable}}}`)
-		setNewDisplay(newValue)
-		setDisplay(newValue)
+		Swal.fire({
+			title: '¿Estas seguro?',
+			text: 'No podras revertir esta acción',
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonText: 'Si, eliminar',
+			cancelButtonText: 'Cancelar',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				dispatch({ type: 'REMOVE_CALC_VAR', payload: variable })
+				const newValue = newDisplay.filter((item) => item != `{{${variable}}}`)
+				setNewDisplay(newValue)
+				setDisplay(newValue)
+			}
+		})
 	}
-
+	const handleInfo = (variable) => {
+		setModalInfo(true)
+		setDataVariable(variable)
+	}
 	const handleClear = () => {
 		setNewDisplay([])
 		setDisplay([])
@@ -92,6 +111,11 @@ const Calculadora = ({ display, setDisplay, showNumbers }) => {
 		inputRef.current.focus()
 	}
 	useEffect(() => {
+		if (state.equation.length) {
+			setNewDisplay(state.equation)
+		}
+	}, [])
+	useEffect(() => {
 		dispatch({ type: 'SET_EQUATION', payload: newDisplay })
 	}, [newDisplay])
 
@@ -123,13 +147,14 @@ const Calculadora = ({ display, setDisplay, showNumbers }) => {
 				<div className='w-full flex flex-col gap-3'>
 					{state.calcVars.length >= 1 && (
 						<div className='flex gap-1 w-full flex-wrap'>
-							{state.calcVars.map((variable) => (
-								<Chip
-									key={variable.calc_name_var}
-									color='success'
+							{state.calcVars.map((variable, index) => (
+								<ChipCustom
+									key={index}
 									onClick={() => handleClick(`{{${variable.calc_name_var}}}`)}
-									label={variable.calc_name_var}
 									onDelete={() => handleDeleteVar(variable.calc_name_var)}
+									color={'success'}
+									onInfo={() => handleInfo(variable)}
+									label={variable.calc_name_var}
 								/>
 							))}
 						</div>
@@ -161,6 +186,18 @@ const Calculadora = ({ display, setDisplay, showNumbers }) => {
 					</div>
 				</div>
 			</div>
+			<Modal className='flex justify-center items-center ' open={modalInfo} onClose={() => setModalInfo(false)}>
+				<Card className='relative p-5 w-3/4'>
+					<IconButton className='!absolute top-2 right-2' onClick={() => setModalInfo(false)}>
+						<Close />
+					</IconButton>
+
+					<Typography variant='h5' className='text-center !mb-3'>
+						Detalle Variable de calculo
+					</Typography>
+					<CalculatorVars data={dataVariable} />
+				</Card>
+			</Modal>
 		</Paper>
 	)
 }

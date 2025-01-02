@@ -1,45 +1,60 @@
-import { Checkbox, MenuItem, TextField, Typography } from '@mui/material'
+import { Checkbox, MenuItem, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-function PropertyField({ field, dataField }) {
-	const [idVariable, setIdVariable] = useState(dataField.id_variable)
-	const [show, setShow] = useState(dataField.show)
-	const [listVariable, setListVariable] = useState([])
+function PropertyField({ field, data, listVariable }) {
+	const [info, setInfo] = useState(data.variables)
+
 	useEffect(() => {
-		setListVariable([{ name: 'variable 1', id: 1 }])
-	}, [])
+		setInfo(data.variables)
+	}, [data])
+
+	const setVariable = (value) => {
+		const newInfo = { ...info }
+		newInfo.variables[field].id_variable = value
+		data.setVariables(newInfo.variables)
+		setInfo(newInfo)
+	}
+
+	const setShowVar = (value) => {
+		const newInfo = { ...info }
+		newInfo.variables[field].show = value
+		data.setVariables(newInfo.variables)
+		setInfo(newInfo)
+	}
 
 	return (
-		<>
-			{/* <Typography variant='body1' className='uppercase w-full text-center'>
-				{field}
-			</Typography> */}
-			<div className='flex w-full'>
-				<TextField
-					select
-					label={`Variable para ${field.toLocaleUpperCase()}`}
-					onChange={(e) => {
-						const value = e.target.value
-						setIdVariable(value)
-					}}
-					className='w-full'
-					value={idVariable}
-				>
-					<MenuItem value={0}>
-						<em>Selecciona una variable</em>
+		<div className='flex w-full'>
+			<TextField
+				select
+				label={`Variable para ${field.toLocaleUpperCase()}`}
+				onChange={(e) => {
+					const value = e.target.value
+					setVariable(value)
+				}}
+				className='w-full'
+				value={info?.variables?.[field]?.id_variable}
+			>
+				<MenuItem value={0}>
+					<em>Selecciona una variable</em>
+				</MenuItem>
+				{listVariable.map((variable, index) => (
+					<MenuItem key={index} value={variable.id}>
+						{variable.name}
 					</MenuItem>
-					{listVariable.map((variable, index) => (
-						<MenuItem key={index} value={variable.id}>
-							{variable.name}
-						</MenuItem>
-					))}
-				</TextField>
-				<div className='flex justify-start items-center border w-1/2' onClick={() => setShow(!show)}>
-					<Checkbox key={'text'} checked={show} onChange={(e) => setShow(e.target.checked)} />
-					Visualizar
-				</div>
+				))}
+			</TextField>
+			<div
+				className='flex justify-start items-center border w-1/2'
+				onClick={() => setShowVar(!info?.variables?.[field]?.show)}
+			>
+				<Checkbox
+					key={'text'}
+					checked={info?.variables?.[field]?.show}
+					onChange={(e) => setShowVar(e.target.checked)}
+				/>
+				Visualizar
 			</div>
-		</>
+		</div>
 	)
 }
 

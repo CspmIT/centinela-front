@@ -4,7 +4,10 @@ export const ListImg = () => [
 		id: 1,
 		name: 'Cisterna enterrada',
 		src: `${urlBase}/Cisterna.png`,
-		variables: { nivel: { id_variable: 0, show: false } },
+		variables: {
+			nivel: { id_variable: 0, show: false },
+			egreso: { id_variable: 0, show: false },
+		},
 	},
 	{
 		id: 2,

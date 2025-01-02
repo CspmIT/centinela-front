@@ -18,6 +18,11 @@ const reducer = (state, action) => {
 				...state,
 				calcVars: [...state.calcVars, action.payload],
 			}
+		case 'SET_CALC_VAR':
+			return {
+				...state,
+				calcVars: action.payload,
+			}
 		case 'REMOVE_CALC_VAR':
 			return {
 				...state,

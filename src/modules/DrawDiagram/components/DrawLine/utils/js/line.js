@@ -87,6 +87,7 @@ export const createLine = (points, fabricCanvasRef, setSelectedObject, changeToo
 		id: finalLine.id,
 		points: getPointsLine(finalLine),
 	})
+
 	// Crear puntos movibles para los extremos de la línea
 	const startCircle = new fabric.Circle({
 		id: `${id}_start`,
@@ -353,8 +354,8 @@ export const deleteLineTemp = (canvas) => {
  * @author Jose Romani <jose.romani@hotmail.com>
  */
 export const addMetadataPoints = (line, canvas) => {
-	const startPoint = canvas.getObjects('circle').find((item) => item.id == `${line.id}_start`)
-	const endPoint = canvas.getObjects('circle').find((item) => item.id == `${line.id}_end`)
+	const startPoint = canvas.getObjects('circle').find((item) => item.id == `${line.line.id}_start`)
+	const endPoint = canvas.getObjects('circle').find((item) => item.id == `${line.line.id}_end`)
 	startPoint.metadata = line
 	endPoint.metadata = line
 }
@@ -369,12 +370,12 @@ export const addMetadataPoints = (line, canvas) => {
  * @author Jose Romani <jose.romani@hotmail.com>
  */
 export const updatePropertyLine = (line, property, canvas) => {
-	const lineSelect = canvas.getObjects('line').find((obj) => obj.id === line.id)
+	const lineSelect = canvas.getObjects('line').find((obj) => obj.id === line.line.id)
 	if (!lineSelect) return
-	const value = parseInt(line[property]) || line[property]
+	const value = parseInt(line.line[property]) || line.line[property]
 	lineSelect.set({ [property]: value })
-	const circles_start = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.id}_start`))
-	const circles_end = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.id}_end`))
+	const circles_start = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.line.id}_start`))
+	const circles_end = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.line.id}_end`))
 	if (circles_start && circles_end && property !== 'stroke') {
 		circles_start.set('radius', 8 + value - 3)
 		circles_end.set('radius', 8 + value - 3)
@@ -394,22 +395,23 @@ export const updatePropertyLine = (line, property, canvas) => {
  * @author Jose Romani <jose.romani@hotmail.com>
  */
 const getLocationLineforText = (line) => {
-	const x1 = line.points.start.left
-	const x2 = line.points.end.left
-	const y1 = line.points.start.top
-	const y2 = line.points.end.top
+	const x1 = line.line.points.start.left
+	const x2 = line.line.points.end.left
+	const y1 = line.line.points.start.top
+	const y2 = line.line.points.end.top
 	const centerX = (x1 + x2) / 2
 	const centerY = (y1 + y2) / 2
 	let angleRadians = Math.atan2(y2 - y1, x2 - x1)
 	let offset = 20
 
 	let textY =
-		line.locationText !== 'Top'
+		line.text.locationText !== 'Top'
 			? centerY + offset // Arriba de la línea
 			: centerY - offset // Abajo de la línea
 	offset = angleRadians < 0.5 ? offset : 0
 	let textX = centerX - offset
 	if (angleRadians > 1.4 || angleRadians < -1.4) {
+		offset = line.text.locationText !== 'Top' ? -15 : 15
 		angleRadians = parseFloat(angleRadians) - Math.PI
 		textX = centerX - offset * Math.sin(angleRadians) * -1
 	}
@@ -427,36 +429,36 @@ const getLocationLineforText = (line) => {
  */
 export const addTextLine = (line, fabricCanvasRef) => {
 	const canvas = fabricCanvasRef.current
-	if (line?.showText) {
-		const textLine = canvas.getObjects('textbox').find((obj) => obj.id === `${line.id}_text_line`)
-		const Line = canvas.getObjects('line').find((obj) => obj.id === line.id)
+	if (line.text?.showText) {
+		const textLine = canvas.getObjects('textbox').find((obj) => obj.id === `${line.line.id}_text_line`)
+		const Line = canvas.getObjects('line').find((obj) => obj.id === line.line.id)
 		const textLocation = getLocationLineforText(line)
-		const maxWidth = calcWidthText(line.text, line.sizeText)
+		const maxWidth = calcWidthText(line.text.text, line.text.sizeText)
 		if (textLine) {
 			textLine.set({
-				text: line.text,
-				fontSize: line.sizeText,
-				fill: line.colorText,
-				originY: line.locationText === 'Top' ? 'bottom' : 'top',
-				backgroundColor: line.backgroundText,
+				text: line.text.text,
+				fontSize: line.text.sizeText,
+				fill: line.text.colorText,
+				originY: line.text.locationText === 'Top' ? 'bottom' : 'top',
+				backgroundColor: line.text.backgroundText,
 				left: textLocation.textX,
 				top: textLocation.textY,
 				angle: (textLocation.angleRadians * 180) / Math.PI,
 			})
 		} else {
-			const text = new fabric.Textbox(line.text, {
-				id: `${line.id}_text_line`,
+			const text = new fabric.Textbox(line.text.text, {
+				id: `${line.line.id}_text_line`,
 				left: textLocation.textX,
 				top: textLocation.textY,
 				angle: (textLocation.angleRadians * 180) / Math.PI,
-				fontSize: line.sizeText || 20,
+				fontSize: line.text.sizeText || 20,
 				fontFamily: 'Arial',
-				fill: line.colorText || '#000000',
+				fill: line.text.colorText || '#000000',
 				textAlign: 'center',
 				originX: 'center', // Establecer origen en el centro
-				originY: line.locationText === 'Top' ? 'bottom' : 'top',
+				originY: line.text.locationText === 'Top' ? 'bottom' : 'top',
 				width: maxWidth,
-				backgroundColor: line.backgroundText || 'white',
+				backgroundColor: line.text.backgroundText || 'white',
 				editable: false,
 				hasBorders: false,
 				hasControls: false,
@@ -491,8 +493,8 @@ export const animationDobleLine = (canvas, id) => {
 	if (!lineFlow) {
 		lineFlow = new fabric.Line([line.x1, line.y1, line.x2, line.y2], {
 			id: `${id}_back`,
-			stroke: invertHexColor(line.metadata.stroke),
-			strokeWidth: parseInt(line.metadata.strokeWidth),
+			stroke: invertHexColor(line.metadata.line.stroke),
+			strokeWidth: parseInt(line.metadata.line.strokeWidth),
 			strokeDashArray: [20, 30],
 			centeredScaling: true,
 			hasBorders: false,
@@ -510,23 +512,22 @@ export const animationDobleLine = (canvas, id) => {
 		canvas.add(lineFlow)
 	}
 	const animateLineFlow = () => {
-		if (!line.metadata.animation || !canvas.getObjects('line').some((item) => item.id == line.id)) {
+		if (!line.metadata.animation.animation || !canvas.getObjects('line').some((item) => item.id == line.id)) {
 			canvas.remove(lineFlow)
-			line.set('strokeWidth', parseInt(line.metadata.strokeWidth))
+			line.set('strokeWidth', parseInt(line.metadata.line.strokeWidth))
 			return
 		}
-		line.set('strokeWidth', parseInt(line.metadata.strokeWidth) + 4)
+		line.set('strokeWidth', parseInt(line.metadata.line.strokeWidth) + 4)
 		canvas.requestRenderAll()
 		updateLineMove(canvas, line)
-		// lineFlow.stroke = invertHexColor(line.metadata.stroke)
 		lineFlow.set({
-			stroke: invertHexColor(line.metadata.stroke),
+			stroke: invertHexColor(line.metadata.line.stroke),
 			x1: line.x1,
 			y1: line.y1,
 			x2: line.x2,
 			y2: line.y2,
 		})
-		const movement = line.metadata.invertAnimation ? 1 : -1
+		const movement = line.metadata.animation.invertAnimation ? 1 : -1
 		lineFlow.set('strokeDashOffset', lineFlow.strokeDashOffset - movement)
 
 		if (lineFlow.strokeDashOffset < -50 || lineFlow.strokeDashOffset > 50) {

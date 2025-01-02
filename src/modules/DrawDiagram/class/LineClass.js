@@ -1,73 +1,48 @@
-export class LineDiagram {
+/**
+ * Clase base Line para gestionar las propiedades principales de una línea.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class Line {
 	/**
-	 * @param {Object} params - Parámetros para inicializar la instancia.
-	 * @param {number} params.id - Identificador de la linea.
-	 * @param {Object} params.points - Objeto con los puntos {start:{left, top}, end:{left, top}}.
-	 * @param {string} params.stroke - Color de linea principal.
-	 * @param {number} params.strokeWidth - Ancho de la linea.
-	 * @param {string} params.colorSecondary - Color de linea secundaria.
-	 * @param {boolean} params.animation - Estado de la animacion de la linea.
-	 * @param {boolean} params.invertAnimation - Sentido de la animación.
-	 * @param {number} params.status - Estado de la linea (1 para activo, 0 para inactivo).
-	 * @param {string} params.text - Texto de la linea.
-	 * @param {number} params.sizeText - Tamaño del texto.
-	 * @param {number} params.colorText - Color del texto.
-	 * @param {string} params.backgroundText - Color de fondo.
+	 * @param {Object} params - Parámetros para inicializar la línea.
+	 * @param {number} params.id - Identificador de la línea.
+	 * @param {Object} params.points - Objeto con los puntos {start: {left, top}, end: {left, top}}.
+	 * @param {string} params.stroke - Color principal de la línea.
+	 * @param {number} params.strokeWidth - Ancho de la línea principal.
+	 * @param {string} params.colorSecondary - Color de la línea secundaria.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	constructor({
-		id,
-		points = { start: {}, end: {} },
-		stroke = '#000000',
-		strokeWidth = 3,
-		colorSecondary = '#000000',
-		animation = false,
-		invertAnimation = false,
-		status = 1,
-		showText = false,
-		text = 'texto predeterminado',
-		sizeText = 20,
-		colorText = '#000000',
-		backgroundText = '#ffffff',
-		locationText = 'Top',
-	}) {
-		if (!id || !points.start || !points.end) throw new Error('Debes pasar todo los parametros necesarios')
-		Object.assign(this, {
-			id,
-			points,
-			stroke,
-			strokeWidth,
-			colorSecondary,
-			animation,
-			invertAnimation,
-			status,
-			showText,
-			text,
-			sizeText,
-			colorText,
-			backgroundText,
-			locationText,
-		})
+	constructor({ id, points, stroke = '#000000', strokeWidth = 3, colorSecondary = '#000000' }) {
+		if (!id || !points?.start || !points?.end) {
+			throw new Error('Debes pasar todos los parámetros necesarios')
+		}
+		this.id = id
+		this.points = points
+		this.stroke = stroke
+		this.strokeWidth = strokeWidth
+		this.colorSecondary = colorSecondary
+		this.status = 1 // Activo por defecto
 	}
 
 	/**
-	 * Cambia el estado de la linea a inactivo.
+	 * Cambia el estado de la línea a inactivo.
+	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	delete() {
 		this.status = 0
 	}
 
 	/**
-	 * Establece los Puntos que componen la linea.
-	 * @param {Object} point - Objeto con los puntos { start:{left, top}, end:{left, top} }.
+	 * Establece los puntos de la línea.
+	 * @param {Object} points - Objeto con los puntos {start: {left, top}, end: {left, top}}.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setPoints(point) {
-		this.points = point
+	setPoints(points) {
+		this.points = points
 	}
 
 	/**
-	 * Establece el color principal de la linea.
+	 * Establece el color principal de la línea.
 	 * @param {string} color - Nuevo color principal.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
@@ -76,8 +51,8 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el ancho de la linea principal.
-	 * @param {number} width - Nuevo tamaño.
+	 * Establece el ancho de la línea principal.
+	 * @param {number} width - Nuevo ancho de la línea.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setWidth(width) {
@@ -85,17 +60,34 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el color de la linea secundaria.
-	 * @param {string} color - Nuevo Color para la linea secundaria.
+	 * Establece el color de la línea secundaria.
+	 * @param {string} color - Nuevo color para la línea secundaria.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setColorLineSecondary(color) {
 		this.colorSecondary = color
 	}
+}
+
+/**
+ * Clase LineAnimation para gestionar las animaciones de la línea.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class LineAnimation {
+	/**
+	 * @param {Object} params - Parámetros para la animación.
+	 * @param {boolean} params.animation - Estado de la animación.
+	 * @param {boolean} params.invertAnimation - Dirección de la animación.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor({ animation = false, invertAnimation = false }) {
+		this.animation = animation
+		this.invertAnimation = invertAnimation
+	}
 
 	/**
-	 * Establece si la linea tiene animación.
-	 * @param {boolean} status - Nuevo estado de activacion de la animación.
+	 * Establece si la línea tiene animación.
+	 * @param {boolean} status - Nuevo estado de la animación.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setAnimation(status) {
@@ -103,17 +95,49 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el Sentido de la animación.
-	 * @param {boolean} status - Nuevo Sentido.
+	 * Establece la dirección de la animación.
+	 * @param {boolean} status - Nuevo estado de la dirección de la animación.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setInvertAnimation(status) {
 		this.invertAnimation = status
 	}
+}
+
+/**
+ * Clase LineText para gestionar las propiedades relacionadas con el texto de la línea.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class LineText {
+	/**
+	 * @param {Object} params - Parámetros para el texto de la línea.
+	 * @param {boolean} params.showText - Determina si se muestra el texto.
+	 * @param {string} params.text - Contenido del texto.
+	 * @param {number} params.sizeText - Tamaño del texto.
+	 * @param {string} params.colorText - Color del texto.
+	 * @param {string} params.backgroundText - Color de fondo del texto.
+	 * @param {string} params.locationText - Ubicación del texto respecto a la línea.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor({
+		showText = false,
+		text = 'texto predeterminado',
+		sizeText = 20,
+		colorText = '#000000',
+		backgroundText = '#ffffff',
+		locationText = 'Top',
+	}) {
+		this.showText = showText
+		this.text = text
+		this.sizeText = sizeText
+		this.colorText = colorText
+		this.backgroundText = backgroundText
+		this.locationText = locationText
+	}
 
 	/**
-	 * Establece el estado para activar/desactivar el texto para la linea.
-	 * @param {boolean} status - Nuevo estado.
+	 * Establece si se muestra el texto.
+	 * @param {boolean} status - Nuevo estado de visibilidad del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setShowText(status) {
@@ -121,8 +145,8 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el nuevo texto.
-	 * @param {string} text - Nuevo texto.
+	 * Establece el contenido del texto.
+	 * @param {string} text - Nuevo contenido del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setText(text) {
@@ -130,8 +154,8 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el tamaño de la linea.
-	 * @param {number} size - Nuevo tamaño de texto.
+	 * Establece el tamaño del texto.
+	 * @param {number} size - Nuevo tamaño del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setSizeText(size) {
@@ -139,8 +163,8 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Establece el color de la linea.
-	 * @param {string} color - Nuevo color de texto.
+	 * Establece el color del texto.
+	 * @param {string} color - Nuevo color del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setColorText(color) {
@@ -148,8 +172,8 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Cambia el color del fondo de texto.
-	 * @param {string} color - Nuevo color de fondo.
+	 * Cambia el color de fondo del texto.
+	 * @param {string} color - Nuevo color de fondo del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setBackgroundTextColor(color) {
@@ -157,11 +181,115 @@ export class LineDiagram {
 	}
 
 	/**
-	 * Cambia la ubicación del texto con respecto a la línea.
-	 * @param {string} ubi - Nuevo Ubicación.
+	 * Cambia la ubicación del texto respecto a la línea.
+	 * @param {string} location - Nueva ubicación del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setLocationText(ubi) {
-		this.locationText = ubi
+	setLocationText(location) {
+		this.locationText = location
+	}
+}
+
+/**
+ * Clase principal LineDiagram que compone las funcionalidades de Line, LineAnimation y LineText.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export class LineDiagram {
+	/**
+	 * @param {Object} params - Parámetros para inicializar LineDiagram.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor(params) {
+		this.line = new Line(params)
+		this.animation = new LineAnimation(params)
+		this.text = new LineText(params)
+	}
+
+	/**
+	 * Delegación de métodos de la clase Line.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	delete() {
+		this.line.delete()
+	}
+
+	setPoints(points) {
+		this.line.setPoints(points)
+	}
+
+	setStroke(color) {
+		this.line.setStroke(color)
+	}
+
+	setWidth(width) {
+		this.line.setWidth(width)
+	}
+
+	setColorLineSecondary(color) {
+		this.line.setColorLineSecondary(color)
+	}
+
+	/**
+	 * Delegación de métodos de la clase LineAnimation.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setAnimation(status) {
+		this.animation.setAnimation(status)
+	}
+
+	setInvertAnimation(status) {
+		this.animation.setInvertAnimation(status)
+	}
+
+	/**
+	 * Delegación de métodos de la clase LineText.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setShowText(status) {
+		this.text.setShowText(status)
+	}
+
+	setText(text) {
+		this.text.setText(text)
+	}
+
+	setSizeText(size) {
+		this.text.setSizeText(size)
+	}
+
+	setColorText(color) {
+		this.text.setColorText(color)
+	}
+
+	setBackgroundTextColor(color) {
+		this.text.setBackgroundTextColor(color)
+	}
+
+	setLocationText(location) {
+		this.text.setLocationText(location)
+	}
+
+	/**
+	 * Obtiene los datos de la linea para guardar.
+	 * @returns {Object} - Datos del texto.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	getDataSave() {
+		return {
+			id: parseInt(this.line.id),
+			points: this.line.points,
+			stroke: this.line.stroke,
+			strokeWidth: this.line.strokeWidth,
+			colorSecondary: this.line.colorSecondary,
+			status: this.line.status,
+			animation: this.animation.animation,
+			invertAnimation: this.animation.invertAnimation,
+			showText: this.text.showText,
+			text: this.text.text,
+			sizeText: this.text.sizeText,
+			colorText: this.text.colorText,
+			backgroundText: this.text.backgroundText,
+			locationText: this.text.locationText,
+		}
 	}
 }

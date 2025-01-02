@@ -1,7 +1,6 @@
 import * as fabric from 'fabric'
 import { PolylineDiagram } from '../../../../class/PolylineClass'
 import { invertHexColor } from '../../../ToolsCanvas/utils/js'
-import { gridColumnLookupSelector } from '@mui/x-data-grid'
 
 let tempPolyline = null
 let points = []
@@ -96,7 +95,7 @@ const handleMouseMoveTemp = (canvas) => (e) => {
  */
 export const finalizePolyline = async (canvas, setSelectedObject, data = {}) => {
 	if ((tempPolyline && points.length > 1) || data?.points) {
-		const id = `${data?.id || generateId()}_polyline`
+		const id = `${data?.id || generateId()}`
 		if (canvas.getObjects('polyline').find((obj) => obj.id == id)) return false
 		if (tempPolyline) {
 			canvas.remove(tempPolyline)
@@ -130,8 +129,8 @@ export const finalizePolyline = async (canvas, setSelectedObject, data = {}) => 
 		if (tempPolyline) {
 			tempPolyline = null
 		}
-		if (polyline.animation) {
-			animationDoblePolyline(canvas, polyline.id)
+		if (polyline.animation.animation) {
+			animationDoblePolyline(canvas, polyline.polyline.id)
 		}
 		canvas.getObjects().forEach((obj) => (obj.selectable = true))
 		setSelectedObject(finalPolyline.metadata)
@@ -192,7 +191,7 @@ const addPolylineListeners = (polyline, canvas, setSelectedObject) => {
  */
 const handleVisualizerCircle = (idLine, status, canvas) => {
 	canvas.getObjects('circle').forEach((circle) => {
-		circle.set({ visible: circle.id.includes(idLine) ? status : false })
+		circle.set({ visible: circle.id.includes(`${idLine}_polyline`) ? status : false })
 		if (status) {
 			canvas.bringObjectToFront(circle)
 		}
@@ -326,7 +325,7 @@ const updateRadiusCircles = (polylineId, canvas) => {
 const updateAllPolyline = (id, canvas) => {
 	const polyline = canvas.getObjects('polyline').find((obj) => obj.id === id)
 	const circles = canvas.getObjects('circle').filter((circle) => circle.id.includes(`${id}_polyline_`))
-	const polylineback = canvas.getObjects().find((obj) => obj.id === id + '_back')
+	const polylineback = canvas.getObjects('polyline').find((obj) => obj.id === id + '_back')
 	if (polyline && circles) {
 		circles.forEach((circle, index) => {
 			polyline.points[index] = { x: circle.left, y: circle.top }
@@ -359,12 +358,14 @@ const generateId = () => Math.random().toString(36).substring(2, 9)
  * @author Jose Romani <jose.romani@hotmail.com>
  */
 export const updatePropertyPolyline = (polyline, property, canvas) => {
-	const lineSelect = canvas.getObjects('polyline').find((obj) => obj.id === polyline.id)
-	const polylineback = canvas.getObjects('polyline').find((obj) => obj.id === polyline.id + '_back')
-	const circles = canvas.getObjects('circle').filter((circle) => circle.id.includes(`${polyline.id}_polyline_`))
+	const lineSelect = canvas.getObjects('polyline').find((obj) => obj.id === polyline.polyline.id)
+	const polylineback = canvas.getObjects('polyline').find((obj) => obj.id === polyline.polyline.id + '_back')
+	const circles = canvas.getObjects('circle').filter((circle) => circle.id.includes(`${polyline.polyline.id}_`))
 
 	if (lineSelect) {
-		const value = isNaN(polyline[property]) ? polyline[property] : parseInt(polyline[property], 10)
+		const value = isNaN(polyline.appearance[property])
+			? polyline.appearance[property]
+			: parseInt(polyline.appearance[property], 10)
 		lineSelect.set({ [property]: value })
 
 		if (polylineback && property === 'stroke') {
@@ -378,10 +379,10 @@ export const updatePropertyPolyline = (polyline, property, canvas) => {
 			circles.forEach((circle, index) => {
 				circle.set('radius', 8 + value - 3)
 				lineSelect.points[index] = { x: circle.left, y: circle.top }
-				lineSelect.set({ points: polyline.points })
+				lineSelect.set({ points: polyline.polyline.points })
 				lineSelect.setBoundingBox(true)
 				lineSelect.setCoords()
-				lineSelect.metadata.setPoints(polyline.points)
+				lineSelect.metadata.setPoints(polyline.polyline.points)
 			})
 		}
 		canvas.requestRenderAll()
@@ -419,8 +420,8 @@ export const animationDoblePolyline = (canvas, id) => {
 		// Crear la nueva polilínea animada
 		polylineFlow = new fabric.Polyline(adjustedPoints, {
 			id: `${id}_back`,
-			stroke: invertHexColor(polyline.metadata.stroke),
-			strokeWidth: parseInt(polyline.metadata.strokeWidth),
+			stroke: invertHexColor(polyline.metadata.appearance.stroke),
+			strokeWidth: parseInt(polyline.metadata.appearance.strokeWidth),
 			strokeDashArray: [20, 30],
 			fill: null, // Asegurar que no tenga relleno
 			centeredScaling: true,
@@ -440,15 +441,15 @@ export const animationDoblePolyline = (canvas, id) => {
 	}
 
 	const animatePolylineFlow = () => {
-		if (!polyline.metadata.animation) {
+		if (!polyline.metadata.animation.animation) {
 			canvas.remove(polylineFlow)
-			polyline.set('strokeWidth', parseInt(polyline.metadata.strokeWidth))
+			polyline.set('strokeWidth', parseInt(polyline.metadata.appearance.strokeWidth))
 			updateRadiusCircles(polyline.id, canvas)
 			return
 		}
 
-		polyline.strokeWidth = parseInt(polyline.metadata.strokeWidth) + 4
-		polylineFlow.stroke = invertHexColor(polyline.metadata.stroke)
+		polyline.strokeWidth = parseInt(polyline.metadata.appearance.strokeWidth) + 4
+		polylineFlow.stroke = invertHexColor(polyline.metadata.appearance.stroke)
 		const adjustedPoints = adjustPointsToCenter(canvas, id)
 
 		updateAllPolyline(id, canvas)
@@ -456,7 +457,7 @@ export const animationDoblePolyline = (canvas, id) => {
 		polylineFlow.set({
 			points: adjustedPoints,
 		})
-		const movement = polyline.metadata.invertAnimation ? -1 : 1
+		const movement = polyline.metadata.animation.invertAnimation ? -1 : 1
 		polylineFlow.strokeDashOffset -= movement
 
 		if (polylineFlow.strokeDashOffset < -50) polylineFlow.strokeDashOffset = 0

@@ -1,7 +1,8 @@
 import { Checkbox, MenuItem, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { animationDoblePolyline, updatePropertyPolyline } from './utils/js/polyline'
 
-function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updateProperty }) {
+function PropertyPolyLineBase({ data, fabricCanvasRef }) {
 	const [info, setInfo] = useState(data)
 	const [showAnimation, setShowAnimation] = useState(info.animation?.animation)
 	const [invertAnimation, setInvertAnimation] = useState(info.animation?.invertAnimation)
@@ -18,25 +19,25 @@ function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updatePro
 
 	const changeWidth = (width) => {
 		const infoUpdate = { ...info }
-		infoUpdate.line.strokeWidth = width
+		infoUpdate.appearance.strokeWidth = width
 		setInfo(infoUpdate)
 		data.setWidth(width)
-		updateProperty(infoUpdate, 'strokeWidth', canvas)
+		updatePropertyPolyline(infoUpdate, 'strokeWidth', canvas)
 	}
 	const changeColor = (color) => {
-		const infoUpdate = { ...info, stroke: color }
+		const infoUpdate = { ...info }
+		infoUpdate.appearance.stroke = color
 		setInfo(infoUpdate)
 		data.setStroke(color)
-		updateProperty(infoUpdate, 'stroke', canvas)
+		updatePropertyPolyline(infoUpdate, 'stroke', canvas)
 	}
 	const activeDobleLine = (status) => {
-		const infoUpdate = { ...info, animation: status }
+		const infoUpdate = { ...info }
+		infoUpdate.animation.animation = status
 		setInfo(infoUpdate)
 		setShowAnimation(status)
 		data.setAnimation(status)
-		if (animationDobleLine) {
-			animationDobleLine(canvas, info.line.id)
-		}
+		animationDoblePolyline(canvas, info.polyline.id)
 	}
 	const changeAnimation = (val) => {
 		const infoUpdate = { ...info }
@@ -44,7 +45,7 @@ function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updatePro
 		setInfo(infoUpdate)
 		data.setInvertAnimation(val)
 		setInvertAnimation(val)
-		animationDobleLine(canvas, info.line.id)
+		animationDoblePolyline(canvas, info.polyline.id)
 	}
 	return (
 		<div className='flex flex-col gap-4'>
@@ -56,7 +57,7 @@ function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updatePro
 					name='strokeWidth'
 					onChange={(e) => changeWidth(e.target.value)}
 					className='w-1/2'
-					value={info?.line?.strokeWidth || ''}
+					value={info?.appearance?.strokeWidth || ''}
 				/>
 				<TextField
 					type='color'
@@ -65,7 +66,7 @@ function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updatePro
 					name='stroke'
 					onChange={(e) => changeColor(e.target.value)}
 					className='w-1/2'
-					value={info?.line?.stroke || '#000000'}
+					value={info?.appearance?.stroke || '#000000'}
 				/>
 			</div>
 			<div
@@ -90,4 +91,4 @@ function PropertyLineBase({ data, fabricCanvasRef, animationDobleLine, updatePro
 	)
 }
 
-export default PropertyLineBase
+export default PropertyPolyLineBase

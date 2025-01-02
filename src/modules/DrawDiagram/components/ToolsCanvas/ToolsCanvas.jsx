@@ -15,7 +15,7 @@ import PropertyCanva from '../PropertyCanva/PropertyCanva'
 import ListField from '../Fields/ListField'
 import { HiOutlineVariable } from 'react-icons/hi2'
 
-function ToolsCanvas({ selectedObject, handleChangeTypeImg, fabricCanvasRef, onPropertySelected }) {
+function ToolsCanvas({ selectedObject, fabricCanvasRef, onPropertySelected }) {
 	const [alignment, setAlignment] = useState('web')
 
 	const handleChange = async (event, newAlignment) => {
@@ -49,7 +49,6 @@ function ToolsCanvas({ selectedObject, handleChangeTypeImg, fabricCanvasRef, onP
 				setAlignment(selectedObject ? 'PropertyText' : null)
 				break
 			case 'ImageDiagram':
-			case 'ImageTopic':
 				setAlignment(selectedObject ? 'PropertyImg' : null)
 				break
 			case 'LineDiagram':
@@ -136,14 +135,9 @@ function ToolsCanvas({ selectedObject, handleChangeTypeImg, fabricCanvasRef, onP
 					<ListField />
 				</div>
 			) : null}
-			{alignment === 'PropertyImg' &&
-			(getInstanceType(selectedObject) == 'ImageDiagram' || getInstanceType(selectedObject) == 'ImageTopic') ? (
+			{alignment === 'PropertyImg' && getInstanceType(selectedObject) == 'ImageDiagram' ? (
 				<div onClick={() => handleComponentClick('PropertiesSelect')}>
-					<PropertiesSelect
-						data={selectedObject}
-						fabricCanvasRef={fabricCanvasRef}
-						handleChangeTypeImg={handleChangeTypeImg}
-					/>
+					<PropertiesSelect data={selectedObject} fabricCanvasRef={fabricCanvasRef} />
 				</div>
 			) : null}
 			{alignment === 'PropertyCanvas' ? (

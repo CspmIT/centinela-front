@@ -1,11 +1,13 @@
-import { Button, FormControlLabel, Switch, TextField, Typography } from '@mui/material'
+import { Button, FormControlLabel, MenuItem, Switch, TextField, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import Calculadora from './Calculator'
 import CalculatorVars from './ClculatorVars'
 import { useForm } from 'react-hook-form'
 import { useVars } from './ProviderVars'
 import Swal from 'sweetalert2'
-const DataGenerator = () => {
+import { request } from '../../utils/js/request'
+import { backend } from '../../utils/routes/app.routes'
+const DataGenerator = ({ handleClose, data = null }) => {
 	const [requireCalc, setRequireCalc] = useState(false)
 	const [display, setDisplay] = useState([])
 	const {
@@ -29,47 +31,98 @@ const DataGenerator = () => {
 	}, [requireCalc, setValue])
 	const [state, dispatch] = useVars()
 	const isValidFormula = display.length
-	const onSubmit = (data) => {
-		if (requireCalc) {
-			if (state.calcVars.length === 0) {
-				Swal.fire({
-					icon: 'error',
-					title: 'Error',
-					text: 'Debe generar la formula de la variable para poder guardarla',
-				})
-				return false
+	const onSubmit = async (data) => {
+		try {
+			if (requireCalc) {
+				if (state.calcVars.length === 0) {
+					Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'Debe generar la formula de la variable para poder guardarla',
+					})
+					return false
+				}
+				// Valido que display tenga la variable del calculo
+				if (!isValidFormula) {
+					Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'Debe existir al menos una variable en la formula',
+					})
+					return false
+				}
 			}
-			// Valido que display tenga la variable del calculo
-			if (!isValidFormula) {
-				Swal.fire({
-					icon: 'error',
-					title: 'Error',
-					text: 'Debe existir al menos una variable en la formula',
-				})
-				return false
-			}
-		}
 
-		const dataConsult = state.calcVars.length
-			? { ...state }
-			: {
-					calcVars: [
-						{
-							calc_name_var: '',
+			const dataConsult = requireCalc
+				? state.calcVars.reduce((acc, val) => {
+						if (!acc?.[val.calc_name_var]) acc[val.calc_name_var] = {}
+						acc[val.calc_name_var] = {
+							calc_topic: val.calc_topic,
+							calc_field: val.calc_field,
+							calc_time: val.calc_time,
+							calc_unit: val.calc_unit,
+						}
+						return acc
+				  }, {})
+				: {
+						[data.name_var]: {
 							calc_topic: data.topic,
 							calc_field: data.field,
 							calc_time: data.time,
 							calc_unit: data.unit_topic,
 						},
-					],
-			  }
-		const dataReturn = { name_var: data.name_var, unit: data.unit, data_consult: dataConsult }
-
-		console.log(dataReturn)
-		// guardar
+				  }
+			const dataReturn = {
+				name: data.name_var,
+				unit: data.unit,
+				calc: requireCalc,
+				varsInflux: dataConsult,
+				equation: state?.equation || null,
+			}
+			await request(`${backend[import.meta.env.VITE_APP_NAME]}/saveVariable`, 'POST', dataReturn)
+			if (handleClose) {
+				handleClose()
+			}
+			// guardar
+		} catch (error) {
+			console.error(error)
+			Swal.fire({
+				icon: 'warning',
+				title: 'Atención!',
+				text: `Hubo un problema al guardar.`,
+			})
+		}
 	}
+	useEffect(() => {
+		if (data) {
+			setValue('name_var', data?.name)
+			setValue('unit', data?.unit)
+			if (data?.calc) {
+				handleRquiredCalc()
+			}
+			if (!data.calc) {
+				setValue('topic', data?.varsInflux?.[data.name]?.calc_topic)
+				setValue('field', data?.varsInflux?.[data.name]?.calc_field)
+				setValue('time', data?.varsInflux?.[data.name]?.calc_time)
+				setValue('unit_topic', data?.varsInflux?.[data.name]?.calc_unit)
+			} else {
+				const vars = Object.keys(data?.varsInflux).reduce((acc, val) => {
+					acc.push({
+						calc_name_var: val,
+						calc_topic: data?.varsInflux[val].calc_topic,
+						calc_field: data?.varsInflux[val].calc_field,
+						calc_time: data?.varsInflux[val].calc_time,
+						calc_unit: data?.varsInflux[val].calc_unit,
+					})
+					return acc
+				}, [])
+				dispatch({ type: 'SET_CALC_VAR', payload: vars })
+				dispatch({ type: 'SET_EQUATION', payload: data?.equation })
+			}
+		}
+	}, [data])
 	return (
-		<div className='p-5 flex flex-col justify-start items-center min-w-[97vw]  '>
+		<div className='p-5 flex flex-col gap-2 justify-start items-center min-w-[90vw] max-w-[94vw]'>
 			<Typography variant='h5' className='text-center'>
 				Configuracion de variables
 			</Typography>
@@ -97,14 +150,14 @@ const DataGenerator = () => {
 			</div>
 			<div className='flex w-full justify-center gap-3'>
 				<FormControlLabel
-					control={<Switch />}
+					control={<Switch checked={requireCalc} />}
 					label='¿La variable requiere un calculo?'
 					onChange={handleRquiredCalc}
 				/>
 			</div>
 
 			{!requireCalc ? (
-				<div className='flex w-full justify-center gap-3'>
+				<div className='flex w-full justify-center gap-3 '>
 					<TextField
 						type='text'
 						className='w-1/3'
@@ -140,15 +193,24 @@ const DataGenerator = () => {
 						helperText={errors.time && errors.time.message}
 					/>
 					<TextField
-						type='text'
-						className='w-2/12'
+						select
 						label='Unidad'
 						{...register('unit_topic', {
 							required: 'Este campo es requerido',
 						})}
+						className='w-2/12'
 						error={!!errors.unit_topic}
 						helperText={errors.unit_topic && errors.unit_topic.message}
-					/>
+						defaultValue={'ms'}
+					>
+						<MenuItem value='ms'>Milisegundos</MenuItem>
+						<MenuItem value='s'>Segundos</MenuItem>
+						<MenuItem value='m'>Minutos</MenuItem>
+						<MenuItem value='h'>Horas</MenuItem>
+						<MenuItem value='d'>Días</MenuItem>
+						<MenuItem value='mo'>Mes</MenuItem>
+						<MenuItem value='y'>Año</MenuItem>
+					</TextField>
 				</div>
 			) : null}
 

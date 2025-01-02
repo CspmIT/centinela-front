@@ -34,7 +34,7 @@ export const request = async (url, method, data = false) => {
 			}
 			throw messageError
 		} else {
-			throw error.response.data
+			throw error
 		}
 	}
 }

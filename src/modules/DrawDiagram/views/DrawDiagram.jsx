@@ -2,7 +2,7 @@ import * as fabric from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import CardCustom from '../../../components/CardCustom'
 import styles from '../utils/css/style.module.css'
-import { handleConvertToImagenTopic, handleDrop } from '../components/DrawImage/utils/js/actionImage'
+import { handleDrop } from '../components/DrawImage/utils/js/actionImage'
 import { Button } from '@mui/material'
 import { drawLine } from '../components/DrawLine/utils/js/line'
 import { newText } from '../components/DrawText/utils/js'
@@ -134,9 +134,6 @@ function DrawDiagram() {
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [activeToolRef.current])
 
-	const handleChangeTypeImg = (id, status) => {
-		handleConvertToImagenTopic(id, status, fabricCanvasRef, setSelectedObject, changeTool)
-	}
 	return (
 		<CardCustom
 			className={
@@ -157,7 +154,7 @@ function DrawDiagram() {
 				<div className='absolute top-2 left-2 w-1/4 '>
 					<ToolsCanvas
 						selectedObject={selectedObject}
-						handleChangeTypeImg={handleChangeTypeImg}
+						// handleChangeTypeImg={handleChangeTypeImg}
 						fabricCanvasRef={fabricCanvasRef}
 						onPropertySelected={changeTool}
 					/>

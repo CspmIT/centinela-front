@@ -1,17 +1,18 @@
 import { Button, IconButton, MenuItem, TextField, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useVars } from './ProviderVars'
 import { useForm } from 'react-hook-form'
 import Swal from 'sweetalert2'
 import { Add } from '@mui/icons-material'
 
-const CalculatorVars = () => {
+const CalculatorVars = ({ data }) => {
 	const [state, dispatch] = useVars()
 	const {
 		getValues,
 		trigger,
 		register,
 		formState: { errors },
+		setValue,
 		clearErrors,
 	} = useForm()
 
@@ -19,6 +20,15 @@ const CalculatorVars = () => {
 		const validation = await trigger(['calc_name_var', 'calc_topic', 'calc_field', 'calc_time', 'calc_unit'])
 		return validation
 	}
+	useEffect(() => {
+		if (data) {
+			setValue('calc_name_var', data.calc_name_var)
+			setValue('calc_topic', data.calc_topic)
+			setValue('calc_field', data.calc_field)
+			setValue('calc_time', data.calc_time)
+			setValue('calc_unit', data.calc_unit)
+		}
+	}, [data])
 
 	const isValidName = (value) => state.calcVars.some((variable) => variable.calc_name_var === value)
 
@@ -62,6 +72,7 @@ const CalculatorVars = () => {
 				<TextField
 					type='text'
 					label='Nombre '
+					disabled={data ? true : false}
 					{...register('calc_name_var', {
 						required: 'Este campo es requerido',
 						validate: (value) => !isValidName(value) || 'Ya existe esta variable',
@@ -72,6 +83,7 @@ const CalculatorVars = () => {
 				<TextField
 					type='text'
 					className='w-1/3'
+					disabled={data ? true : false}
 					label='Topico'
 					{...register('calc_topic', {
 						required: 'Este campo es requerido',
@@ -83,6 +95,7 @@ const CalculatorVars = () => {
 				<TextField
 					type='text'
 					label='Field'
+					disabled={data ? true : false}
 					{...register('calc_field', {
 						required: 'Este campo es requerido',
 					})}
@@ -93,6 +106,7 @@ const CalculatorVars = () => {
 				<TextField
 					type='number'
 					className='w-1/12'
+					disabled={data ? true : false}
 					label='Tiempo'
 					{...register('calc_time', {
 						required: 'Este campo es requerido',
@@ -113,6 +127,7 @@ const CalculatorVars = () => {
 						required: 'Este campo es requerido',
 					})}
 					className='w-2/12'
+					disabled={data ? true : false}
 					defaultValue={'ms'}
 				>
 					<MenuItem value='ms'>Milisegundos</MenuItem>
@@ -123,11 +138,13 @@ const CalculatorVars = () => {
 					<MenuItem value='mo'>Mes</MenuItem>
 					<MenuItem value='y'>Año</MenuItem>
 				</TextField>
-				<div className='flex items-center justify-center min-h-14'>
-					<IconButton className='!bg-blue-300' color='primary' onClick={addCalcVar}>
-						<Add />
-					</IconButton>
-				</div>
+				{!data ? (
+					<div className='flex items-center justify-center min-h-14'>
+						<IconButton className='!bg-blue-300' color='primary' onClick={addCalcVar}>
+							<Add />
+						</IconButton>
+					</div>
+				) : null}
 			</div>
 		</>
 	)
