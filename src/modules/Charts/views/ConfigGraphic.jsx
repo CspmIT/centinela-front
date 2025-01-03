@@ -14,56 +14,11 @@ const ConfigGraphic = () => {
     const { id } = useParams()
     const {
         register,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm()
 
-    const globalVars = [
-        {
-            id: 1,
-            name: 'Variable 1',
-            unit: '°C',
-            value: 25,
-            type: 'number',
-            date: '2021-10-22',
-        },
-        {
-            id: 2,
-            name: 'Variable 2',
-            unit: '°C',
-            value: 30,
-            type: 'number',
-            date: '2021-10-22',
-        },
-        {
-            id: 3,
-            name: 'Variable 3',
-            unit: '°C',
-            value: 35,
-            type: 'number',
-            date: '2021-10-22',
-        },
-        {
-            id: 4,
-            name: 'Variable 4',
-            unit: '°C',
-            value: 40,
-            type: 'number',
-            date: '2021-10-22',
-            dato_consulta: {
-                calculo: 'Variable 1 + Variable 2 /100',
-                variable: [
-                    {
-                        name: 'Variable 1',
-                        topico: 'Temperatura',
-                        field: 'Temperatura',
-                        time: '2021-10-22',
-                        unit: '°C',
-                    }
-                ],
-            }
-        },
-    ]
 
     const onSubmit = (data) => {
         console.log(data)
@@ -80,26 +35,11 @@ const ConfigGraphic = () => {
                     onSubmit={handleSubmit(onSubmit, onError)}
                     className="flex flex-col gap-4 items-center"
                 >
-                    {/* <div className="flex w-full justify-center">
-                        <TextField
-                            type='text'
-                            className="w-1/3 max-sm:w-full"
-                            label="Titulo del grafico"
-                            {...register('title', {
-                                required: 'Este campo es requerido',
-                            })}
-                            error={errors.title}
-                            helperText={errors.title && errors.title.message}
-                        />
-                    </div> */}
-
-                    {/* COMPONENTE DE VARIABLES */}
-                    {/* <DataGenerator register={register} errors={errors} /> */}
                     {
                         !configs[id].singleValue ? (
                             <GraphVariableSelector />
                         ) : (
-                            <ConfigSimple register={register} errors={errors} id={id}/>
+                            <ConfigSimple setValue={setValue} register={register} errors={errors} id={id}/>
                         )
                     }
                     {/* <SelectorVars /> */}

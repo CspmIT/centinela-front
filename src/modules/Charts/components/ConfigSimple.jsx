@@ -17,7 +17,7 @@ const Title = memo(({ title }) => (
     </Typography>
 ))
 
-const ConfigSimple = ({ register, errors, id }) => {
+const ConfigSimple = ({ register, errors, id, setValue }) => {
     const [chartType, setChartType] = useState(configs[id].typeGraph)
     const [config, setConfig] = useState(configs[id].preConfig)
     const [title, setTitle] = useState('')
@@ -25,6 +25,7 @@ const ConfigSimple = ({ register, errors, id }) => {
     const fetchVars = async () => {
         const vars = await getVarsInflux()
         setOptions(vars)
+        setValue('idVar', vars[0].id)
     }
 
     useEffect(() => {
@@ -37,7 +38,6 @@ const ConfigSimple = ({ register, errors, id }) => {
         }
 
         fetchVars()
-        console.log(options)
     }, [])
 
     const handleChange = (e) => {
@@ -47,6 +47,14 @@ const ConfigSimple = ({ register, errors, id }) => {
         let newValue = value
         if (name === 'color' && !/^#[0-9A-F]{6}$/i.test(value)) {
             newValue = '#000000' // Valor por defecto si el formato es incorrecto
+        }
+        if (name === 'maxValue') {
+            const mitad =   value / 2 || 0
+            newValue = value || 1 
+            setConfig((prevConfig) => ({
+                ...prevConfig,
+                ['value']: mitad,
+            }))
         }
 
         setConfig((prevConfig) => ({
@@ -140,39 +148,29 @@ const ConfigSimple = ({ register, errors, id }) => {
                             </TextField>
                         )}
 
-                        <TextField
-                            type="text"
-                            className="w-full"
-                            label="Valor del grafico"
-                            {...register('value', {
-                                required: 'Este campo es requerido',
-                            })}
-                            onChange={handleChange}
-                            error={errors.value}
-                            helperText={errors.value && errors.value.message}
-                        />
                         <SelectVars
+                            setValue={setValue}
                             label={'Valor del grafico'}
                             options={options}
                         />
-                        <Tooltip
+                        {/* <Tooltip
                             arrow
                             title="Este campo se usa para calcular el porcentaje/nivel del grafico."
-                        >
-                            <TextField
-                                type="text"
-                                className="w-full"
-                                label="Valor maximo del grafico"
-                                {...register('maxValue', {
-                                    required: 'Este campo es requerido',
-                                })}
-                                onChange={handleChange}
-                                error={errors.maxValue}
-                                helperText={
-                                    errors.maxValue && errors.maxValue.message
-                                }
-                            />
-                        </Tooltip>
+                        > */}
+                        <TextField
+                            type="text"
+                            className="w-full"
+                            label="Valor maximo del grafico"
+                            {...register('maxValue', {
+                                required: 'Este campo es requerido',
+                            })}
+                            onChange={handleChange}
+                            error={errors.maxValue}
+                            helperText={
+                                errors.maxValue && errors.maxValue.message
+                            }
+                        />
+                        {/* </Tooltip> */}
                         {!config.porcentage && configs[id].typeUnity && (
                             <TextField
                                 type="text"
