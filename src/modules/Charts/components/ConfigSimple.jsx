@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState, useEffect } from 'react'
+import React, { lazy, Suspense, useState, useEffect, memo } from 'react'
 import {
     Card,
     CardContent,
@@ -8,10 +8,24 @@ import {
     Typography,
 } from '@mui/material'
 import { configs } from '../configs/configs'
+import SelectVars from './SelectVars'
+import { getVarsInflux } from '../../DrawDiagram/components/Fields/actions'
+
+const Title = memo(({ title }) => (
+    <Typography variant="h6" component="div" align="center" className="mb-2">
+        {title}
+    </Typography>
+))
 
 const ConfigSimple = ({ register, errors, id }) => {
     const [chartType, setChartType] = useState(configs[id].typeGraph)
     const [config, setConfig] = useState(configs[id].preConfig)
+    const [title, setTitle] = useState('')
+    const [options, setOptions] = useState([])
+    const fetchVars = async () => {
+        const vars = await getVarsInflux()
+        setOptions(vars)
+    }
 
     useEffect(() => {
         // Validar y corregir el formato del color al inicializar
@@ -21,6 +35,9 @@ const ConfigSimple = ({ register, errors, id }) => {
                 color: '#000000', // Valor por defecto si el formato es incorrecto
             }))
         }
+
+        fetchVars()
+        console.log(options)
     }, [])
 
     const handleChange = (e) => {
@@ -61,56 +78,68 @@ const ConfigSimple = ({ register, errors, id }) => {
                             })}
                             error={errors.title}
                             helperText={errors.title && errors.title.message}
+                            onChange={(e) => setTitle(e.target.value)}
                         />
-                        <TextField
-                            select
-                            className="w-full"
-                            label="Tipo de grafico"
-                            {...register('type', {
-                                required: 'Este campo es requerido',
-                            })}
-                            onChange={handleChange}
-                            value={config.type}
-                        >
-                            <MenuItem value={'circle'}>Círculo</MenuItem>
-                            <MenuItem value={'rect'}>Rectángulo</MenuItem>
-                            <MenuItem value={'roundRect'}>
-                                Rectángulo redondeado
-                            </MenuItem>
-                            <MenuItem value={'triangle'}>Triangulo</MenuItem>
-                            <MenuItem value={'diamond'}>Diamante</MenuItem>
-                            <MenuItem value={'arrow'}>Flecha</MenuItem>
-                            <MenuItem value={'pin'}>Gota</MenuItem>
-                        </TextField>
-                        <TextField
-                            type="text"
-                            className="w-full"
-                            label="Tipo de valor"
-                            {...register('porcentage', {
-                                required: 'Este campo es requerido',
-                            })}
-                            onChange={handleChange}
-                            error={errors.asvalue}
-                            helperText={
-                                errors.asvalue && errors.asvalue.message
-                            }
-                            value={config.porcentage}
-                            select
-                        >
-                            <MenuItem value={true}>Porcentaje</MenuItem>
-                            <MenuItem value={false}>Valor</MenuItem>
-                        </TextField>
-                        <TextField
-                            select
-                            className="w-full"
-                            label="Borde"
-                            {...register('border')}
-                            onChange={handleChange}
-                            value={config.border}
-                        >
-                            <MenuItem value={true}>Si</MenuItem>
-                            <MenuItem value={false}>No</MenuItem>
-                        </TextField>
+                        {configs[id].format && (
+                            <TextField
+                                select
+                                className="w-full"
+                                label="Tipo de grafico"
+                                {...register('type', {
+                                    required: 'Este campo es requerido',
+                                })}
+                                onChange={handleChange}
+                                value={config.type}
+                            >
+                                <MenuItem value={'circle'}>Círculo</MenuItem>
+                                <MenuItem value={'rect'}>Rectángulo</MenuItem>
+                                <MenuItem value={'roundRect'}>
+                                    Rectángulo redondeado
+                                </MenuItem>
+                                <MenuItem value={'triangle'}>
+                                    Triangulo
+                                </MenuItem>
+                                <MenuItem value={'diamond'}>Diamante</MenuItem>
+                                <MenuItem value={'arrow'}>Flecha</MenuItem>
+                                <MenuItem value={'pin'}>Gota</MenuItem>
+                            </TextField>
+                        )}
+
+                        {configs[id].typeValue && (
+                            <TextField
+                                type="text"
+                                className="w-full"
+                                label="Tipo de valor"
+                                {...register('porcentage', {
+                                    required: 'Este campo es requerido',
+                                })}
+                                onChange={handleChange}
+                                error={errors.asvalue}
+                                helperText={
+                                    errors.asvalue && errors.asvalue.message
+                                }
+                                value={config.porcentage}
+                                select
+                            >
+                                <MenuItem value={true}>Porcentaje</MenuItem>
+                                <MenuItem value={false}>Valor</MenuItem>
+                            </TextField>
+                        )}
+
+                        {configs[id].typeBorder && (
+                            <TextField
+                                select
+                                className="w-full"
+                                label="Borde"
+                                {...register('border')}
+                                onChange={handleChange}
+                                value={config.border}
+                            >
+                                <MenuItem value={true}>Si</MenuItem>
+                                <MenuItem value={false}>No</MenuItem>
+                            </TextField>
+                        )}
+
                         <TextField
                             type="text"
                             className="w-full"
@@ -121,6 +150,10 @@ const ConfigSimple = ({ register, errors, id }) => {
                             onChange={handleChange}
                             error={errors.value}
                             helperText={errors.value && errors.value.message}
+                        />
+                        <SelectVars
+                            label={'Valor del grafico'}
+                            options={options}
                         />
                         <Tooltip
                             arrow
@@ -140,7 +173,7 @@ const ConfigSimple = ({ register, errors, id }) => {
                                 }
                             />
                         </Tooltip>
-                        {!config.porcentage && (
+                        {!config.porcentage && configs[id].typeUnity && (
                             <TextField
                                 type="text"
                                 className="w-full"
@@ -172,6 +205,7 @@ const ConfigSimple = ({ register, errors, id }) => {
                 </CardContent>
             </Card>
             <Card className="w-1/2 max-sm:w-full p-3 mb-4">
+                <Title title={title} />
                 <Suspense fallback={<div>Cargando...</div>}>
                     <ChartComponent {...config} />
                 </Suspense>

@@ -80,7 +80,7 @@ const ConfigGraphic = () => {
                     onSubmit={handleSubmit(onSubmit, onError)}
                     className="flex flex-col gap-4 items-center"
                 >
-                    <div className="flex w-full justify-center">
+                    {/* <div className="flex w-full justify-center">
                         <TextField
                             type='text'
                             className="w-1/3 max-sm:w-full"
@@ -91,7 +91,7 @@ const ConfigGraphic = () => {
                             error={errors.title}
                             helperText={errors.title && errors.title.message}
                         />
-                    </div>
+                    </div> */}
 
                     {/* COMPONENTE DE VARIABLES */}
                     {/* <DataGenerator register={register} errors={errors} /> */}

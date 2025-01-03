@@ -1,11 +1,9 @@
-import { Grid, Typography, useMediaQuery } from '@mui/material'
+import { Grid, Typography,} from '@mui/material'
 import LiquidFill from '../../Charts/components/LiquidFillPorcentaje'
 import CardCustom from '../../../components/CardCustom'
-import Chart from '../../Charts/components/Chart'
 import CirclePorcentaje from '../../Charts/components/CirclePorcentaje'
 import BarDataSet from '../../Charts/components/BarDataSet'
 import StackedAreaChart from '../../Charts/components/StackedAreaChart'
-import Surface from '../../Charts/components/Surface'
 import DoughnutChart from '../../Charts/components/DoughnutChart'
 import LineChart from '../../Charts/components/LineChart'
 
