@@ -51,7 +51,7 @@ function PropertyTextInflux({ data, fabricCanvasRef }) {
 					label='Tamaño del texto'
 					id='sizeText'
 					name='sizeText'
-					onChange={(e) => changeSizeText(e.target.value)}
+					onChange={(e) => changeSizeText(parseInt(e.target.value))}
 					className='w-1/2'
 					value={info?.sizeTextValue || ''}
 				/>

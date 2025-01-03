@@ -2,7 +2,7 @@ import * as fabric from 'fabric'
 import { useEffect, useRef, useState } from 'react'
 import CardCustom from '../../../components/CardCustom'
 import styles from '../utils/css/style.module.css'
-import { handleConvertToImagenTopic, handleDrop } from '../components/DrawImage/utils/js/actionImage'
+import { handleDrop } from '../components/DrawImage/utils/js/actionImage'
 import { Button } from '@mui/material'
 import { drawLine } from '../components/DrawLine/utils/js/line'
 import { newText } from '../components/DrawText/utils/js'
@@ -12,12 +12,11 @@ import { saveDiagram, uploadCanvaDb } from '../utils/js/drawActions'
 import { useParams } from 'react-router-dom'
 
 function DrawDiagram() {
-	const canvasRef = useRef(null)
 	const { id } = useParams()
+	const canvasRef = useRef(null)
 	const fabricCanvasRef = useRef(null)
 	const activeToolRef = useRef(null)
 	const [selectedObject, setSelectedObject] = useState(null)
-	const [pointer, setPointer] = useState([])
 
 	// Cambiar herramienta activa
 	const changeTool = (tool) => {
@@ -54,13 +53,13 @@ function DrawDiagram() {
 	// Manejar la herramienta de líneas
 	const handleLineTool = async (event) => {
 		if (activeToolRef.current !== 'Polyline' && activeToolRef.current !== 'Line') {
-			canvas?.set({ defaultCursor: 'default' })
+			fabricCanvasRef?.current?.set({ defaultCursor: 'default' })
 		} else {
 			if (activeToolRef.current === 'Polyline') {
 				drawPolyline(event.pointer, fabricCanvasRef, setSelectedObject, changeTool)
 			}
 			if (activeToolRef.current === 'Line') {
-				drawLine(event.pointer, fabricCanvasRef, setPointer, changeTool, setSelectedObject)
+				drawLine(event.pointer, fabricCanvasRef, changeTool, setSelectedObject)
 			}
 		}
 	}
@@ -76,6 +75,7 @@ function DrawDiagram() {
 			height: parent.offsetHeight,
 			selection: false,
 		})
+
 		fabricCanvasRef.current = canvas
 
 		// Manejar eventos
@@ -134,9 +134,6 @@ function DrawDiagram() {
 		return () => window.removeEventListener('keydown', handleKeyDown)
 	}, [activeToolRef.current])
 
-	const handleChangeTypeImg = (id, status) => {
-		handleConvertToImagenTopic(id, status, fabricCanvasRef, setSelectedObject, changeTool)
-	}
 	return (
 		<CardCustom
 			className={
@@ -157,7 +154,7 @@ function DrawDiagram() {
 				<div className='absolute top-2 left-2 w-1/4 '>
 					<ToolsCanvas
 						selectedObject={selectedObject}
-						handleChangeTypeImg={handleChangeTypeImg}
+						// handleChangeTypeImg={handleChangeTypeImg}
 						fabricCanvasRef={fabricCanvasRef}
 						onPropertySelected={changeTool}
 					/>

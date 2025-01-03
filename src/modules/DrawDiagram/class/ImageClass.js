@@ -1,146 +1,139 @@
-export class ImageDiagram {
+/**
+ * Clase que representa una imagen con posición, tamaño, y estado.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class Image {
 	/**
-	 * @param {Object} params - Parámetros para inicializar la instancia.
-	 * @param {number} params.id - Identificador de la imagen.
-	 * @param {string} params.name - Nombre de la imagen.
-	 * @param {string} params.src - URL de la imagen.
-	 * @param {number} params.left - Posición horizontal de la imagen.
-	 * @param {number} params.top - Posición vertical de la imagen.
-	 * @param {number} params.angle - Angulo de la imagen.
-	 * @param {number} params.width - Ancho de la imagen.
-	 * @param {number} params.height - Alto de la imagen.
-	 * @param {string|number} params.value - Valor asociado al diagrama (puede ser string o número).
-	 * @param {number} params.status - Estado de la imagen (1 para activo, 0 para inactivo).
-	 * @param {number} params.statusText - Estado del texto (1 para activo, 0 para inactivo).
-	 * @param {string} params.text - Texto de la imagen.
-	 * @param {number} params.sizeText - Tamaño del texto de la imagen.
-	 * @param {number} params.colorText - Color del texto de la imagen.
-	 * @param {string} params.backgroundText - Color o texto de fondo.
-	 * @param {string} params.textPosition - Ubicación del titulo/texto que querramos en la imagen
-	 * @param {boolean} params.animation - Valor para indicar si la imagen tiene activa o no animación
+	 * Crea una instancia de la clase Image.
+	 * @param {Object} params - Los parámetros para inicializar la imagen.
+	 * @param {string} params.id - El ID único de la imagen.
+	 * @param {string} params.name - El nombre de la imagen.
+	 * @param {string} params.src - La fuente (URL) de la imagen.
+	 * @param {number} params.left - La posición horizontal de la imagen.
+	 * @param {number} params.top - La posición vertical de la imagen.
+	 * @param {number} [params.angle=0] - El ángulo de rotación de la imagen.
+	 * @param {number} params.width - El ancho de la imagen.
+	 * @param {number} params.height - El alto de la imagen.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor({ id, name, src, left, top, angle = 0, width, height }) {
+		if (!id || !name || !src) throw new Error('Los parámetros id, name y src son obligatorios.')
+		if (typeof left !== 'number' || typeof top !== 'number' || left < 0 || top < 0) {
+			throw new Error('Los valores de posición deben ser números positivos.')
+		}
+		if (typeof width !== 'number' || typeof height !== 'number' || width <= 0 || height <= 0) {
+			throw new Error('El ancho y alto deben ser números positivos mayores que cero.')
+		}
+
+		this.id = id
+		this.name = name
+		this.src = src
+		this.position = { top, left }
+		this.size = { width, height }
+		this.angle = angle
+		this.status = 1 // Activo
+	}
+
+	/**
+	 * Mueve la imagen a una nueva posición.
+	 * @param {number} top - La nueva posición vertical.
+	 * @param {number} left - La nueva posición horizontal.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	move(top, left) {
+		if (typeof top !== 'number' || typeof left !== 'number') {
+			throw new Error('Los valores de posición deben ser números.')
+		}
+		this.position = { top, left }
+	}
+
+	/**
+	 * Rota la imagen a un ángulo específico.
+	 * @param {number} angle - El ángulo de rotación en grados.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	rotate(angle) {
+		if (typeof angle !== 'number') throw new Error('El ángulo debe ser un número.')
+		this.angle = angle
+	}
+
+	/**
+	 * Redimensiona la imagen a un nuevo tamaño.
+	 * @param {number} width - El nuevo ancho de la imagen.
+	 * @param {number} height - El nuevo alto de la imagen.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	resize(width, height) {
+		if (typeof width !== 'number' || typeof height !== 'number' || width <= 0 || height <= 0) {
+			throw new Error('El ancho y alto deben ser números positivos mayores que cero.')
+		}
+		this.size = { width: Number(width.toFixed(2)), height: Number(height.toFixed(2)) }
+	}
+
+	/**
+	 * Cambia el estado de la imagen a inactivo.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	delete() {
+		this.status = 0 // Inactivo
+	}
+}
+
+/**
+ * Clase que representa un texto asociado a una imagen.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class ImageText {
+	/**
+	 * Crea una instancia de la clase ImageText.
+	 * @param {Object} params - Los parámetros para inicializar el texto de la imagen.
+	 * @param {string} [params.text=''] - El texto a mostrar.
+	 * @param {number} [params.sizeText=20] - El tamaño del texto.
+	 * @param {string} [params.colorText='#000000'] - El color del texto.
+	 * @param {string} [params.backgroundText='#ffffff'] - El color de fondo del texto.
+	 * @param {string} [params.textPosition='Top'] - La posición del texto en la imagen.
+	 * @param {boolean} [params.statusText=0] - El estado del texto (activo o inactivo).
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	constructor({
-		id,
-		name,
-		src,
-		left,
-		top,
-		angle = 0,
-		width,
-		height,
-		status = 1,
-		statusText = 0,
 		text = '',
 		sizeText = 20,
 		colorText = '#000000',
 		backgroundText = '#ffffff',
 		textPosition = 'Top',
-		animation = false,
+		statusText = 0,
 	}) {
-		if (!id || !name || !src || !left || !top || !width || !height)
-			throw new Error('Debes pasar todo los parametros necesarios')
-		Object.assign(this, {
-			id,
-			name,
-			src,
-			left,
-			top,
-			angle,
-			width,
-			height,
-			status,
-			statusText,
-			text,
-			sizeText,
-			colorText,
-			backgroundText,
-			textPosition,
-			animation,
-		})
-	}
-
-	/**
-	 * Cambia el estado de la imagen a inactivo.
-	 */
-	delete() {
-		this.status = 0
-	}
-
-	/**
-	 * Mueve  la imagen a una nueva posición.
-	 * @param {number} top - Nueva posición vertical.
-	 * @param {number} left - Nueva posición horizontal.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	move(top, left) {
-		this.top = top
-		this.left = left
-	}
-
-	/**
-	 * Rota  la imagen a una nueva posición.
-	 * @param {number} angle - Angulo de rotación.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	rotate(angle) {
-		this.angle = angle
-	}
-
-	/**
-	 * Cambia el tamaño de la imagen.
-	 * @param {number} width - Nuevo ancho de la imagen.
-	 * @param {number} height - Nuevo alto de la imagen.
-	 * @throws {Error} Si el ancho o el alto son menores o iguales a cero.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	resize(width, height) {
-		if (width <= 0 || height <= 0) {
-			throw new Error('El ancho y alto deben ser mayores que cero.')
-		}
-		this.width = parseFloat(width.toFixed(2))
-		this.height = parseFloat(height.toFixed(2))
-	}
-
-	/**
-	 * Cambia el nombre de la imagen.
-	 * @param {string} name - Nuevo nombre de la imagen.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setName(name) {
-		this.name = name
-	}
-
-	/**
-	 * Cambia el estado del texto.
-	 * @param {number} status - Nuevo estado del texto.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setStatusText(status) {
-		this.statusText = status
+		this.text = text
+		this.sizeText = sizeText
+		this.colorText = colorText
+		this.backgroundText = backgroundText
+		this.textPosition = textPosition
+		this.statusText = statusText
 	}
 
 	/**
 	 * Establece el texto de la imagen.
-	 * @param {string} text - Nuevo texto.
+	 * @param {string} text - El nuevo texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setText(text) {
+		if (typeof text !== 'string') throw new Error('El texto debe ser una cadena.')
 		this.text = text
 	}
 
 	/**
-	 * Establece el tamaño del texto de la imagen.
-	 * @param {number} size - Nuevo tamaño de texto.
+	 * Establece el tamaño del texto.
+	 * @param {number} size - El nuevo tamaño del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setSizeText(size) {
+		if (typeof size !== 'number' || size <= 0) throw new Error('El tamaño del texto debe ser un número positivo.')
 		this.sizeText = size
 	}
 
 	/**
-	 * Establece el color del texto de la imagen.
-	 * @param {string} color - Nuevo color de texto.
+	 * Establece el color del texto.
+	 * @param {string} color - El nuevo color del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setColorText(color) {
@@ -148,8 +141,8 @@ export class ImageDiagram {
 	}
 
 	/**
-	 * Cambia el color del texto de fondo.
-	 * @param {string} color - Nuevo color de fondo.
+	 * Establece el color de fondo del texto.
+	 * @param {string} color - El nuevo color de fondo del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setBackgroundTextColor(color) {
@@ -157,171 +150,82 @@ export class ImageDiagram {
 	}
 
 	/**
-	 * Cambia la ubicación del texto.
-	 * @param {string} ubi - Nueva ubicación.
+	 * Establece la posición del texto.
+	 * @param {string} position - La nueva posición del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setTextPosition(ubi) {
-		this.textPosition = ubi
+	setTextPosition(position) {
+		this.textPosition = position
 	}
 
 	/**
-	 * Activa/Desactiva la animacion de la imagen.
-	 * @param {boolean} status - Nueva estado.
+	 * Establece el estado del texto (activo o inactivo).
+	 * @param {boolean} status - El estado del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setAnimated(status) {
-		this.animation = status
-	}
-
-	/**
-	 * Devuelve la posición actual de la imagen.
-	 * @returns {{top: number, left: number}} Objeto con la posición actual.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	getUbication() {
-		return { top: this.top, left: this.left }
-	}
-
-	/**
-	 * Devuelve el tamaño actual de la imagen.
-	 * @returns {{width: number, height: number}} Objeto con el tamaño actual.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	getSize() {
-		return { width: this.width, height: this.height }
-	}
-
-	/**
-	 * Devuelve el texto de la imagen.
-	 * @returns {string} El texto de la imagen.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	getText() {
-		return this.text
-	}
-
-	/**
-	 * Convierte una instancia de ImageDiagram en una instancia de ImageTopic.
-	 * @param {ImageDiagram} image - Instancia de ImageDiagram.
-	 * @param {number} params.statusTopic - Tema de la imagen.
-	 * @param {string} params.topic - Topico de la imagen.
-	 * @param {string} params.typeSensor - Tipo de sensor que va a ser esta imagen (Analogico o Binario)
-	 * @param {Array} params.optionValue - Aray donde se van a pasar los parametros del sensor de tipo binario.
-	 * @param {Array} params.field - Array donde vas a estar todo los fields para la consulta en influx.
-	 * @param {boolean} params.showValue - Estado para saber si se muestra o no el valor del dato de influx.
-	 * @param {string} params.valuePosition - Ubicación del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {number} params.sizeTextValue - Tamaño del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {string} params.colorTextValue - Color del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {string} params.backgroundTextValue - Color de fondo del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {number} params.startValueRange - Rango inicial.
-	 * @param {number} params.startUniRange - Rango final.
-	 * @returns {ImageTopic} Nueva instancia de ImageTopic.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	static convertToImageTopic(
-		image,
-		{
-			statusTopic = 1,
-			topic = '',
-			typeSensor = '',
-			optionValue = [],
-			field = [],
-			showValue = false,
-			valuePosition = 'Top',
-			sizeTextValue = 20,
-			colorTextValue = '#000000',
-			backgroundTextValue = '#ffffff',
-			startValueRange = '1',
-			startUniRange = 'm',
-		}
-	) {
-		return new ImageTopic({
-			...image,
-			statusTopic,
-			topic,
-			typeSensor,
-			optionValue,
-			field,
-			showValue,
-			valuePosition,
-			sizeTextValue,
-			colorTextValue,
-			backgroundTextValue,
-			startValueRange,
-			startUniRange,
-		})
+	setStatusText(status) {
+		if (![false, true].includes(status)) throw new Error('El estado debe ser false o true.')
+		this.statusText = status
 	}
 }
 
-export class ImageTopic extends ImageDiagram {
+/**
+ * Clase que representa un conjunto de variables asociadas a la imagen.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class ImageVariables {
 	/**
-	 * @param {Object} params - Parámetros para inicializar la instancia.
-	 * @param {number} params.id - Identificador de la imagen.
-	 * @param {string} params.name - Nombre de la imagen.
-	 * @param {string} params.src - URL de la imagen.
-	 * @param {number} params.left - Posición horizontal de la imagen.
-	 * @param {number} params.top - Posición vertical de la imagen.
-	 * @param {number} params.angle - Angulo de la imagen.
-	 * @param {number} params.width - Ancho de la imagen.
-	 * @param {number} params.height - Alto de la imagen.
-	 * @param {number} params.status - Estado de la imagen (1 o 0).
-	 * @param {number} params.statusText - Estado del texto (1 para activo, 0 para inactivo).
-	 * @param {string} params.text - Texto de la imagen.
-	 * @param {number} params.sizeText - Tamaño del texto de la imagen.
-	 * @param {string} params.colorText - Color del texto de la imagen.
-	 * @param {string} params.backgroundText - Color de fondo del texto .
-	 * @param {string} params.textPosition - Ubicación del titulo/texto que querramos en la imagen
-	 * @param {boolean} params.animation - Valor para indicar si la imagen tiene activa o no animación
-	 * @param {number} params.statusTopic - Tema de la imagen.
-	 * @param {string} params.topic - Topico de la imagen.
-	 * @param {string} params.typeSensor - Tipo de sensor que va a ser esta imagen (Analogico o Binario)
-	 * @param {Array} params.optionValue - Aray donde se van a pasar los parametros del sensor de tipo binario.
-	 * @param {Array} params.field - Array donde vas a estar todo los fields para la consulta en influx.
-	 * @param {boolean} params.showValue - Estado para saber si se muestra o no el valor del dato de influx.
-	 * @param {string} params.valuePosition - Ubicación del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {number} params.sizeTextValue - Tamaño del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {string} params.colorTextValue - Color del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {string} params.backgroundTextValue - Color de fondo del texto del valor, que se mostrara en caso de estar habilitado.
-	 * @param {number} params.startValueRange - Rango inicial.
-	 * @param {number} params.startUniRange - Rango final.
+	 * Crea una instancia de la clase ImageVariables.
+	 * @param {Object} variables - Un objeto que contiene las variables.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	constructor({
-		id,
-		name,
-		src,
-		left,
-		top,
-		angle = 0,
-		width,
-		height,
-		value = 0,
-		status = 1,
-		statusText = 0,
-		text = '',
-		sizeText = 20,
-		colorText = '#000000',
-		backgroundText = '#ffffff',
-		textPosition = 'Top',
-		animation = false,
-		statusTopic = 0,
-		topic = '',
-		typeSensor = '',
-		optionValue = [],
-		field = [],
-		showValue = false,
-		valuePosition = 'Top',
-		sizeTextValue = 20,
-		colorTextValue = '#000000',
-		backgroundTextValue = '#ffffff',
-		// startValueRange = '1',
-		// startUniRange = 'm',
-	}) {
-		if (!id || !name || !src || !left || !top || !width || !height)
-			throw new Error('Debes pasar todo los parametros necesarios')
+	constructor(variables = {}) {
+		if (typeof variables !== 'object' || Array.isArray(variables)) {
+			throw new Error('Las variables deben ser un objeto.')
+		}
+		this.variables = variables
+	}
 
-		super({
+	/**
+	 * Establece las variables asociadas a la imagen.
+	 * @param {Object} variables - Un objeto con las variables a establecer.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariables(variables) {
+		if (typeof variables !== 'object' || Array.isArray(variables)) {
+			throw new Error('Las variables deben ser un objeto.')
+		}
+		this.variables = variables
+	}
+}
+
+/**
+ * Clase que representa el diagrama de imagen con texto y variables.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export class ImageDiagram {
+	/**
+	 * Crea una instancia de la clase ImageDiagram.
+	 * @param {Object} params - Los parámetros para inicializar el diagrama de imagen.
+	 * @param {string} params.id - El ID único de la imagen.
+	 * @param {string} params.name - El nombre de la imagen.
+	 * @param {string} params.src - La fuente (URL) de la imagen.
+	 * @param {number} params.left - La posición horizontal de la imagen.
+	 * @param {number} params.top - La posición vertical de la imagen.
+	 * @param {number} params.angle - El ángulo de rotación de la imagen.
+	 * @param {number} params.width - El ancho de la imagen.
+	 * @param {number} params.height - El alto de la imagen.
+	 * @param {string} params.text - El texto asociado a la imagen.
+	 * @param {number} params.sizeText - El tamaño del texto.
+	 * @param {string} params.colorText - El color del texto.
+	 * @param {string} params.backgroundText - El color de fondo del texto.
+	 * @param {string} params.textPosition - La posición del texto.
+	 * @param {boolean} params.statusText - El estado del texto (activo o inactivo).
+	 * @param {Object} params.variables - Un objeto con las variables asociadas.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor(params) {
+		const {
 			id,
 			name,
 			src,
@@ -330,146 +234,142 @@ export class ImageTopic extends ImageDiagram {
 			angle,
 			width,
 			height,
-			value,
-			status,
-			statusText,
 			text,
 			sizeText,
 			colorText,
 			backgroundText,
 			textPosition,
-			animation,
-		})
-		Object.assign(this, {
-			statusTopic,
-			topic,
-			typeSensor,
-			optionValue,
-			field,
-			showValue,
-			valuePosition,
-			sizeTextValue,
-			colorTextValue,
-			backgroundTextValue,
-			// startValueRange,
-			// startUniRange,
-		})
+			statusText,
+			variables,
+		} = params
+
+		this.image = new Image({ id, name, src, left, top, angle, width, height })
+		this.text = new ImageText({ text, sizeText, colorText, backgroundText, textPosition, statusText })
+		this.variables = new ImageVariables(variables)
 	}
 
 	/**
-	 * Establece el topico para la consulta a influx.
-	 * @param {string} topic - Nuevo topico.
+	 * Mueve la imagen a una nueva posición.
+	 * @param {number} top - La nueva posición vertical.
+	 * @param {number} left - La nueva posición horizontal.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setStatusTopic(status) {
-		this.statusTopic = status
+	move(top, left) {
+		this.image.move(top, left)
 	}
 
 	/**
-	 * Establece el topico para la consulta a influx.
-	 * @param {string} topic - Nuevo topico.
+	 * Rota la imagen a un ángulo específico.
+	 * @param {number} angle - El ángulo de rotación en grados.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setTopic(topic) {
-		this.topic = topic
+	rotate(angle) {
+		this.image.rotate(angle)
 	}
 
 	/**
-	 * Establece el tipo de sensor.
-	 * @param {string} type - Nuevo tipo.
+	 * Redimensiona la imagen a un nuevo tamaño.
+	 * @param {number} width - El nuevo ancho de la imagen.
+	 * @param {number} height - El nuevo alto de la imagen.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setTypeSensor(type) {
-		this.typeSensor = type
+	resize(width, height) {
+		this.image.resize(width, height)
 	}
 
 	/**
-	 * Establece en un Array los parametros para el sensor.
-	 * @param {Array} options - Nuevo array.
+	 * Cambia el estado de la imagen a inactivo.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setOptionsValue(options) {
-		this.optionValue = options
+	delete() {
+		this.image.delete()
 	}
 
 	/**
-	 * Establece el estado de la visualizacion del dato obtenido de Influx.
-	 * @param {boolean} status - Estado de visualizacion.
+	 * Establece el texto de la imagen.
+	 * @param {string} text - El nuevo texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setShowValue(status) {
-		this.showValue = status
+	setText(text) {
+		this.text.setText(text)
 	}
 
 	/**
-	 * Establece la ubicación del dato obtenido de Influx.
-	 * @param {string} position - Ubicación del valor.
+	 * Establece el tamaño del texto.
+	 * @param {number} size - El nuevo tamaño del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setPositionValue(position) {
-		this.valuePosition = position
+	setSizeText(size) {
+		this.text.setSizeText(size)
 	}
 
 	/**
-	 * Establece el tamaño del texto del valor de influx.
-	 * @param {number} size - Nuevo tamaño de texto.
+	 * Establece el color del texto.
+	 * @param {string} color - El nuevo color del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setSizeTextValue(size) {
-		this.sizeTextValue = size
+	setColorText(color) {
+		this.text.setColorText(color)
 	}
 
 	/**
-	 * Establece el color del texto del valor de influx.
-	 * @param {string} color - Nuevo color de texto.
+	 * Establece el color de fondo del texto.
+	 * @param {string} color - El nuevo color de fondo del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setColorTextValue(color) {
-		this.colorTextValue = color
+	setBackgroundTextColor(color) {
+		this.text.setBackgroundTextColor(color)
 	}
 
 	/**
-	 * Cambia el color de fondo del texto ( valor ).
-	 * @param {string} color - Nuevo color de fondo.
+	 * Establece la posición del texto.
+	 * @param {string} position - La nueva posición del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	setBackgroundTextValue(color) {
-		this.backgroundTextValue = color
-	}
-
-	// /**
-	//  * Establece el valor para el rango inicial de la consulta.
-	//  * @param {number} value - Nuevo valor para el rango inicial de la consulta.
-	//  * @author Jose Romani <jose.romani@hotmail.com>
-	//  */
-	// setStartValueRange(value) {
-	// 	this.startValueRange = value
-	// }
-
-	// /**
-	//  * Establece una unidad para el rango inicial de la consulta.
-	//  * @param {string} uni - Nueva unidad para rango inicial de la consulta.
-	//  * @author Jose Romani <jose.romani@hotmail.com>
-	//  */
-	// setStartUniRange(uni) {
-	// 	this.startUniRange = uni
-	// }
-
-	/**
-	 * Establece el fields para la consulta.
-	 * @param {string} field - Nuevo field.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setField(field) {
-		this.field = field
+	setTextPosition(position) {
+		this.text.setTextPosition(position)
 	}
 
 	/**
-	 * Devuelve los datos para completar la query para influx.
-	 * @returns {{topic: string, field: Array, finishRange: string, startRange: string}} Objeto con el topico, fields, rando de inicio y de fin.
+	 * Establece el estado del texto (activo o inactivo).
+	 * @param {boolean} status - El estado del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	getTopicData() {
-		return { topic: this.topic, field: this.field, finishRange: this.finishRange, startRange: this.startRange }
+	setStatusText(status) {
+		this.text.setStatusText(status)
+	}
+
+	/**
+	 * Establece las variables asociadas a la imagen.
+	 * @param {Object} variables - Un objeto con las variables a establecer.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariables(variables) {
+		this.variables.setVariables(variables)
+	}
+
+	/**
+	 * Obtiene los datos de la imagen para guardar.
+	 * @returns {Object} - Datos del texto.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	getDataSave() {
+		return {
+			id: parseInt(this.image.id),
+			name: this.image.name,
+			src: this.image.src,
+			left: this.image.position.left,
+			top: this.image.position.top,
+			angle: this.image.angle,
+			width: this.image.size.width,
+			height: this.image.size.height,
+			text: this.text.text,
+			sizeText: this.text.sizeText,
+			colorText: this.text.colorText,
+			backgroundText: this.text.backgroundText,
+			textPosition: this.text.textPosition,
+			statusText: this.text.statusText,
+			variables: this.variables.variables,
+		}
 	}
 }

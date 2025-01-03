@@ -43,8 +43,8 @@ function App() {
 		{ path: '/newDiagram', element: <DrawDiagram /> },
 		{ path: '/newDiagram/:id', element: <DrawDiagram /> },
 		{ path: '/AddMenu', element: <AddMenu /> },
-        {path: '/config/graphic', element: <SelectType />},
-        {path: '/config/graphic/:id', element: <ConfigGraphic/>},
+		{ path: '/config/graphic', element: <SelectType /> },
+		{ path: '/config/graphic/:id', element: <ConfigGraphic /> },
 	]
 	//Incorporo el theme de mui
 	const lightTheme = createTheme({

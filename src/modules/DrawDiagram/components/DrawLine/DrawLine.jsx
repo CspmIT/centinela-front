@@ -9,19 +9,25 @@ function DrawLine({ selectedObject, fabricCanvasRef }) {
 	useEffect(() => {
 		setInfo(selectedObject)
 	}, [selectedObject])
-	const [checkboxText, setCheckboxText] = useState(info.showText)
+	const [checkboxText, setCheckboxText] = useState(info.text.showText)
 	const activeTextLine = (status) => {
 		setCheckboxText(status)
 		const infoUpdate = { ...info, showText: status }
 		setInfo(infoUpdate)
 		selectedObject.setShowText(status)
-		addTextLine(selectedObject, fabricCanvasRef)
+		addTextLine(infoUpdate, fabricCanvasRef)
 	}
 	const chageLocation = (ubi) => {
 		const infoUpdate = { ...info, locationText: ubi }
 		setInfo(infoUpdate)
 		selectedObject.setLocationText(ubi)
-		addTextLine(selectedObject, fabricCanvasRef)
+		addTextLine(infoUpdate, fabricCanvasRef)
+	}
+	const changeText = (text) => {
+		const infoUpdate = { ...info }
+		infoUpdate.text = text
+
+		addTextLine(infoUpdate, fabricCanvasRef)
 	}
 	return (
 		<div className={`w-full flex flex-col gap-3 px-5 py-4 bg-gray-100 `}>
@@ -48,7 +54,7 @@ function DrawLine({ selectedObject, fabricCanvasRef }) {
 					</div>
 				</AccordionSummary>
 				<AccordionDetails>
-					<PropertyText AddText={addTextLine} data={selectedObject} fabricCanvasRef={fabricCanvasRef} />
+					<PropertyText AddText={changeText} data={info.text} fabricCanvasRef={fabricCanvasRef} />
 					<TextField
 						select
 						label='Posición del Texto'
@@ -56,7 +62,7 @@ function DrawLine({ selectedObject, fabricCanvasRef }) {
 						name='locationText'
 						onChange={(e) => chageLocation(e.target.value)}
 						className='w-full '
-						value={info?.locationText || 'Top'}
+						value={info?.text.locationText || 'Top'}
 					>
 						<MenuItem value='Top'>Arriba</MenuItem>
 						<MenuItem value='Bottom'>Abajo</MenuItem>

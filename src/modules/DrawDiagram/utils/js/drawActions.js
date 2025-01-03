@@ -2,7 +2,7 @@ import Swal from 'sweetalert2'
 import * as fabric from 'fabric'
 import { request, requestFile } from '../../../../utils/js/request'
 import { backend } from '../../../../utils/routes/app.routes'
-import { ImageDiagram, ImageTopic } from '../../class/ImageClass'
+import { ImageDiagram } from '../../class/ImageClass'
 import { LineDiagram } from '../../class/LineClass'
 import { PolylineDiagram } from '../../class/PolylineClass'
 import { TextDiagram } from '../../class/TextClass'
@@ -10,7 +10,6 @@ import { createLine } from '../../components/DrawLine/utils/js/line'
 import { finalizePolyline } from '../../components/DrawPolyLine/utils/js/polyline'
 import { createImage } from '../../components/DrawImage/utils/js/actionImage'
 import { newText } from '../../components/DrawText/utils/js'
-import { handlechangeBackground } from '../../components/PropertyCanva/utils/js/propertyCanvas'
 import axios from 'axios'
 
 /**
@@ -36,7 +35,6 @@ export const calcWidthText = (texto, fontSize = 20) => {
 const classMap = {
 	TextDiagram,
 	ImageDiagram,
-	ImageTopic,
 	LineDiagram,
 	PolylineDiagram,
 }
@@ -49,11 +47,6 @@ const classMap = {
  * @author Jose Romani <jose.romani@hotmail.com>
  */
 export const getInstanceType = (obj) => {
-	// Primero verificamos si es de la clase más específica (ImageTopic)
-	if (obj instanceof ImageTopic) {
-		return 'ImageTopic' // Si es una instancia de ImageTopic, retornamos su tipo
-	}
-
 	// Verificamos el resto de las clases en el mapa
 	for (const [key, value] of Object.entries(classMap)) {
 		if (obj instanceof value) {
@@ -72,19 +65,19 @@ export const saveDiagram = async (fabricCanvasRef) => {
 				if (!obj.metadata) return acc
 				switch (obj.type) {
 					case 'image':
-						acc.images.push(obj.metadata)
+						acc.images.push(obj.metadata.getDataSave())
 						break
 					case 'textbox':
 						if (getInstanceType(obj.metadata) === 'TextDiagram') {
-							acc.texts.push(obj.metadata)
+							acc.texts.push(obj.metadata.getDataSave())
 						}
 						break
 					case 'line':
-						acc.lines.push(obj.metadata)
+						acc.lines.push(obj.metadata.getDataSave())
 						break
 					case 'polyline':
-						obj.metadata.id = parseInt(obj.metadata?.id?.split('_polyline')?.[0]) || obj.metadata.id
-						acc.polylines.push(obj.metadata)
+						console.log(obj.metadata.getDataSave())
+						acc.polylines.push(obj.metadata.getDataSave())
 						break
 				}
 				return acc
@@ -128,7 +121,7 @@ export const uploadCanvaDb = async (id, fabricCanvasRef, setSelectedObject, chan
 	const objectDiagram = await request(
 		`${backend[import.meta.env.VITE_APP_NAME]}/getObjectCanva?id=${id}`,
 		'GET'
-	).then((result) => result.data[0])
+	).then((result) => result?.data?.[0])
 	if (!objectDiagram) {
 		await Swal.fire({
 			title: 'Atención!',

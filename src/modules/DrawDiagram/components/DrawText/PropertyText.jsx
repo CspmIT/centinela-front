@@ -10,6 +10,7 @@ function PropertyText({ data, AddText, fabricCanvasRef }) {
 	const changeText = (string) => {
 		data.setText(string)
 		const infoUpdate = { ...info, text: string }
+		console.log(infoUpdate)
 		setInfo(infoUpdate)
 		AddText(infoUpdate, fabricCanvasRef)
 	}
@@ -59,7 +60,7 @@ function PropertyText({ data, AddText, fabricCanvasRef }) {
 					label='Tamaño del texto'
 					id='sizeText'
 					name='sizeText'
-					onChange={(e) => changeSizeText(e.target.value)}
+					onChange={(e) => changeSizeText(parseInt(e.target.value))}
 					className='w-1/2'
 					value={info?.sizeText || ''}
 				/>

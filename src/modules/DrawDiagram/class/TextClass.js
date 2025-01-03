@@ -1,15 +1,19 @@
-export class TextDiagram {
+/**
+ * Clase base para representar atributos de un texto.
+ * @abstract
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class TextAttributes {
 	/**
-	 * @param {Object} params - Parámetros para inicializar la instancia.
-	 * @param {number} params.id - Identificador del texto.
-	 * @param {number} params.left - Posición horizontal del texto.
-	 * @param {number} params.top - Posición vertical del texto.
-	 * @param {number} params.angle - Angulo del texto.
-	 * @param {number} params.status - Estado del texto (1 para activo, 0 para inactivo).
-	 * @param {string} params.text - Texto del texto.
-	 * @param {number} params.sizeText - Tamaño del texto.
-	 * @param {number} params.colorText - Color del texto.
-	 * @param {string} params.backgroundText - Color de fondo.
+	 * @param {number} id - Identificador del texto.
+	 * @param {number} left - Posición horizontal.
+	 * @param {number} top - Posición vertical.
+	 * @param {number} angle - Ángulo del texto.
+	 * @param {number} status - Estado del texto.
+	 * @param {string} text - Contenido del texto.
+	 * @param {number} sizeText - Tamaño del texto.
+	 * @param {string} colorText - Color del texto.
+	 * @param {string} backgroundText - Fondo del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	constructor({
@@ -23,12 +27,21 @@ export class TextDiagram {
 		colorText = '#000000',
 		backgroundText = '#ffffff',
 	}) {
-		if (!id || !left || !top) throw new Error('Debes pasar todo los parametros necesarios')
+		if (!id || left === undefined || top === undefined) {
+			throw new Error('Debes pasar todos los parámetros necesarios')
+		}
 		Object.assign(this, { id, left, top, angle, status, text, sizeText, colorText, backgroundText })
 	}
+}
 
+/**
+ * Clase para manipular y gestionar las operaciones del texto.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+class TextOperations extends TextAttributes {
 	/**
 	 * Cambia el estado del texto a inactivo.
+	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	delete() {
 		this.status = 0
@@ -47,7 +60,7 @@ export class TextDiagram {
 
 	/**
 	 * Rota el texto a una nueva posición.
-	 * @param {number} angle - Angulo de rotación.
+	 * @param {number} angle - Ángulo de rotación.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	rotate(angle) {
@@ -91,29 +104,35 @@ export class TextDiagram {
 	}
 
 	/**
-	 * Devuelve la posición actual del texto.
-	 * @returns {{top: number, left: number}} Objeto con la posición actual.
+	 * Obtiene los datos del texto para guardar.
+	 * @returns {Object} - Datos del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	static getUbication() {
-		return { top: this.top, left: this.left }
+	getDataSave() {
+		return {
+			id: parseInt(this.id),
+			left: this.left,
+			top: this.top,
+			angle: this.angle,
+			status: this.status,
+			text: this.text,
+			sizeText: this.sizeText,
+			colorText: this.colorText,
+			backgroundText: this.backgroundText,
+		}
 	}
+}
 
+/**
+ * Clase principal que combina atributos y operaciones del texto.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export class TextDiagram extends TextOperations {
 	/**
-	 * Devuelve el tamaño actual del texto.
-	 * @returns {{width: number, height: number}} Objeto con el tamaño actual.
+	 * @param {Object} params - Parámetros para inicializar la instancia.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	static getSize() {
-		return { width: this.width, height: this.height }
-	}
-
-	/**
-	 * Devuelve el texto .
-	 * @returns {string} El texto.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	static getText() {
-		return this.text
+	constructor(params) {
+		super(params)
 	}
 }
