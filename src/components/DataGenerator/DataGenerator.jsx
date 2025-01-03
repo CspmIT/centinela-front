@@ -75,6 +75,7 @@ const DataGenerator = ({ handleClose, data = null }) => {
 			const dataReturn = {
 				name: data.name_var,
 				unit: data.unit,
+				type: data.type_var,
 				calc: requireCalc,
 				varsInflux: dataConsult,
 				equation: state?.equation || null,
@@ -97,6 +98,7 @@ const DataGenerator = ({ handleClose, data = null }) => {
 		if (data) {
 			setValue('name_var', data?.name)
 			setValue('unit', data?.unit)
+			setValue('type_var', data?.type)
 			if (data?.calc) {
 				handleRquiredCalc()
 			}
@@ -147,6 +149,23 @@ const DataGenerator = ({ handleClose, data = null }) => {
 					error={!!errors.unit}
 					helperText={errors.unit && errors.unit.message}
 				/>
+				<TextField
+					select
+					label='tipo de variable'
+					{...register('type_var', {
+						required: 'Este campo es requerido',
+					})}
+					className='w-2/12'
+					error={!!errors.type_var}
+					helperText={errors.type_var && errors.type_var.message}
+					defaultValue={''}
+				>
+					<MenuItem value=''>
+						<em>Seleccione un tipo de Variable</em>
+					</MenuItem>
+					<MenuItem value='last'>Instantánea</MenuItem>
+					<MenuItem value='history'>Histórico</MenuItem>
+				</TextField>
 			</div>
 			<div className='flex w-full justify-center gap-3'>
 				<FormControlLabel
