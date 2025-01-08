@@ -1,6 +1,7 @@
 import * as fabric from 'fabric'
 import { PolylineDiagram } from '../../../../class/PolylineClass'
 import { invertHexColor } from '../../../ToolsCanvas/utils/js'
+import { collapseClasses } from '@mui/material'
 
 let tempPolyline = null
 let points = []
@@ -95,14 +96,15 @@ const handleMouseMoveTemp = (canvas) => (e) => {
  */
 export const finalizePolyline = async (canvas, setSelectedObject, data = {}) => {
 	if ((tempPolyline && points.length > 1) || data?.points) {
-		const id = `${data?.id || generateId()}`
+		const id = data?.id || generateId()
 		if (canvas.getObjects('polyline').find((obj) => obj.id == id)) return false
 		if (tempPolyline) {
 			canvas.remove(tempPolyline)
 		}
 		const polylinePopints = data?.points || points
-		const polyline = new PolylineDiagram({ ...data, id, points: polylinePopints })
 
+		const variable = data?.id_influxvars ? { variable: data.id_influxvars } : {}
+		const polyline = new PolylineDiagram({ ...data, ...variable, id, points: polylinePopints })
 		const finalPolyline = new fabric.Polyline(polylinePopints, {
 			id,
 			stroke: data?.stroke || 'black',
@@ -116,7 +118,6 @@ export const finalizePolyline = async (canvas, setSelectedObject, data = {}) => 
 			targetFindTolerance: 20,
 			strokeLineJoin: 'round',
 		})
-
 		finalPolyline.metadata = polyline
 
 		addPolylineListeners(finalPolyline, canvas, setSelectedObject)
@@ -414,7 +415,6 @@ export const animationDoblePolyline = (canvas, id) => {
 
 	if (!polyline) return // Verificar si la polilínea existe
 	let polylineFlow = canvas.getObjects('polyline').find((obj) => obj.id === `${id}_back`)
-
 	if (!polylineFlow) {
 		const adjustedPoints = adjustPointsToCenter(canvas, id)
 		// Crear la nueva polilínea animada
@@ -436,12 +436,12 @@ export const animationDoblePolyline = (canvas, id) => {
 		polylineFlow.on('selected', () => {
 			polyline.fire('selected')
 		})
-
 		canvas.add(polylineFlow)
 	}
 
 	const animatePolylineFlow = () => {
 		if (!polyline.metadata.animation.animation) {
+			console.log('hello')
 			canvas.remove(polylineFlow)
 			polyline.set('strokeWidth', parseInt(polyline.metadata.appearance.strokeWidth))
 			updateRadiusCircles(polyline.id, canvas)
@@ -463,6 +463,10 @@ export const animationDoblePolyline = (canvas, id) => {
 		if (polylineFlow.strokeDashOffset < -50) polylineFlow.strokeDashOffset = 0
 
 		canvas.requestRenderAll()
+		canvas.remove(polyline)
+		canvas.bringObjectToFront(polylineFlow)
+		polylineFlow.setBoundingBox()
+
 		requestAnimationFrame(animatePolylineFlow)
 	}
 
@@ -486,4 +490,95 @@ const adjustPointsToCenter = (canvas, id) => {
 		})
 	}
 	return points
+}
+
+/**
+ * Finaliza la creación de la polilínea al presionar Enter.
+ * Agrega la polilínea al canvas y asigna sus eventos y vértices.
+ *
+ * @param {fabric.Canvas} canvas - El objeto canvas de Fabric.js .
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export const viewPolyline = async (canvas, data = {}) => {
+	if ((tempPolyline && points.length > 1) || data?.points) {
+		const id = `${data?.id || generateId()}`
+
+		if (canvas.getObjects('polyline').find((obj) => obj.id == id)) return false
+
+		const polylinePopints = data?.points || points
+
+		const variable = data?.id_influxvars ? { variable: data.id_influxvars } : {}
+		const polyline = new PolylineDiagram({ ...data, ...variable, id, points: polylinePopints })
+		const finalPolyline = new fabric.Polyline(polylinePopints, {
+			id,
+			stroke: data?.stroke || 'black',
+			strokeWidth: data?.strokeWidth || 3,
+			fill: 'transparent',
+			strokeLineCap: 'round',
+			hasControls: false,
+			hasBorders: false,
+			selectable: false,
+			strokeLineJoin: 'round',
+		})
+
+		finalPolyline.metadata = polyline
+
+		canvas.add(finalPolyline)
+		if (polyline.animation.animation) {
+			animationPolylineView(canvas, polyline.polyline.id)
+		}
+
+		canvas.renderAll()
+	}
+}
+
+/**
+ * Animación de la polilínea de doble trazo, creando un efecto visual de movimiento.
+ *
+ * @param {fabric.Canvas} canvas - El objeto canvas de Fabric.js .
+ * @param {string} id - ID de la polilínea a animar.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export const animationPolylineView = (canvas, id) => {
+	const polyline = canvas.getObjects('polyline').find((obj) => obj.id === id)
+
+	if (!polyline) return // Verificar si la polilínea existe
+	let polylineFlow = canvas.getObjects('polyline').find((obj) => obj.id === `${id}_back`)
+	if (!polylineFlow) {
+		const adjustedPoints = adjustPointsToCenter(canvas, id)
+		// Crear la nueva polilínea animada
+		polylineFlow = new fabric.Polyline(polyline.points, {
+			id: `${id}_back`,
+			stroke: invertHexColor(polyline.metadata.appearance.stroke),
+			strokeWidth: parseInt(polyline.metadata.appearance.strokeWidth),
+			strokeDashArray: [20, 30],
+			fill: null, // Asegurar que no tenga relleno
+			centeredScaling: true,
+			hasBorders: false,
+			hasControls: false,
+			evented: false,
+			selectable: false,
+		})
+
+		canvas.add(polylineFlow)
+	}
+
+	const animatePolylineFlow = () => {
+		polyline.strokeWidth = parseInt(polyline.metadata.appearance.strokeWidth) + 4
+		polylineFlow.stroke = invertHexColor(polyline.metadata.appearance.stroke)
+
+		updateAllPolyline(id, canvas)
+
+		const movement = polyline.metadata.animation.invertAnimation ? -1 : 1
+		polylineFlow.strokeDashOffset -= movement
+
+		if (polylineFlow.strokeDashOffset < -50) polylineFlow.strokeDashOffset = 0
+
+		canvas.requestRenderAll()
+		polylineFlow.setBoundingBox()
+
+		requestAnimationFrame(animatePolylineFlow)
+	}
+
+	animatePolylineFlow()
 }

@@ -7,20 +7,14 @@ class Line {
 	 * @param {Object} params - Parámetros para inicializar la línea.
 	 * @param {number} params.id - Identificador de la línea.
 	 * @param {Object} params.points - Objeto con los puntos {start: {left, top}, end: {left, top}}.
-	 * @param {string} params.stroke - Color principal de la línea.
-	 * @param {number} params.strokeWidth - Ancho de la línea principal.
-	 * @param {string} params.colorSecondary - Color de la línea secundaria.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	constructor({ id, points, stroke = '#000000', strokeWidth = 3, colorSecondary = '#000000' }) {
+	constructor({ id, points }) {
 		if (!id || !points?.start || !points?.end) {
 			throw new Error('Debes pasar todos los parámetros necesarios')
 		}
 		this.id = id
 		this.points = points
-		this.stroke = stroke
-		this.strokeWidth = strokeWidth
-		this.colorSecondary = colorSecondary
 		this.status = 1 // Activo por defecto
 	}
 
@@ -40,6 +34,22 @@ class Line {
 	setPoints(points) {
 		this.points = points
 	}
+}
+
+// Define the appearance properties of the Polyline
+export class LineAppearance {
+	/**
+	 * @param {Object} params - Parámetros para inicializar la línea.
+	 * @param {string} params.stroke - Color principal de la línea.
+	 * @param {number} params.strokeWidth - Ancho de la línea.
+	 * @param {string} params.colorSecondary - Color secundario de la línea.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	constructor({ stroke = '#000000', strokeWidth = 3, colorSecondary = '#000000' }) {
+		this.stroke = stroke
+		this.strokeWidth = strokeWidth
+		this.colorSecondary = colorSecondary
+	}
 
 	/**
 	 * Establece el color principal de la línea.
@@ -51,8 +61,8 @@ class Line {
 	}
 
 	/**
-	 * Establece el ancho de la línea principal.
-	 * @param {number} width - Nuevo ancho de la línea.
+	 * Establece el ancho de la línea.
+	 * @param {number} width - Nuevo ancho.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setWidth(width) {
@@ -60,8 +70,8 @@ class Line {
 	}
 
 	/**
-	 * Establece el color de la línea secundaria.
-	 * @param {string} color - Nuevo color para la línea secundaria.
+	 * Establece el color secundario de la línea.
+	 * @param {string} color - Nuevo color secundario.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	setColorLineSecondary(color) {
@@ -73,16 +83,18 @@ class Line {
  * Clase LineAnimation para gestionar las animaciones de la línea.
  * @author Jose Romani <jose.romani@hotmail.com>
  */
-class LineAnimation {
+export class LineAnimation {
 	/**
 	 * @param {Object} params - Parámetros para la animación.
 	 * @param {boolean} params.animation - Estado de la animación.
 	 * @param {boolean} params.invertAnimation - Dirección de la animación.
+	 * @param {number} params.variable - Variable de la línea.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
-	constructor({ animation = false, invertAnimation = false }) {
+	constructor({ animation = false, invertAnimation = false, variable = 0 }) {
 		this.animation = animation
 		this.invertAnimation = invertAnimation
+		this.variable = variable
 	}
 
 	/**
@@ -102,13 +114,22 @@ class LineAnimation {
 	setInvertAnimation(status) {
 		this.invertAnimation = status
 	}
+
+	/**
+	 * Establece la variable relacionada al estado de la linea.
+	 * @param {number} idVariable - Nuevo estado de la dirección de la animación.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariable(idVariable) {
+		this.variable = idVariable
+	}
 }
 
 /**
  * Clase LineText para gestionar las propiedades relacionadas con el texto de la línea.
  * @author Jose Romani <jose.romani@hotmail.com>
  */
-class LineText {
+export class LineText {
 	/**
 	 * @param {Object} params - Parámetros para el texto de la línea.
 	 * @param {boolean} params.showText - Determina si se muestra el texto.
@@ -201,6 +222,7 @@ export class LineDiagram {
 	 */
 	constructor(params) {
 		this.line = new Line(params)
+		this.appearance = new LineAppearance(params)
 		this.animation = new LineAnimation(params)
 		this.text = new LineText(params)
 	}
@@ -218,15 +240,15 @@ export class LineDiagram {
 	}
 
 	setStroke(color) {
-		this.line.setStroke(color)
+		this.appearance.setStroke(color)
 	}
 
 	setWidth(width) {
-		this.line.setWidth(width)
+		this.appearance.setWidth(width)
 	}
 
 	setColorLineSecondary(color) {
-		this.line.setColorLineSecondary(color)
+		this.appearance.setColorLineSecondary(color)
 	}
 
 	/**
@@ -239,6 +261,15 @@ export class LineDiagram {
 
 	setInvertAnimation(status) {
 		this.animation.setInvertAnimation(status)
+	}
+
+	/**
+	 * Establece la variable relacionada al estado de la linea.
+	 * @param {number} idVariable - Nuevo estado de la dirección de la animación.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariable(idVariable) {
+		this.animation.variable = idVariable
 	}
 
 	/**
@@ -276,13 +307,13 @@ export class LineDiagram {
 	 */
 	getDataSave() {
 		return {
-			id: parseInt(this.line.id),
+			id: typeof this.line.id == 'string' ? 0 : parseInt(this.line.id),
 			status: this.line.status,
 			points: this.line.points,
-			stroke: this.line.stroke,
-			strokeWidth: this.line.strokeWidth,
-			colorSecondary: this.line.colorSecondary,
 			status: this.line.status,
+			stroke: this.appearance.stroke,
+			strokeWidth: this.appearance.strokeWidth,
+			colorSecondary: this.appearance.colorSecondary,
 			animation: this.animation.animation,
 			invertAnimation: this.animation.invertAnimation,
 			showText: this.text.showText,
@@ -291,6 +322,7 @@ export class LineDiagram {
 			colorText: this.text.colorText,
 			backgroundText: this.text.backgroundText,
 			locationText: this.text.locationText,
+			id_influxvars: this.animation.variable,
 		}
 	}
 }

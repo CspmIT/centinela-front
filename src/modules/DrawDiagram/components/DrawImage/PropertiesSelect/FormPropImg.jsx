@@ -23,8 +23,10 @@ function FormPropImg({ data, fabricCanvasRef }) {
 	}, [data])
 
 	const changeName = (string) => {
-		data.setName(string)
-		setInfo((prev) => ({ ...prev, name: string }))
+		data.rename(string)
+		const newInfo = { ...info }
+		newInfo.image.name = string
+		setInfo({ ...newInfo })
 	}
 	const setVariables = async () => {
 		const variables = await getVarsInflux()
@@ -60,11 +62,10 @@ function FormPropImg({ data, fabricCanvasRef }) {
 			</Accordion>
 
 			{info?.variables ? (
-				<div className='flex flex-col justify-center items-center gap-5'>
-					<Typography variant='h6' className='text-center uppercase'>
+				<div className='flex flex-col justify-center items-center gap-4'>
+					<Typography variant='h6' className='text-center uppercase !m-0'>
 						Variables
 					</Typography>
-					<Divider />
 					{Object.keys(info.variables.variables).map((name, index) => (
 						<PropertyField key={index} field={name} data={data} listVariable={listVariable} />
 					))}

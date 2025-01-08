@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import InputColor from '../../../../components/InputColor/InputColor'
 import { TextField } from '@mui/material'
 import { parseRgba } from '../../../../components/InputColor/utils'
 
-function PropertyText({ data, AddText, fabricCanvasRef }) {
+function PropertyText({ data, AddText, fabricCanvasRef, variableActive = false }) {
 	const [info, setInfo] = useState(data)
 	const [backgroundText, setBackgroudText] = useState(info?.backgroundText || '#ffffff')
 
@@ -43,16 +43,19 @@ function PropertyText({ data, AddText, fabricCanvasRef }) {
 
 	return (
 		<div className='flex flex-col gap-4'>
-			<TextField
-				type='text'
-				multiline
-				label='Texto'
-				id='text'
-				name='text'
-				onChange={(e) => changeText(e.target.value)}
-				className='w-full'
-				value={info?.text || ''}
-			/>
+			{!variableActive ? (
+				<TextField
+					type='text'
+					multiline
+					label='Texto'
+					id='text'
+					name='text'
+					onChange={(e) => changeText(e.target.value)}
+					className='w-full'
+					value={info?.text || ''}
+				/>
+			) : null}
+
 			<div className='w-full flex gap-2 justify-center'>
 				<TextField
 					type='number'

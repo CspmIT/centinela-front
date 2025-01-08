@@ -15,6 +15,9 @@ const ListDrawDiagram = () => {
 	const editDiagram = (diagram) => {
 		navigate(`/newDiagram/${diagram.id}`)
 	}
+	const viewDiagram = (diagram) => {
+		navigate(`/viewDiagram/${diagram.id}`)
+	}
 	const getDiagrams = async () => {
 		try {
 			const list = await request(`${backend[import.meta.env.VITE_APP_NAME]}/getDiagrams`, 'GET')
@@ -53,7 +56,7 @@ const ListDrawDiagram = () => {
 				<div className='w-1/2'>
 					<TableCustom
 						data={listDiagram}
-						columns={ColumnsListDiagram(editDiagram)}
+						columns={ColumnsListDiagram(editDiagram, viewDiagram)}
 						density='compact'
 						header={{
 							background: 'rgb(190 190 190)',

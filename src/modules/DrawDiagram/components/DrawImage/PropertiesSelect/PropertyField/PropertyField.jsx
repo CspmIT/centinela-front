@@ -1,7 +1,7 @@
 import { Checkbox, MenuItem, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-function PropertyField({ field, data, listVariable }) {
+function PropertyField({ field, data, listVariable, showCheck = true }) {
 	const [info, setInfo] = useState(data.variables)
 
 	useEffect(() => {
@@ -43,17 +43,19 @@ function PropertyField({ field, data, listVariable }) {
 					</MenuItem>
 				))}
 			</TextField>
-			<div
-				className='flex justify-start items-center border w-1/2'
-				onClick={() => setShowVar(!info?.variables?.[field]?.show)}
-			>
-				<Checkbox
-					key={'text'}
-					checked={info?.variables?.[field]?.show}
-					onChange={(e) => setShowVar(e.target.checked)}
-				/>
-				Visualizar
-			</div>
+			{showCheck ? (
+				<div
+					className='flex justify-start items-center border w-1/2'
+					onClick={() => setShowVar(!info?.variables?.[field]?.show)}
+				>
+					<Checkbox
+						key={'text'}
+						checked={info?.variables?.[field]?.show}
+						onChange={(e) => setShowVar(e.target.checked)}
+					/>
+					Visualizar
+				</div>
+			) : null}
 		</div>
 	)
 }

@@ -2,6 +2,7 @@ import * as fabric from 'fabric'
 import { ImageDiagram } from '../../../../class/ImageClass'
 import { calcWidthText, getInstanceType } from '../../../../utils/js/drawActions'
 import Swal from 'sweetalert2'
+import { ListImg } from '../../../../utils/js/ListImg'
 
 /**
  * Agrega o actualiza un texto en el canvas asociado a un objeto específico.
@@ -63,19 +64,32 @@ export const createImage = async (data, fabricCanvasRef, setSelectedObject, chan
 			imgNode.width = parseInt(data.width)
 			imgNode.height = parseInt(data.height)
 		}
-
+		const imgBuffer = ListImg()
+		const variables = data.variables.length
+			? data.variables.reduce(
+					(acc, val) => {
+						acc.variables[val.name_var] = {
+							id_variable: val.id_influxvars,
+							show: val.show_var,
+						}
+						return acc
+					},
+					{ variables: {} }
+			  )
+			: { variables: imgBuffer.find((item) => item.src.includes(data.src)).variables }
 		const imgnueva = new ImageDiagram({
 			...data,
-			width: parseFloat(data?.width) || imgNode.width * 0.25 || 100,
-			height: parseFloat(data?.height) || imgNode.height * 0.25 || 100,
+			...variables,
+			width: parseFloat(data?.width) || imgNode.width * 0.5 || 100,
+			height: parseFloat(data?.height) || imgNode.height * 0.5 || 100,
 		})
 		imgNode.onload = () => {
 			// Crear una imagen de Fabric.js con las dimensiones correctas
 			const img = new fabric.FabricImage(imgNode, {
 				left: data.left,
 				top: data.top,
-				scaleX: 0.25, // Escala inicial (se ajustará después si es necesario)
-				scaleY: 0.25,
+				scaleX: 0.5, // Escala inicial (se ajustará después si es necesario)
+				scaleY: 0.5,
 				opacity: 1,
 				id: data.id,
 			})
@@ -91,10 +105,10 @@ export const createImage = async (data, fabricCanvasRef, setSelectedObject, chan
 			attachImageEvents(img, fabricCanvasRef, setSelectedObject, changeTool)
 
 			// Añadir la imagen al lienzo
-			canvas.add(img)
 			if (data.statusText) {
 				newTextImg(imgnueva, canvas)
 			}
+			canvas.add(img)
 		}
 
 		return imgnueva
@@ -219,10 +233,11 @@ export const editTextImg = (img, fabricCanvas, textbox) => {
 		flipX = true
 		flipY = true
 	}
-
+	let texto = img.text.text
+	texto = texto == '' ? 'Escriba en la caja de config' : texto
 	textbox.set({
-		text: img.text.text || textbox.text,
-		width: calcWidthText(img.text.text || textbox.text, img.text.sizeText || textbox.fontSize),
+		text: texto,
+		width: calcWidthText(texto, img.text.sizeText || textbox.fontSize),
 		fontSize: img.text.sizeText || textbox.fontSize,
 		fill: img.text.colorText || textbox.fill,
 		backgroundColor: img.text.backgroundText || textbox.backgroundColor,
@@ -286,4 +301,181 @@ const calculateTextPosition = (img, text) => {
 		position.top = topImg + xOffset * sin + yOffset * cos
 	}
 	return position
+}
+
+export const waveEffect = (canvas, data) => {
+	// Crear una forma personalizada para el agua con efecto de ola
+	let wavePath = new fabric.Path('M 0 200 Q 100 180 200 200 T 400 200 L 400 400 L 0 400 Z', {
+		left: data.left + data.width * data.configAnimation.margenLeft,
+		top: data.top + data.height * data.configAnimation.margenTop,
+		selectable: false,
+		fill: data.configAnimation.color,
+	})
+	let wavePath2 = new fabric.Path('M 0 200 Q 100 180 200 200 T 400 200 L 400 400 L 0 400 Z', {
+		left: data.left + data.width * data.configAnimation.margenLeft,
+		top: data.top + data.height * data.configAnimation.margenTop,
+		selectable: false,
+		fill: darkenColor(data.configAnimation.color),
+	})
+
+	const totalWidth = data.width // Ancho total del canvas
+	const totalHeight = data.height // Alto total del canvas
+	const waveHeight = data.height * 0.025 // Amplitud de la ola
+	const waveWidth = data.width * 0.1 // Longitud de onda
+	const baseHeight = 0 // altura base necesaria
+
+	// Agregar los paths al canvas
+	canvas.add(wavePath2)
+	canvas.add(wavePath)
+	// Función para animar el movimiento de la ola
+	function animatedWave() {
+		let offsetX = 0
+		let offsetX2 = 0
+
+		function moveWave() {
+			offsetX += 0.02 // Incrementar el desplazamiento
+			offsetX2 -= 0.01 // Incrementar el desplazamiento
+
+			// Cálculo del ancho superior e inferior basado en los porcentajes
+			const widthTop = totalWidth * (data.configAnimation.widthTop / 100)
+			const widthBottom = totalWidth * (data.configAnimation.widthBottom / 100)
+			const heightLeft = totalHeight * (data.configAnimation.heightLeft / 100)
+			const heightRight = totalHeight * (data.configAnimation.heightRight / 100)
+			const initDraw = ((totalWidth - widthBottom) / 2) * data.configAnimation.margenBotonLeft
+			// Generar path para wavePath
+			let pathData = `M ${initDraw} ${heightLeft} `
+			for (let x = 0; x <= widthTop; x += waveWidth / 4) {
+				const y = baseHeight + Math.sin(((x + offsetX * 50) * Math.PI) / waveWidth) * waveHeight
+				pathData += `L ${x} ${y} `
+			}
+			pathData += `L ${widthBottom} ${heightRight} L ${initDraw} ${heightLeft} Z`
+
+			// Generar path para wavePath2
+			let pathData2 = `M ${initDraw} ${heightLeft} `
+			for (let x = 0; x <= widthTop; x += waveWidth / 4) {
+				const y = baseHeight + Math.sin(((x + offsetX2 * 50) * Math.PI) / waveWidth) * waveHeight
+				pathData2 += `L ${x} ${y} `
+			}
+			pathData2 += `L ${widthBottom} ${heightRight} L ${initDraw} ${heightLeft} Z`
+
+			wavePath.path = new fabric.Path(pathData).path
+			wavePath2.path = new fabric.Path(pathData2).path
+			wavePath.setBoundingBox()
+			wavePath2.setBoundingBox()
+			canvas.renderAll()
+
+			requestAnimationFrame(moveWave)
+		}
+		moveWave()
+	}
+	// Iniciar la animación de la ola
+	animatedWave()
+	return [wavePath2, wavePath]
+}
+
+/**
+ * Crea y agrega una imagen al canvas a partir de un evento de arrastrar y soltar.
+ *
+ * @param {DragEvent} e - Evento de arrastrar y soltar.
+ * @param {React.MutableRefObject<fabric.Canvas>} fabricCanvasRef - Referencia al canvas.
+ * @param {Function} setSelectedObject - Función para actualizar el objeto seleccionado.
+ * @param {Function} changeTool - Función para cambiar la herramienta activa.
+ * @returns {ImageDiagram|undefined} - Instancia del objeto ImageDiagram creado.
+ * @author Jose Romani <jose.romani@hotmail.com>
+ */
+export const viewImage = async (data, fabricCanvasRef) => {
+	try {
+		const canvas = fabricCanvasRef.current
+
+		if (canvas.getObjects('image').find((obj) => obj.id == data.id)) return false
+
+		const imgNode = new Image()
+		const listImage = ListImg()
+		const imgBuffer = listImage.find((item) => item.animation && item.src.includes(data.src))
+		imgNode.src = imgBuffer.srcView
+		if (data.width && data.height) {
+			imgNode.width = parseInt(data.width)
+			imgNode.height = parseInt(data.height)
+		}
+
+		const variables = data.variables.length
+			? data.variables.reduce(
+					(acc, val) => {
+						acc.variables[val.name_var] = {
+							id_variable: val.id_influxvars,
+							show: val.show_var,
+						}
+						return acc
+					},
+					{ variables: {} }
+			  )
+			: { variables: {} }
+		const imgnueva = new ImageDiagram({
+			...data,
+			...variables,
+			width: parseFloat(data?.width) || imgNode.width * 0.25 || 100,
+			height: parseFloat(data?.height) || imgNode.height * 0.25 || 100,
+		})
+		imgNode.onload = () => {
+			// Crear una imagen de Fabric.js con las dimensiones correctas
+			const img = new fabric.FabricImage(imgNode, {
+				left: data.left,
+				top: data.top,
+				selectable: false,
+				opacity: 1,
+				id: data.id,
+			})
+
+			// Ajustar la escala según las dimensiones deseadas (si es necesario)
+			if (data.width && data.height) {
+				img.scaleToWidth(parseFloat(data.width))
+				img.scaleToHeight(parseFloat(data.height))
+			}
+			// Asocia el ImageDiagram al objeto de Fabric.js
+			img.metadata = imgnueva
+
+			// Añadir la imagen al lienzo
+			if (data.statusText) {
+				newTextImg(imgnueva, canvas)
+			}
+
+			canvas.add(img)
+			switch (imgBuffer?.animation) {
+				case 'wave':
+					const data = {
+						left: parseFloat(img.left.toFixed(2)),
+						top: parseFloat(img.top.toFixed(2)),
+						height: parseFloat(imgNode.height.toFixed(2)),
+						width: parseFloat(imgNode.width.toFixed(2)),
+						configAnimation: imgBuffer.configAnimation,
+					}
+					const waves = waveEffect(canvas, data)
+					const gruopImgWaves = new fabric.Group([...waves, img], {
+						selectable: false,
+						hasControls: false,
+					})
+					canvas.add(gruopImgWaves)
+					break
+				default:
+					break
+			}
+		}
+
+		return imgnueva
+	} catch (error) {
+		console.error(error)
+		Swal.fire({ title: 'Atención!', text: error.message, icon: 'warning' })
+		return false
+	}
+}
+
+const darkenColor = (hex, factor = 0.2) => {
+	// Convertir hex a RGB
+	const bigint = parseInt(hex.slice(1), 16)
+	const r = Math.max(0, ((bigint >> 16) & 255) * (1 - factor))
+	const g = Math.max(0, ((bigint >> 8) & 255) * (1 - factor))
+	const b = Math.max(0, (bigint & 255) * (1 - factor))
+
+	// Convertir RGB a hexadecimal
+	return `#${((1 << 24) + (Math.round(r) << 16) + (Math.round(g) << 8) + Math.round(b)).toString(16).slice(1)}`
 }
