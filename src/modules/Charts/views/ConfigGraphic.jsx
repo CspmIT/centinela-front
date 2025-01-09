@@ -1,23 +1,25 @@
-import {
-    Button,
-    FormControlLabel,
-    Switch,
-    TextField,
-    Typography,
-} from '@mui/material'
-import React from 'react'
+import { Button, MenuItem, TextField, Typography } from '@mui/material'
+import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 import DataGenerator from '../../../components/DataGenerator/DataGenerator'
-import VarsProvider from '../../../components/DataGenerator/ProviderVars'
+import VarsProvider, {
+} from '../../../components/DataGenerator/ProviderVars'
+import SelectorVars from '../../../components/SelectorVars/SelectorVars'
+import GraphVariableSelector from '../../../components/SelectorVars/GraphVariableSelector'
+import { configs } from '../configs/configs'
+import ConfigSimple from '../components/ConfigSimple'
 
 const ConfigGraphic = () => {
     const { id } = useParams()
     const {
         register,
+        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm()
+
+
     const onSubmit = (data) => {
         console.log(data)
     }
@@ -31,22 +33,16 @@ const ConfigGraphic = () => {
                 </Typography>
                 <form
                     onSubmit={handleSubmit(onSubmit, onError)}
-                    className="flex flex-col gap-4 "
+                    className="flex flex-col gap-4 items-center"
                 >
-                    <div className="flex w-full justify-center">
-                        <TextField
-                            className="w-1/3"
-                            label="Titulo del grafico"
-                            {...register('title', {
-                                required: 'Este campo es requerido',
-                            })}
-                            error={errors.title}
-                            helperText={errors.title && errors.title.message}
-                        />
-                    </div>
-
-                    {/* COMPONENTE DE VARIABLES */}
-                    <DataGenerator register={register} errors={errors} />
+                    {
+                        !configs[id].singleValue ? (
+                            <GraphVariableSelector />
+                        ) : (
+                            <ConfigSimple setValue={setValue} register={register} errors={errors} id={id}/>
+                        )
+                    }
+                    {/* <SelectorVars /> */}
                     <div className="flex justify-center">
                         <Button
                             type="submit"
