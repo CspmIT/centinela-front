@@ -1,3 +1,5 @@
+import { LineAnimation, LineAppearance, LineText } from './LineClass'
+
 // Define the core functionality for Polyline management
 export class Polyline {
 	/**
@@ -30,161 +32,6 @@ export class Polyline {
 	}
 }
 
-// Define the appearance properties of the Polyline
-export class PolylineAppearance {
-	/**
-	 * @param {string} stroke - Color principal de la línea.
-	 * @param {number} strokeWidth - Ancho de la línea.
-	 * @param {string} colorSecondary - Color secundario de la línea.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	constructor({ stroke = '#000000', strokeWidth = 3, colorSecondary = '#000000' }) {
-		this.stroke = stroke
-		this.strokeWidth = strokeWidth
-		this.colorSecondary = colorSecondary
-	}
-
-	/**
-	 * Establece el color principal de la línea.
-	 * @param {string} color - Nuevo color principal.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setStroke(color) {
-		this.stroke = color
-	}
-
-	/**
-	 * Establece el ancho de la línea.
-	 * @param {number} width - Nuevo ancho.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setWidth(width) {
-		this.strokeWidth = width
-	}
-
-	/**
-	 * Establece el color secundario de la línea.
-	 * @param {string} color - Nuevo color secundario.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setColorLineSecondary(color) {
-		this.colorSecondary = color
-	}
-}
-
-// Define the animation properties of the Polyline
-export class PolylineAnimation {
-	/**
-	 * @param {boolean} animation - Estado de la animación de la línea.
-	 * @param {boolean} invertAnimation - Sentido de la animación.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	constructor({ animation = false, invertAnimation = false }) {
-		this.animation = animation
-		this.invertAnimation = invertAnimation
-	}
-
-	/**
-	 * Activa o desactiva la animación de la línea.
-	 * @param {boolean} status - Nuevo estado de la animación.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setAnimation(status) {
-		this.animation = status
-	}
-
-	/**
-	 * Cambia el sentido de la animación.
-	 * @param {boolean} status - Nuevo sentido de la animación.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setInvertAnimation(status) {
-		this.invertAnimation = status
-	}
-}
-
-// Define the text properties of the Polyline
-export class PolylineText {
-	/**
-	 * @param {boolean} showText - Indica si se muestra el texto.
-	 * @param {string} text - Texto de la línea.
-	 * @param {number} sizeText - Tamaño del texto.
-	 * @param {string} colorText - Color del texto.
-	 * @param {string} backgroundText - Color de fondo del texto.
-	 * @param {string} locationText - Ubicación del texto respecto a la línea.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	constructor({
-		showText = false,
-		text = 'texto predeterminado',
-		sizeText = 20,
-		colorText = '#000000',
-		backgroundText = '#ffffff',
-		locationText = 'Top',
-	}) {
-		this.showText = showText
-		this.text = text
-		this.sizeText = sizeText
-		this.colorText = colorText
-		this.backgroundText = backgroundText
-		this.locationText = locationText
-	}
-
-	/**
-	 * Cambia el estado de mostrar el texto.
-	 * @param {boolean} status - Nuevo estado.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setShowText(status) {
-		this.showText = status
-	}
-
-	/**
-	 * Cambia el texto de la línea.
-	 * @param {string} text - Nuevo texto.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setText(text) {
-		this.text = text
-	}
-
-	/**
-	 * Cambia el tamaño del texto.
-	 * @param {number} size - Nuevo tamaño.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setSizeText(size) {
-		this.sizeText = size
-	}
-
-	/**
-	 * Cambia el color del texto.
-	 * @param {string} color - Nuevo color del texto.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setColorText(color) {
-		this.colorText = color
-	}
-
-	/**
-	 * Cambia el color de fondo del texto.
-	 * @param {string} color - Nuevo color de fondo.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setBackgroundTextColor(color) {
-		this.backgroundText = color
-	}
-
-	/**
-	 * Cambia la ubicación del texto respecto a la línea.
-	 * @param {string} location - Nueva ubicación.
-	 * @author Jose Romani <jose.romani@hotmail.com>
-	 */
-	setLocationText(location) {
-		this.locationText = location
-	}
-}
-
 // Main PolylineDiagram class combining all functionalities
 export class PolylineDiagram {
 	/**
@@ -194,9 +41,9 @@ export class PolylineDiagram {
 	 */
 	constructor(params) {
 		this.polyline = new Polyline(params)
-		this.appearance = new PolylineAppearance(params)
-		this.animation = new PolylineAnimation(params)
-		this.text = new PolylineText(params)
+		this.appearance = new LineAppearance(params)
+		this.animation = new LineAnimation(params)
+		this.text = new LineText(params)
 	}
 
 	setPoints(points) {
@@ -243,6 +90,15 @@ export class PolylineDiagram {
 		this.animation.invertAnimation = status
 	}
 
+	/**
+	 * Establece la variable relacionada al estado de la linea.
+	 * @param {number} idVariable - Nuevo estado de la dirección de la animación.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariable(idVariable) {
+		this.animation.variable = idVariable
+	}
+
 	setStroke(color) {
 		this.appearance.stroke = color
 	}
@@ -261,7 +117,7 @@ export class PolylineDiagram {
 	 */
 	getDataSave() {
 		return {
-			id: parseInt(this.polyline.id),
+			id: typeof this.polyline.id == 'string' ? 0 : parseInt(this.polyline.id),
 			status: this.polyline.status,
 			points: this.polyline.points,
 			stroke: this.appearance.stroke,
@@ -275,6 +131,7 @@ export class PolylineDiagram {
 			colorText: this.text.colorText,
 			backgroundText: this.text.backgroundText,
 			locationText: this.text.locationText,
+			id_influxvars: this.animation.variable,
 		}
 	}
 }

@@ -35,6 +35,18 @@ class Image {
 	}
 
 	/**
+	 * Cambio de nombre de la imagen.
+	 * @param {string} name - Nuevo nombre.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	rename(name) {
+		if (typeof name !== 'string' || name === '') {
+			throw new Error('El nombre no es correcto.')
+		}
+		this.name = name
+	}
+
+	/**
 	 * Mueve la imagen a una nueva posición.
 	 * @param {number} top - La nueva posición vertical.
 	 * @param {number} left - La nueva posición horizontal.
@@ -197,6 +209,16 @@ class ImageVariables {
 		}
 		this.variables = variables
 	}
+
+	getVariables() {
+		const varCleaner = Object.keys(this.variables).reduce((acc, val) => {
+			if (this.variables[val].id_variable !== 0 || this.variables[val].require) {
+				acc[val] = this.variables[val]
+			}
+			return acc
+		}, {})
+		return varCleaner
+	}
 }
 
 /**
@@ -246,6 +268,18 @@ export class ImageDiagram {
 		this.image = new Image({ id, name, src, left, top, angle, width, height })
 		this.text = new ImageText({ text, sizeText, colorText, backgroundText, textPosition, statusText })
 		this.variables = new ImageVariables(variables)
+	}
+
+	/**
+	 * Cambio de nombre de la imagen.
+	 * @param {string} name - Nuevo nombre.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	rename(name) {
+		if (typeof name !== 'string' || name === '') {
+			throw new Error('El nombre no es correcto.')
+		}
+		this.image.rename = name
 	}
 
 	/**
@@ -355,7 +389,7 @@ export class ImageDiagram {
 	 */
 	getDataSave() {
 		return {
-			id: parseInt(this.image.id),
+			id: typeof this.image.id == 'string' ? 0 : parseInt(this.image.id),
 			name: this.image.name,
 			src: this.image.src,
 			status: this.image.status,
@@ -370,7 +404,7 @@ export class ImageDiagram {
 			backgroundText: this.text.backgroundText,
 			textPosition: this.text.textPosition,
 			statusText: this.text.statusText,
-			variables: this.variables.variables,
+			variables: this.variables.getVariables(),
 		}
 	}
 }

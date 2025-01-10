@@ -26,11 +26,12 @@ class TextAttributes {
 		sizeText = 20,
 		colorText = '#000000',
 		backgroundText = '#ffffff',
+		variable = '',
 	}) {
 		if (!id || left === undefined || top === undefined) {
 			throw new Error('Debes pasar todos los parámetros necesarios')
 		}
-		Object.assign(this, { id, left, top, angle, status, text, sizeText, colorText, backgroundText })
+		Object.assign(this, { id, left, top, angle, status, text, sizeText, colorText, backgroundText, variable })
 	}
 }
 
@@ -104,13 +105,22 @@ class TextOperations extends TextAttributes {
 	}
 
 	/**
+	 * Establece la variable relacionada al estado de la linea.
+	 * @param {number} idVariable - Nuevo estado de la dirección de la animación.
+	 * @author Jose Romani <jose.romani@hotmail.com>
+	 */
+	setVariable(variable) {
+		this.variable = variable
+	}
+
+	/**
 	 * Obtiene los datos del texto para guardar.
 	 * @returns {Object} - Datos del texto.
 	 * @author Jose Romani <jose.romani@hotmail.com>
 	 */
 	getDataSave() {
 		return {
-			id: parseInt(this.id),
+			id: typeof this.id == 'string' ? 0 : parseInt(this.id),
 			left: this.left,
 			top: this.top,
 			angle: this.angle,
@@ -119,6 +129,7 @@ class TextOperations extends TextAttributes {
 			sizeText: this.sizeText,
 			colorText: this.colorText,
 			backgroundText: this.backgroundText,
+			id_influxvars: this.variable,
 		}
 	}
 }

@@ -21,6 +21,7 @@ import ListDrawDiagram from './modules/DrawDiagram/views/ListDrawDiagram'
 import DrawDiagram from './modules/DrawDiagram/views/DrawDiagram'
 import SelectType from './modules/Charts/views/SelectType'
 import ConfigGraphic from './modules/Charts/views/ConfigGraphic'
+import ViewDiagram from './modules/DrawDiagram/views/ViewDiagram'
 
 function App() {
 	const { darkMode } = useContext(MainContext)
@@ -42,6 +43,7 @@ function App() {
 		{ path: '/config/diagram', element: <ListDrawDiagram /> },
 		{ path: '/newDiagram', element: <DrawDiagram /> },
 		{ path: '/newDiagram/:id', element: <DrawDiagram /> },
+		{ path: '/viewDiagram/:id', element: <ViewDiagram /> },
 		{ path: '/AddMenu', element: <AddMenu /> },
 		{ path: '/config/graphic', element: <SelectType /> },
 		{ path: '/config/graphic/:id', element: <ConfigGraphic /> },

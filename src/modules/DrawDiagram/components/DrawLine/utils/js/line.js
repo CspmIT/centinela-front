@@ -82,8 +82,10 @@ export const createLine = (points, fabricCanvasRef, setSelectedObject, changeToo
 		perPixelTargetFind: true,
 		targetFindTolerance: 20,
 	})
+	const variable = data?.id_influxvars ? { variable: data.id_influxvars } : {}
 	finalLine.metadata = new LineDiagram({
 		...data,
+		...variable,
 		id: finalLine.id,
 		points: getPointsLine(finalLine),
 	})
@@ -372,7 +374,7 @@ export const addMetadataPoints = (line, canvas) => {
 export const updatePropertyLine = (line, property, canvas) => {
 	const lineSelect = canvas.getObjects('line').find((obj) => obj.id === line.line.id)
 	if (!lineSelect) return
-	const value = parseInt(line.line[property]) || line.line[property]
+	const value = parseInt(line.appearance[property]) || line.appearance[property]
 	lineSelect.set({ [property]: value })
 	const circles_start = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.line.id}_start`))
 	const circles_end = canvas.getObjects('circle').find((circle) => circle.id.includes(`${line.line.id}_end`))
@@ -493,8 +495,8 @@ export const animationDobleLine = (canvas, id) => {
 	if (!lineFlow) {
 		lineFlow = new fabric.Line([line.x1, line.y1, line.x2, line.y2], {
 			id: `${id}_back`,
-			stroke: invertHexColor(line.metadata.line.stroke),
-			strokeWidth: parseInt(line.metadata.line.strokeWidth),
+			stroke: invertHexColor(line.metadata.appearance.stroke),
+			strokeWidth: parseInt(line.metadata.appearance.strokeWidth),
 			strokeDashArray: [20, 30],
 			centeredScaling: true,
 			hasBorders: false,
@@ -514,14 +516,14 @@ export const animationDobleLine = (canvas, id) => {
 	const animateLineFlow = () => {
 		if (!line.metadata.animation.animation || !canvas.getObjects('line').some((item) => item.id == line.id)) {
 			canvas.remove(lineFlow)
-			line.set('strokeWidth', parseInt(line.metadata.line.strokeWidth))
+			line.set('strokeWidth', parseInt(line.metadata.appearance.strokeWidth))
 			return
 		}
-		line.set('strokeWidth', parseInt(line.metadata.line.strokeWidth) + 4)
+		line.set('strokeWidth', parseInt(line.metadata.appearance.strokeWidth) + 4)
 		canvas.requestRenderAll()
 		updateLineMove(canvas, line)
 		lineFlow.set({
-			stroke: invertHexColor(line.metadata.line.stroke),
+			stroke: invertHexColor(line.metadata.appearance.stroke),
 			x1: line.x1,
 			y1: line.y1,
 			x2: line.x2,
@@ -537,4 +539,32 @@ export const animationDobleLine = (canvas, id) => {
 		requestAnimationFrame(animateLineFlow)
 	}
 	animateLineFlow()
+}
+
+export const viewLine = async (points, canvas, data) => {
+	const id = data?.id || data
+	if (canvas.getObjects('line').find((obj) => obj.id == id)) return false
+	const finalLine = new fabric.Line(points, {
+		id: id,
+		stroke: data.stroke || 'black',
+		strokeWidth: data.strokeWidth || 2,
+		hasControls: false,
+		hasBorders: false,
+		selectable: false,
+	})
+	const variable = data?.id_influxvars ? { variable: data.id_influxvars } : {}
+	finalLine.metadata = new LineDiagram({
+		...data,
+		...variable,
+		id: finalLine.id,
+		points: getPointsLine(finalLine),
+	})
+	canvas.add(finalLine)
+	if (data?.animation) {
+		animationDobleLine(canvas, data.id)
+	}
+	if (data?.showText) {
+		addTextLine(finalLine.metadata, fabricCanvasRef)
+	}
+	return finalLine
 }

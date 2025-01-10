@@ -16,7 +16,7 @@ import ListField from '../Fields/ListField'
 import { HiOutlineVariable } from 'react-icons/hi2'
 
 function ToolsCanvas({ selectedObject, fabricCanvasRef, onPropertySelected }) {
-	const [alignment, setAlignment] = useState('web')
+	const [alignment, setAlignment] = useState('Primary')
 
 	const handleChange = async (event, newAlignment) => {
 		const canvas = fabricCanvasRef?.current
@@ -58,7 +58,13 @@ function ToolsCanvas({ selectedObject, fabricCanvasRef, onPropertySelected }) {
 				setAlignment(selectedObject ? 'PropertyPolyline' : null)
 				break
 			default:
-				setAlignment(null)
+				if (alignment == 'Primary') {
+					setTimeout(() => {
+						setAlignment('PropertyCanvas')
+					}, 500)
+				} else {
+					setAlignment(null)
+				}
 				break
 		}
 	}, [selectedObject])
@@ -142,7 +148,7 @@ function ToolsCanvas({ selectedObject, fabricCanvasRef, onPropertySelected }) {
 			) : null}
 			{alignment === 'PropertyCanvas' ? (
 				<div onClick={() => handleComponentClick('PropertiesSelect')}>
-					<PropertyCanva fabricCanvasRef={fabricCanvasRef} />
+					<PropertyCanva data={selectedObject} fabricCanvasRef={fabricCanvasRef} />
 				</div>
 			) : null}
 		</>

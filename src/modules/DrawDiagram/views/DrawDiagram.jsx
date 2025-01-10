@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from 'react'
 import CardCustom from '../../../components/CardCustom'
 import styles from '../utils/css/style.module.css'
 import { handleDrop } from '../components/DrawImage/utils/js/actionImage'
-import { Button } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Button, Checkbox, TextField } from '@mui/material'
 import { drawLine } from '../components/DrawLine/utils/js/line'
 import { newText } from '../components/DrawText/utils/js'
 import { drawPolyline } from '../components/DrawPolyLine/utils/js/polyline'
 import ToolsCanvas from '../components/ToolsCanvas/ToolsCanvas'
 import { saveDiagram, uploadCanvaDb } from '../utils/js/drawActions'
 import { useParams } from 'react-router-dom'
+import { ExpandMore, Save } from '@mui/icons-material'
 
 function DrawDiagram() {
 	const { id } = useParams()
@@ -105,7 +106,6 @@ function DrawDiagram() {
 				if (back) {
 					back.forEach((element) => {
 						element.visible = false
-						// canvas.remove(element)
 					})
 				}
 			}
@@ -118,13 +118,13 @@ function DrawDiagram() {
 				if (text) {
 					text.forEach((element) => {
 						element.visible = false
-						// canvas.remove(element)
 					})
 				}
 			}
 			activeObject.metadata.delete()
 			activeObject.visible = false
 			canvas.discardActiveObject()
+			canvas.requestRenderAll()
 			setSelectedObject(null)
 			e.preventDefault()
 		}
@@ -139,21 +139,27 @@ function DrawDiagram() {
 				'w-full  h-full flex flex-col items-center justify-center text-black dark:text-white relative p-3 rounded-md'
 			}
 		>
-			<Button onClick={() => saveDiagram(fabricCanvasRef)}>Guardar</Button>
+			<Button
+				variant='contained'
+				className='!absolute bottom-5 right-5 z-50'
+				onClick={() => saveDiagram(fabricCanvasRef)}
+			>
+				<Save />
+			</Button>
+
 			<div
 				key={'canvasDiseno'}
 				id={'canva'}
 				className='flex w-full bg-slate-200 relative'
-				onDrop={(e) => handleDrop(e, fabricCanvasRef, setSelectedObject, changeTool)} // Manejar el evento de soltar
-				onDragOver={(e) => e.preventDefault()} // Permitir que las imágenes sean soltadas
+				onDrop={(e) => handleDrop(e, fabricCanvasRef, setSelectedObject, changeTool)}
+				onDragOver={(e) => e.preventDefault()}
 			>
 				<div className={`flex w-full ${styles.hscreenCustom} `}>
 					<canvas ref={canvasRef} width={1000} height={600} style={{ border: '1px solid black' }} />
 				</div>
-				<div className='absolute top-2 left-2 w-1/4 '>
+				<div className='absolute top-1 left-2 w-1/4 '>
 					<ToolsCanvas
 						selectedObject={selectedObject}
-						// handleChangeTypeImg={handleChangeTypeImg}
 						fabricCanvasRef={fabricCanvasRef}
 						onPropertySelected={changeTool}
 					/>

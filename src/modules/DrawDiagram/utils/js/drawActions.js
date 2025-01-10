@@ -11,6 +11,7 @@ import { finalizePolyline } from '../../components/DrawPolyLine/utils/js/polylin
 import { createImage } from '../../components/DrawImage/utils/js/actionImage'
 import { newText } from '../../components/DrawText/utils/js'
 import axios from 'axios'
+import SwalLoader from '../../../../components/SwalLoader/SwalLoader'
 
 /**
  * Calcula el ancho del texto basado en su tamaño de fuente y contenido.
@@ -58,11 +59,12 @@ export const getInstanceType = (obj) => {
 
 export const saveDiagram = async (fabricCanvasRef) => {
 	try {
+		SwalLoader()
 		const canvas = fabricCanvasRef.current
 		const objects = canvas.getObjects()
 		const saveObjects = await objects.reduce(
 			(acc, obj) => {
-				if (!obj.metadata) return acc
+				if (!obj.metadata || !obj.visible) return acc
 				switch (obj.type) {
 					case 'image':
 						acc.images.push(obj.metadata.getDataSave())
@@ -83,13 +85,34 @@ export const saveDiagram = async (fabricCanvasRef) => {
 			},
 			{ images: [], texts: [], lines: [], polylines: [] }
 		)
-		if (!Object.values(saveObjects).some((item) => item.length)) return false
+		if (saveObjects.images.length) {
+			if (validationVariableImg(saveObjects.images)) {
+				Swal.fire({
+					title: 'Atención!',
+					text: 'Falta definir las variables requeridas en imagenes.',
+					icon: 'warning',
+				})
+				return false
+			}
+		}
+		if (!Object.values(saveObjects).some((item) => item.length)) {
+			Swal.close()
+			return false
+		}
 		let imgSave = ''
 		if (canvas.metadata) {
 			const formData = new FormData()
 			formData.append('image', canvas.metadata)
 			formData.append('bucketName', 'mas-agua')
 			imgSave = await requestFile(`${backend.Archivos}/uploadImg`, 'POST', formData)
+		}
+		if (!canvas?.title) {
+			Swal.fire({
+				title: 'Atención!',
+				text: 'Se necesita poner un titulo al diagrama. Clickea la opción de propiedades y escribe un titulo',
+				icon: 'warning',
+			})
+			return false
 		}
 		saveObjects.diagram = {
 			title: canvas.title || 'Prueba',
@@ -115,72 +138,92 @@ export const saveDiagram = async (fabricCanvasRef) => {
 		})
 	}
 }
-
+const validationVariableImg = (images) => {
+	return images.some((item) => {
+		return Object.values(item.variables).some((variable) => variable.require && variable.id_variable === 0)
+	})
+}
 export const uploadCanvaDb = async (id, fabricCanvasRef, setSelectedObject, changeTool) => {
-	const objectDiagram = await request(
-		`${backend[import.meta.env.VITE_APP_NAME]}/getObjectCanva?id=${id}`,
-		'GET'
-	).then((result) => result?.data?.[0])
-	if (!objectDiagram) {
-		await Swal.fire({
-			title: 'Atención!',
-			text: 'No se encontro el diagrama.',
-			icon: 'warning',
-		})
-		setTimeout(() => {
-			window.location.href = '/config/diagram'
-		}, 600)
-
-		return false
-	}
-	const canvas = fabricCanvasRef.current
-	canvas.id = objectDiagram.id
-	canvas.backgroundColor = objectDiagram.backgroundColor
-	canvas.title = objectDiagram.title
-	if (objectDiagram.backgroundImg) {
-		const imgBuffer = await getImageBackgroundDb(objectDiagram.backgroundImg)
-		const img = new Image()
-		img.src = imgBuffer
-		img.onload = () => {
-			const left = (canvas.width - img.width) / 2
-			const top = (canvas.height - img.height) / 2
-			canvas.backgroundImage = new fabric.FabricImage(img, {
-				width: canvas.width,
-				height: canvas.height,
-				left: left,
-				top: top,
+	try {
+		const objectDiagram = await request(
+			`${backend[import.meta.env.VITE_APP_NAME]}/getObjectCanva?id=${id}`,
+			'GET'
+		).then((result) => result?.data?.[0])
+		if (!objectDiagram) {
+			await Swal.fire({
+				title: 'Atención!',
+				text: 'No se encontro el diagrama.',
+				icon: 'warning',
 			})
-		}
-	}
+			setTimeout(() => {
+				window.location.href = '/config/diagram'
+			}, 600)
 
-	if (objectDiagram?.lines.length) {
-		const lines = objectDiagram.lines
-		for (const line of lines) {
-			const points = [line.points.start.left, line.points.start.top, line.points.end.left, line.points.end.top]
-			createLine(points, fabricCanvasRef, setSelectedObject, changeTool, line)
+			return false
 		}
-	}
-	if (objectDiagram?.polylines.length) {
-		const polylines = objectDiagram.polylines
-		for (const polyline of polylines) {
-			finalizePolyline(canvas, setSelectedObject, polyline)
+		const canvas = fabricCanvasRef.current
+		canvas.id = objectDiagram.id
+		canvas.backgroundColor = objectDiagram.backgroundColor
+		canvas.title = objectDiagram.title
+		if (objectDiagram.backgroundImg) {
+			const imgBuffer = await getImageBackgroundDb(objectDiagram.backgroundImg)
+			const img = new Image()
+			img.src = imgBuffer
+			img.onload = () => {
+				const left = (canvas.width - img.width) / 2
+				const top = (canvas.height - img.height) / 2
+				canvas.backgroundImage = new fabric.FabricImage(img, {
+					width: canvas.width,
+					height: canvas.height,
+					left: left,
+					top: top,
+				})
+			}
 		}
-	}
-	if (objectDiagram?.images.length) {
-		const images = objectDiagram.images
-		for (const image of images) {
-			createImage(image, fabricCanvasRef, setSelectedObject, changeTool)
+
+		if (objectDiagram?.lines.length) {
+			const lines = objectDiagram.lines
+			for (const line of lines) {
+				const points = [
+					line.points.start.left,
+					line.points.start.top,
+					line.points.end.left,
+					line.points.end.top,
+				]
+				createLine(points, fabricCanvasRef, setSelectedObject, changeTool, line)
+			}
 		}
-	}
-	if (objectDiagram?.texts.length) {
-		const texts = objectDiagram.texts
-		for (const text of texts) {
-			newText(fabricCanvasRef, text, changeTool, setSelectedObject)
+		if (objectDiagram?.polylines.length) {
+			const polylines = objectDiagram.polylines
+			for (const polyline of polylines) {
+				finalizePolyline(canvas, setSelectedObject, polyline)
+			}
 		}
+		if (objectDiagram?.texts.length) {
+			const texts = objectDiagram.texts
+			for (const text of texts) {
+				newText(fabricCanvasRef, text, changeTool, setSelectedObject)
+			}
+		}
+		if (objectDiagram?.images.length) {
+			const images = objectDiagram.images
+			for (const image of images) {
+				createImage(image, fabricCanvasRef, setSelectedObject, changeTool)
+			}
+		}
+
+		Swal.close()
+		canvas.discardActiveObject()
+		setSelectedObject(null)
+		changeTool(null)
+	} catch (error) {
+		console.error(error)
+		Swal.fire({
+			title: 'Atención!',
+			text: 'Hubo un problema al traer el diagrama',
+			icon: 'error',
+		})
 	}
-	canvas.discardActiveObject()
-	setSelectedObject(null)
-	changeTool(null)
 }
 
 const getImageBackgroundDb = async (name) => {
