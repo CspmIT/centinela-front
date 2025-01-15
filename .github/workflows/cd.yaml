@@ -63,7 +63,7 @@ jobs:
             - name: Build and push
               run: |
                   REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)
-                  docker build \
+                  docker build --network host \
                   --build-arg VITE_APP_NAME=${{ secrets.VITE_APP_NAME }} \
                   --build-arg SECRET=${{ secrets.SECRET }} \
                   --build-arg VITE_ENTORNO=${{ secrets.VITE_ENTORNO }} \
