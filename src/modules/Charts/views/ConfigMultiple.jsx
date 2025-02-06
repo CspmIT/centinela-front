@@ -2,8 +2,6 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 import GraphVariableSelector from '../../../components/SelectorVars/GraphVariableSelector'
 import { Card, TextField, Typography } from '@mui/material'
 import { configs } from '../configs/configs'
-import { request } from '../../../utils/js/request'
-import { backend } from '../../../utils/routes/app.routes'
 
 const ConfigMultiple = ({ id, setValue }) => {
     const [chartType, setType] = useState(configs[id].typeGraph)
@@ -12,7 +10,7 @@ const ConfigMultiple = ({ id, setValue }) => {
     const [lineStyle, setLineStyleProp]= useState('line')
     const [title, setTitle] = useState('')
     const ChartComponent = lazy(() =>
-        import(`/src/modules/Charts/components/${chartType}.jsx`)
+        import(`../components/${chartType}.jsx`)
     )
     // Simula la obtención de variables desde la base de datos
     useEffect(() => {
