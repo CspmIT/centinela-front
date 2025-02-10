@@ -276,7 +276,7 @@ const ChartComponentDbWrapper = ({
                 data[ySeries[0].idVar.id].map((item) =>
                     xConfig.dateTimeType == 'date'
                         ? item.time
-                        : item.time.split(' ')[1]
+                        : item.time
                 ) || [] // Suponiendo que InfluxDB devuelve timestamps
             const updatedYSeries = ySeries.map((series) => ({
                 ...series,
