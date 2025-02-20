@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import Map, {
     NavigationControl,
     Marker,
@@ -8,85 +7,96 @@ import Map, {
 } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import ControlPanel from './ControlPanel'
+import Pin from './Pin'
+import { Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 
 const MapBase = ({
     navigationcontrol = true,
-    marker = true,
     height = '100%',
     width = '100%',
     fullScreen = true,
     geolocation = true,
     controlPanel = true,
+    whithPopup = true,
+    markers = false,
+    setMarkers = false
 }) => {
-    const [latitude, setLatitude] = useState(-30.716256365145455)
-    const [longitude, setLongitude] = useState(-62.005196197872266)
-    const [popupInfo, setPopupInfo] = useState(null)
-
-    const handleDrag = (e) => {
-        const { lng, lat } = e.lngLat
-        setLatitude(lat)
-        setLongitude(lng)
-    }
-
-    useEffect(() => {
-        setPopupInfo({
-            titulo: 'Test',
-            descripcion: 'description',
-            latitude: latitude,
-            longitude: longitude,
+    const handleDragMarker = (e, marker) => {
+        let { lng, lat } = e.lngLat
+        const updateMarker = markers.map((mark, index) => {
+            if (mark.name === marker.name) {
+                return {
+                    name: mark.name,
+                    latitude: lat,
+                    longitude: lng,
+                    popupInfo: {
+                        lat: lat,
+                        lng: lng,
+                        name: mark.popupInfo.name,
+                    },
+                }
+            }
+            return mark
         })
-    }, [latitude, longitude])
+        setMarkers(updateMarker)
+    }
+    const [zoomLevel, setZoomLevel] = useState(20)
+    const handleZoom = (e) => {
+        setZoomLevel(e.viewState.zoom)
+    }
+    useEffect(() => {
+        console.log(markers)
+        setMarkers(markers)
+    }, [zoomLevel])
+
     return (
-        <>
+        <div style={{ position: 'relative', width, height }}>
             <Map
                 initialViewState={{
                     longitude: -62.005196197872266,
                     latitude: -30.716256365145455,
-                    zoom: 14,
+                    zoom: 20,
                 }}
                 style={{ width, height }}
                 mapStyle="https://api.maptiler.com/maps/streets/style.json?key=mHpRzO9eugI7vKv1drLO"
+                onZoom={handleZoom}
             >
                 {navigationcontrol && <NavigationControl position="top-left" />}
                 {fullScreen && <FullscreenControl position="top-left" />}
                 {geolocation && <GeolocateControl position="top-left" />}
-                {marker && (
+
+                {markers.map((marker, index) => (
                     <>
                         <Marker
+                            key={`marker-${index}`}
                             draggable={true}
-                            longitude={longitude}
-                            latitude={latitude}
-                            anchor="top-right"
-                            color={'#f04'}
-                            onDragEnd={handleDrag}
-                            onClick={(e) => {
-                                e.originalEvent.stopPropagation()
-                                setPopupInfo({
-                                    titulo: 'Test',
-                                    descripcion: 'description',
-                                    latitude: latitude,
-                                    longitude: longitude,
-                                })
-                            }}
-                        ></Marker>
-                        {popupInfo && (
+                            longitude={marker.longitude}
+                            latitude={marker.latitude}
+                            anchor="bottom-right"
+                            onDragEnd={(e) => handleDragMarker(e, marker)}
+                        >
+                            <Pin label={marker.name} color="#3498db" />
+                        </Marker>
+                        {marker?.popupInfo && whithPopup &&(
                             <Popup
+                                key={`popup-${index}`}
                                 anchor="top-left"
-                                latitude={Number(popupInfo.latitude)}
-                                longitude={Number(popupInfo.longitude)}
-                                onClose={() => {
-                                    setPopupInfo(null)
-                                }}
+                                closeButton={false}
+                                latitude={Number(marker.popupInfo.lat)}
+                                longitude={Number(marker.popupInfo.lng)}
+                                closeOnClick={false}
                             >
-                                <h1>{popupInfo.titulo}</h1>
-                                <p>{popupInfo.descripcion}</p>
+                                <Typography variant="h6">
+                                    {marker.popupInfo.name}
+                                </Typography>
                             </Popup>
                         )}
                     </>
-                )}
+                ))}
             </Map>
-            {controlPanel && <ControlPanel />}
-        </>
+            {controlPanel && <ControlPanel addMarker={addMarker} />}
+        </div>
     )
 }
 
