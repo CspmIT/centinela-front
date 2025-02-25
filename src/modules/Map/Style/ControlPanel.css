@@ -11,6 +11,8 @@
   right: 0;
   outline: none;
   cursor: auto;
+  max-height: 65vh; /* Ajusta según sea necesario */
+  overflow-y: auto;
 }
 
 .control-panel h3 {

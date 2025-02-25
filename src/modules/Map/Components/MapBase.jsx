@@ -20,6 +20,8 @@ const MapBase = ({
     whithPopup = true,
     markers = false,
     setMarkers = false,
+    viewState, 
+    setViewState
 }) => {
     const handleDragMarker = (e, marker) => {
         let { lng, lat } = e.lngLat
@@ -32,7 +34,7 @@ const MapBase = ({
                     popupInfo: {
                         lat: lat,
                         lng: lng,
-                        name: mark.popupInfo.name,
+                        idVar: mark.popupInfo.idVar,
                         data: mark.popupInfo.data,
                     },
                 }
@@ -47,16 +49,10 @@ const MapBase = ({
     return (
         <div style={{ position: 'relative', width, height }}>
             <Map
-                reuseMaps
-                initialViewState={{
-                    longitude: -62.005196197872266,
-                    latitude: -30.716256365145455,
-                    zoom: 14,
-                    bearing: 0,
-                    pitch: 0,
-                }}
+                {...viewState}
                 style={{ width, height }}
                 mapStyle="https://api.maptiler.com/maps/streets/style.json?key=mHpRzO9eugI7vKv1drLO"
+                onMove={(e) => setViewState(e.viewState)}
             >
                 {navigationcontrol && <NavigationControl position="top-left" />}
                 {fullScreen && <FullscreenControl position="top-left" />}
@@ -84,7 +80,7 @@ const MapBase = ({
                             >
                                 <Typography variant="body2">
                                     {marker.popupInfo.data === null
-                                        ? marker.popupInfo.name
+                                        ? marker.popupInfo.idVar
                                         : marker.popupInfo.data}
                                 </Typography>
                             </Popup>
