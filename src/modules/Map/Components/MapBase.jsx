@@ -9,6 +9,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 import ControlPanel from './ControlPanel'
 import Pin from './Pin'
 import { Typography } from '@mui/material'
+import { useEffect } from 'react'
 
 const MapBase = ({
     navigationcontrol = true,
@@ -21,7 +22,8 @@ const MapBase = ({
     markers = false,
     setMarkers = false,
     viewState, 
-    setViewState
+    setViewState,
+    draggable = false
 }) => {
     const handleDragMarker = (e, marker) => {
         let { lng, lat } = e.lngLat
@@ -61,7 +63,7 @@ const MapBase = ({
                     <>
                         <Marker
                             key={`marker-${index}`}
-                            draggable={true}
+                            draggable={draggable}
                             longitude={marker.longitude}
                             latitude={marker.latitude}
                             anchor="bottom"

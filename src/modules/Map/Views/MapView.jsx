@@ -3,12 +3,12 @@ import MapBase from '../Components/MapBase'
 import SelectVars from '../../Charts/components/SelectVars'
 import { useForm } from 'react-hook-form'
 import Swal from 'sweetalert2'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { backend } from '../../../utils/routes/app.routes'
 import { request } from '../../../utils/js/request'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
-const MapView = ({create = false}) => {
+const MapView = ({ create = false }) => {
     const {
         register,
         getValues,
@@ -16,10 +16,22 @@ const MapView = ({create = false}) => {
         trigger,
         formState: { errors },
     } = useForm()
-    const [markers, setMarkers] = useState([])
-    const { id = false } = useParams()
+
     const navigate = useNavigate()
-    const generateMarker = (name, lat, lng, idVar) => {
+    const [searchParam] = useSearchParams()
+
+
+    const [markers, setMarkers] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [viewState, setViewState] = useState({
+        longitude: -62.005196197872266,
+        latitude: -30.716256365145455,
+        zoom: 14,
+        bearing: 0,
+        pitch: 0,
+    })
+
+    const generateMarker = (name, lat, lng, idVar, data) => {
         return {
             name,
             latitude: parseFloat(lat),
@@ -32,6 +44,7 @@ const MapView = ({create = false}) => {
             },
         }
     }
+
     const saveMarker = async () => {
         const { markerName, markerLat, markerLng, idVar = false } = getValues()
         if (!idVar) {
@@ -49,14 +62,6 @@ const MapView = ({create = false}) => {
         const marker = generateMarker(markerName, markerLat, markerLng, idVar)
         setMarkers([...markers, marker])
     }
-
-    const [viewState, setViewState] = useState({
-        longitude: -62.005196197872266,
-        latitude: -30.716256365145455,
-        zoom: 14,
-        bearing: 0,
-        pitch: 0,
-    })
 
     const saveMap = async () => {
         if (!markers || markers.length === 0) {
@@ -93,6 +98,59 @@ const MapView = ({create = false}) => {
             })
         }
     }
+
+    const searchMap = async (id) => {
+        if (!id) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atencion!',
+                html: '<h3>No se pueden cargar los datos.</h3>',
+            })
+            return
+        }
+
+        try {
+            const url = `${backend[import.meta.env.VITE_APP_NAME]}/map?id=${id}`
+            const { data } = await request(url, 'GET')
+            const viewStateObject = {
+                longitude: data[0].longitude,
+                latitude: data[0].latitude,
+                zoom: data[0].zoom,
+                bearing: data[0].bearing,
+                pitch: data[0].pitch,
+            }
+            setViewState(viewStateObject)
+            const markers = data[0].MarkersMaps.map((markerMap) => {
+                console.log(markerMap.PopUpsMarkers)
+                const marker = generateMarker(
+                    markerMap.name,
+                    markerMap.latitude,
+                    markerMap.longitude,
+                    markerMap.PopUpsMarkers.idVar
+                )
+                return marker
+            })
+            
+            setMarkers(markers)
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atencion!',
+                html: '<h3>Ocurrio un error al generar el mapa.</h3>',
+            })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (!create) {
+            const id = searchParam.get('id')
+            searchMap(id)
+        }
+    }, [])
+
+
 
     return (
         <div className="w-full h-[85vh] flex flex-col gap-3">
@@ -156,14 +214,19 @@ const MapView = ({create = false}) => {
                 </div>
             )}
 
-            <MapBase
-                height={'100%'}
-                markers={markers}
-                setMarkers={setMarkers}
-                viewState={viewState}
-                setViewState={setViewState}
-                controlPanel={create}
-            />
+            {loading && !create ? (
+                <Typography align="center">Cargando mapa...</Typography>
+            ) : (
+                <MapBase
+                    height={'100%'}
+                    markers={markers}
+                    setMarkers={setMarkers}
+                    viewState={viewState}
+                    setViewState={setViewState}
+                    controlPanel={create}
+                    draggable={create}
+                />
+            )}
         </div>
     )
 }
