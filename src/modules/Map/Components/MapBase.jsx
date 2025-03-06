@@ -10,6 +10,8 @@ import ControlPanel from './ControlPanel'
 import Pin from './Pin'
 import { Typography } from '@mui/material'
 import { useEffect } from 'react'
+import { request } from '../../../utils/js/request'
+import { backend } from '../../../utils/routes/app.routes'
 
 const MapBase = ({
     navigationcontrol = true,
@@ -21,33 +23,55 @@ const MapBase = ({
     whithPopup = true,
     markers = false,
     setMarkers = false,
-    viewState, 
+    viewState,
     setViewState,
-    draggable = false
+    draggable = false,
+    withInfo = false, // Determina si se consulta InfluxDB
 }) => {
-    const handleDragMarker = (e, marker) => {
-        let { lng, lat } = e.lngLat
-        const updateMarker = markers.map((mark) => {
-            if (mark.name === marker.name) {
-                return {
-                    name: mark.name,
-                    latitude: lat,
-                    longitude: lng,
-                    popupInfo: {
-                        lat: lat,
-                        lng: lng,
-                        idVar: mark.popupInfo.idVar,
-                        data: mark.popupInfo.data,
-                    },
-                }
-            }
-            return mark
-        })
-        setMarkers(updateMarker)
+    useEffect(() => {
+        if (withInfo && markers.length > 0) {
+            fetchInfluxData(markers)
+
+            const interval = setInterval(() => {
+                fetchInfluxData(markers)
+            }, 15000)
+            return () => clearInterval(interval)
+        }
+    }, [withInfo, markers])
+
+    // Función para obtener los datos de gráficos y actualizarlos
+    const fetchInfluxData = async (markers) => {
+        try {
+            const updateMarkers = await Promise.all(
+                markers.map(async (marker) => {
+                    const influxVar = marker.popupInfo.data.varsInflux
+                    const accessKey = Object.values(
+                        marker.popupInfo.data.varsInflux
+                    ).shift()
+                    const { data } = await request(
+                        `${backend[import.meta.env.VITE_APP_NAME]}/dataInflux`,
+                        'POST',
+                        influxVar
+                    )
+                    return {
+                        ...marker,
+                        popupInfo: {
+                            ...marker.popupInfo,
+                            value: `${data[accessKey.calc_field].value} ${
+                                accessKey.calc_unit
+                            }`,
+                        },
+                    }
+                })
+            )
+            console.log(updateMarkers)
+            setMarkers(updateMarkers)
+        } catch (error) {
+            console.log(error)
+            return null
+        }
     }
 
-    // -62.004878
-    // -30.717450
     return (
         <div style={{ position: 'relative', width, height }}>
             <Map
@@ -60,34 +84,34 @@ const MapBase = ({
                 {fullScreen && <FullscreenControl position="top-left" />}
                 {geolocation && <GeolocateControl position="top-left" />}
                 {markers.map((marker, index) => (
-                    <>
-                        <Marker
-                            key={`marker-${index}`}
-                            draggable={draggable}
-                            longitude={marker.longitude}
-                            latitude={marker.latitude}
-                            anchor="bottom"
-                            onDragEnd={(e) => handleDragMarker(e, marker)}
-                        >
-                            <Pin label={marker.name} color="#3498db" />
-                        </Marker>
-                        {marker?.popupInfo && whithPopup && (
-                            <Popup
-                                key={`popup-${index}`}
-                                anchor="top-left"
-                                closeButton={false}
-                                latitude={Number(marker.popupInfo.lat)}
-                                longitude={Number(marker.popupInfo.lng)}
-                                closeOnClick={false}
-                            >
-                                <Typography variant="body2">
-                                    {marker.popupInfo.data === null
-                                        ? marker.popupInfo.idVar
-                                        : marker.popupInfo.data}
-                                </Typography>
-                            </Popup>
-                        )}
-                    </>
+                    <Marker
+                        key={`marker-${index}`}
+                        draggable={draggable}
+                        longitude={marker.longitude}
+                        latitude={marker.latitude}
+                        anchor="bottom"
+                    >
+                        <Pin label={marker.name} color="#3498db" />
+                        {marker?.popupInfo &&
+                            withInfo &&
+                            marker.popupInfo.data && (
+                                <Popup
+                                    key={`popup-${index}`}
+                                    anchor="top-left"
+                                    closeButton={false}
+                                    latitude={Number(marker.popupInfo.lat)}
+                                    longitude={Number(marker.popupInfo.lng)}
+                                    closeOnClick={false}
+                                >
+                                    <Typography variant="body2">
+                                        {typeof marker.popupInfo.value ===
+                                        'string'
+                                            ? marker.popupInfo.value
+                                            : 'No hay datos'}
+                                    </Typography>
+                                </Popup>
+                            )}
+                    </Marker>
                 ))}
             </Map>
             {controlPanel && (

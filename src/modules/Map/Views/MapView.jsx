@@ -40,7 +40,7 @@ const MapView = ({ create = false }) => {
                 lat: parseFloat(lat),
                 lng: parseFloat(lng),
                 idVar: idVar,
-                data: null,
+                data: data || null,
             },
         }
     }
@@ -121,12 +121,12 @@ const MapView = ({ create = false }) => {
             }
             setViewState(viewStateObject)
             const markers = data[0].MarkersMaps.map((markerMap) => {
-                console.log(markerMap.PopUpsMarkers)
                 const marker = generateMarker(
                     markerMap.name,
                     markerMap.latitude,
                     markerMap.longitude,
-                    markerMap.PopUpsMarkers.idVar
+                    markerMap.PopUpsMarkers.idVar,
+                    markerMap.PopUpsMarkers.InfluxVar
                 )
                 return marker
             })
@@ -225,6 +225,7 @@ const MapView = ({ create = false }) => {
                     setViewState={setViewState}
                     controlPanel={create}
                     draggable={create}
+                    withInfo={!create}
                 />
             )}
         </div>
