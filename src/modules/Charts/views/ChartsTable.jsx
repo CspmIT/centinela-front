@@ -29,6 +29,10 @@ const ChartsTable = () => {
                 accessorKey: 'type',
             },
             {
+                header: 'Orden',
+                accessorKey: 'order',
+            },
+            {
                 header: 'Acciones',
                 accessorKey: 'actions',
                 Cell: ({ row }) => (

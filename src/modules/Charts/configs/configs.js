@@ -21,6 +21,7 @@ export const configs = {
         unity: 2,
         color: 2,
         singleValue: true,
+        order: 1,
         preConfig: {
             value: undefined,
             maxValue: undefined,
@@ -29,6 +30,7 @@ export const configs = {
             unidad: undefined,
             shape: 'circle',
             border: 'true',
+            order: 1,
         },
     },
     // value, maxValue, color, type, porcentage = false, border = true, name = '' -> Valores de LiquidFillPorcentaje
@@ -45,10 +47,12 @@ export const configs = {
         unity: 0,
         color: 2,
         singleValue: true,
+        order: 1,
         preConfig: {
             value: undefined,
             maxValue: undefined,
             color: '#363F9C',
+            order: 1,
         },
     },
     3: {
@@ -73,6 +77,7 @@ export const configs = {
         maxValue: 1,
         unity: 2,
         singleValue: true,
+        order: 1,
         preConfig: {
             value: undefined,
             maxValue: undefined,
@@ -82,6 +87,7 @@ export const configs = {
             shape: 'rect',
             border: 'false',
             // other: 'Otro texto reenderizado',
+            order: 1,
         },
     },
     5: {
@@ -101,6 +107,7 @@ export const configs = {
         yType: 1,
         ySeries: 1,
         singleValue: false,
+        order: 1,
     },
     8: {
         id: 8,
@@ -114,6 +121,7 @@ export const configs = {
         description: true,
         description2: true,
         porcentage: false,
+        order: 1,
         preConfig: {
             typeUnity: true,
             value: 0,
@@ -123,6 +131,7 @@ export const configs = {
             porcentage: false,
             description: '',
             description2: '',
+            order: 1,
         },
     },
 }

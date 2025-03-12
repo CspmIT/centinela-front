@@ -32,6 +32,7 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData }) => {
 
     useEffect(() => {
         if (chartData) {
+            setValue('order', chartData.order)
             // Inicializar valores del formulario con los datos existentes
             chartData.ChartConfig.forEach(({ key, value, type }) => {
                 setValue(key, type === 'boolean' ? value === '1' : value)
@@ -231,6 +232,14 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData }) => {
                             error={errors.color}
                             onChange={handleChange}
                             helperText={errors.color && errors.color.message}
+                        />
+                        <TextField
+                            defaultValue={config.order}
+                            type="text"
+                            className="w-full"
+                            label="Orden del grafico en el dashboard"
+                            {...register('order')}
+                            onChange={handleChange}
                         />
                     </div>
                 </CardContent>
