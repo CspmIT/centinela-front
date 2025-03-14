@@ -45,7 +45,7 @@ const MapBase = ({
                         popupInfo: {
                             ...marker.popupInfo,
                             value: `${data[accessKey.calc_field].value} ${
-                                accessKey.calc_unit
+                                marker.popupInfo.data.unit
                             }`,
                         },
                     }
