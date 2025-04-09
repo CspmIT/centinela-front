@@ -129,9 +129,8 @@ const ChartsTable = () => {
                 ),
             },
         ]
-        console.log(columnsCel)
         setColumnsTable(columnsCel)
-        // setCharts(data)
+        setCharts(data)
         setLoader(false)
     }
     useEffect(() => {

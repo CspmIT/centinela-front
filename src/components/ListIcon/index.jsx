@@ -7,6 +7,7 @@ import {
     FaMapMarkedAlt,
     FaProjectDiagram,
     FaChartBar,
+    FaMicrochip,
 } from 'react-icons/fa'
 import { HiVariable } from 'react-icons/hi2'
 import { MdContentPaste, MdNotificationsActive, MdSchema } from 'react-icons/md'
@@ -78,6 +79,11 @@ const ListIcon = () => [
         title: 'Variables',
         name: 'HiVariable',
         icon: <HiVariable className=" text-3xl" />,
+    },
+    {
+        title: 'Perfil PLC',
+        name: 'FaMicrochip',
+        icon: <FaMicrochip className=" text-3xl" />,
     },
 ]
 
