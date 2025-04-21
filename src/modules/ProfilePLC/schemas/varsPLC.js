@@ -19,6 +19,10 @@ export const varPLCSchema = z.object({
         .string({ message: 'El topico debe ser un string' })
         .trim()
         .min(3, { message: 'El topico debe tener al menos 3 caracteres' }),
+    influx: z.enum(
+        ['Sensors_Morteros_Interna', 'Sensors_Externos', 'externos'],
+        { message: 'El influx seleccionado no es valido' }
+    ),
     PLCModel: z.enum(['LOGO_7', 'LOGO_8', 'S7_1200'], {
         message: 'El valor enviado no es valido',
     }),

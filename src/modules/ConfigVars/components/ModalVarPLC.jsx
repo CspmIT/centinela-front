@@ -3,6 +3,7 @@ import {
     Box,
     Button,
     Chip,
+    CircularProgress,
     IconButton,
     MenuItem,
     Modal,
@@ -16,10 +17,12 @@ import { useEffect, useRef, useState } from 'react'
 import { FaTrash } from 'react-icons/fa'
 import { request } from '../../../utils/js/request'
 import { backend } from '../../../utils/routes/app.routes'
+import Swal from 'sweetalert2'
 
-const ModalVarPLC = ({ open, setOpen }) => {
+const ModalVarPLC = ({ open, setOpen, plcProfile = false, list = false }) => {
     const [points, setPoints] = useState([])
     const [variables, setVariables] = useState([])
+    const [loadingSubmit, setLoadingSubmit] = useState(false)
 
     // Se usa para que el scroll vaya abajo cuando se agrega una variable nueva
     const containerRef = useRef(null)
@@ -157,22 +160,77 @@ const ModalVarPLC = ({ open, setOpen }) => {
         setError,
         clearErrors,
         setValue,
+        reset,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(varPLCSchema),
     })
 
+    useEffect(() => {
+        if (!plcProfile) {
+            reset()
+            setPoints([])
+            setVariables([])
+            return
+        }
+        if (plcProfile) {
+            // Setea los valores del formulario
+            setValue('topic', plcProfile.topic)
+            setValue('influx', plcProfile.influx)
+            setValue('PLCModel', plcProfile.PLCModel)
+            setValue('ip', plcProfile.ip)
+            setValue('serviceName', plcProfile.serviceName)
+            setValue('rack', plcProfile.rack)
+            setValue('slot', plcProfile.slot)
+
+            // Setea los valores de los estados locales (si usás useState)
+            setPoints(plcProfile.PointsPLC || [])
+            setVariables(plcProfile.VarsPLC || [])
+        }
+    }, [plcProfile])
+
     const onSubmit = async (data) => {
+        setLoadingSubmit(true)
         const PLCConfig = {
+            id: plcProfile?.id,
+            status: plcProfile?.status,
             ...data,
             points: points,
-            vars: variables
+            vars: variables,
         }
 
         const endPoint = backend[import.meta.env.VITE_APP_NAME]
-        console.log(endPoint)
-        const result = await request(`${endPoint}/plc/create`, 'POST', PLCConfig)
-        console.log(result)
+        const url = plcProfile?.id
+            ? `${endPoint}/plc/edit`
+            : `${endPoint}/plc/create`
+        try {
+            const result = await request(url, 'POST', PLCConfig)
+            const htmlContent = result.data.message
+            await Swal.fire({
+                title: 'Exito',
+                icon: 'success',
+                html: htmlContent,
+            })
+            reset()
+            setPoints([])
+            setVariables([])
+            list()
+            setOpen(false)
+        } catch (error) {
+            const errorMessages = error.response.data.message
+            const htmlContent = errorMessages
+                .map((element) => `<p>${element.message}</p>`)
+                .join('')
+
+            Swal.fire({
+                title: 'Atención',
+                icon: 'error',
+                html: htmlContent,
+            })
+            console.log(error.response.data.message)
+        } finally {
+            setLoadingSubmit(false)
+        }
     }
 
     return (
@@ -196,6 +254,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
                             </Typography>
                             <div className="flex w-full gap-3 justify-center">
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-3/4"
                                     type="text"
                                     label="Topico"
@@ -204,18 +263,25 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                     {...register('topic')}
                                 />
                                 <TextField
-                                    className="w-1/2"
+                                    InputLabelProps={{ shrink: true }}
+                                    className="w-1/4"
                                     type="text"
                                     label="Influx"
                                     select={true}
-                                    defaultValue={''}
-                                    {...register('PLCModel')}
-                                    error={!!errors.PLCModel}
-                                    helperText={errors.PLCModel?.message}
+                                    defaultValue={getValues('influx')}
+                                    {...register('influx')}
+                                    error={!!errors.influx}
+                                    helperText={errors.influx?.message}
                                 >
-                                    <MenuItem value={''}></MenuItem>
-                                    <MenuItem value={'Sensors_Morteros_Interna'}>Mas Agua Morteros</MenuItem>
-                                    <MenuItem value={'Sensors_Externos'}>Mas Agua Externos</MenuItem>
+                                    <MenuItem disabled value={''}></MenuItem>
+                                    <MenuItem
+                                        value={'Sensors_Morteros_Interna'}
+                                    >
+                                        Mas Agua Morteros
+                                    </MenuItem>
+                                    <MenuItem value={'Sensors_Externos'}>
+                                        Mas Agua Externos
+                                    </MenuItem>
                                     <MenuItem value={'externos'}>
                                         Energia Externos
                                     </MenuItem>
@@ -225,18 +291,18 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                 Opciones del PLC
                             </Typography>
                             <div className="flex w-full gap-3">
-
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/2"
                                     type="text"
                                     label="Modelo del PLC"
                                     select={true}
-                                    defaultValue={''}
+                                    defaultValue={getValues('PLCModel')}
                                     {...register('PLCModel')}
                                     error={!!errors.PLCModel}
                                     helperText={errors.PLCModel?.message}
                                 >
-                                    <MenuItem value={''}></MenuItem>
+                                    <MenuItem disabled value={''}></MenuItem>
                                     <MenuItem value={'LOGO_7'}>LOGO_7</MenuItem>
                                     <MenuItem value={'LOGO_8'}>LOGO_8</MenuItem>
                                     <MenuItem value={'S7_1200'}>
@@ -246,6 +312,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
 
                                 {/* LOGO_7, LOGO_8, S7_1200 */}
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/2"
                                     type="text"
                                     label="IP del PLC"
@@ -254,6 +321,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                     {...register('ip')}
                                 />
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/2"
                                     type="text"
                                     label="Nombre del servicio"
@@ -264,6 +332,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
                             </div>
                             <div className="flex w-full gap-3">
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/2"
                                     type="number"
                                     label="RACK"
@@ -272,11 +341,12 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                     {...register('rack')}
                                 />
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/2"
                                     type="number"
                                     label="SLOT"
-                                    error={!!errors.rack}
-                                    helperText={errors.rack?.message}
+                                    error={!!errors.slot}
+                                    helperText={errors.slot?.message}
                                     {...register('slot')}
                                 />
                             </div>
@@ -285,6 +355,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
                             </Typography>
                             <div className="flex w-full gap-3 justify-center items-center">
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/4"
                                     type="number"
                                     label="Inicio"
@@ -296,6 +367,7 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                 />
 
                                 <TextField
+                                    InputLabelProps={{ shrink: true }}
                                     className="w-1/4"
                                     type="number"
                                     label="Fin"
@@ -346,7 +418,12 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                             <Button
                                                 variant="outlined"
                                                 onClick={addVariable}
-                                                disabled={variables.length >= generarOpcionesBytes().length * 8}
+                                                disabled={
+                                                    variables.length >=
+                                                    generarOpcionesBytes()
+                                                        .length *
+                                                        8
+                                                }
                                             >
                                                 Agregar variable
                                             </Button>
@@ -363,6 +440,9 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                                         className="flex gap-3 items-center mb-2 mt-3"
                                                     >
                                                         <TextField
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
                                                             className="w-1/4"
                                                             select
                                                             label="Byte"
@@ -397,6 +477,9 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                                         </TextField>
 
                                                         <TextField
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
                                                             className="w-1/4"
                                                             select
                                                             label="Bit"
@@ -428,6 +511,9 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                                         </TextField>
 
                                                         <TextField
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
                                                             className="w-1/4"
                                                             select
                                                             label="Tipo"
@@ -446,8 +532,14 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                                             <MenuItem value="BOOL">
                                                                 BOOL
                                                             </MenuItem>
+                                                            <MenuItem value="BYTE">
+                                                                BYTE
+                                                            </MenuItem>
                                                             <MenuItem value="INT">
                                                                 INT
+                                                            </MenuItem>
+                                                            <MenuItem value="UINT">
+                                                                UNSIGNED INT
                                                             </MenuItem>
                                                             <MenuItem value="FLOAT">
                                                                 FLOAT
@@ -458,12 +550,18 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                                             <MenuItem value="LONG">
                                                                 LONG
                                                             </MenuItem>
+                                                            <MenuItem value="ULONG">
+                                                                UNSIGNED LONG
+                                                            </MenuItem>
                                                             <MenuItem value="DOUBLE">
                                                                 DOUBLE
                                                             </MenuItem>
                                                         </TextField>
 
                                                         <TextField
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
                                                             className="w-1/4"
                                                             label="Field"
                                                             value={
@@ -500,8 +598,23 @@ const ModalVarPLC = ({ open, setOpen }) => {
                                 type="submit"
                                 color="primary"
                                 variant="contained"
+                                disabled={loadingSubmit}
+                                startIcon={
+                                    loadingSubmit && (
+                                        <CircularProgress
+                                            size={20}
+                                            color="inherit"
+                                        />
+                                    )
+                                }
                             >
-                                Crear perfil
+                                {loadingSubmit
+                                    ? 'Guardando...'
+                                    : plcProfile
+                                    ? plcProfile.status === 2
+                                        ? 'Subir archivos'
+                                        : 'Editar perfil'
+                                    : 'Crear perfil'}
                             </Button>
                         </form>
                     </Box>
