@@ -65,11 +65,18 @@ const chartTypes = [
         disabled: false,
     },
     {
-        id: 8, 
+        id: 8,
         title: 'Speed Gauge',
         image: '/assets/img/charts/gauge-speed.png?height=200&width=200',
-        description: 'some description'
-    }
+        description: 'some description',
+    },
+    {
+        id: 9,
+        title: 'Boolean chart',
+        image: '/assets/img/charts/boolean-chart.png?height=200&width=200',
+        description: 'Led de encendido o apagado con colores y palabras personalizables',
+        boolean: true
+    },
 ]
 
 function SelectType() {
@@ -78,6 +85,10 @@ function SelectType() {
         if (chart?.bomb) {
             navigate('/config/pumps')
             return
+        }
+        if(chart?.boolean){
+            navigate('/config/graphic/boolean')
+            return 
         }
         navigate(`/config/graphic/${chart.id}`)
     }

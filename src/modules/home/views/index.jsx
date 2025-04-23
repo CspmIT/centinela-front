@@ -245,6 +245,7 @@ const ChartComponentDbWrapper = ({
         }
     }
 
+    // Función para obtener los datos de gráficos historicos 
     const fetchChartSeriesData = async (ySeries, xConfig, idChart, filters) => {
         try {
             const queries = ySeries.map((series) => {
