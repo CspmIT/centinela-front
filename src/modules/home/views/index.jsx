@@ -13,6 +13,7 @@ import PumpControl from '../../Charts/views/ConfigBombs'
 import StackedAreaChart from '../../Charts/components/StackedAreaChart'
 import FiltersChart from '../../Charts/components/FiltersChart'
 import GaugeSpeed from '../../Charts/components/GaugeSpeed'
+import BooleanChart from '../../Charts/components/BooleanChart'
 
 const chartComponents = {
     LiquidFillPorcentaje,
@@ -22,6 +23,7 @@ const chartComponents = {
     LineChart,
     PumpControl,
     GaugeSpeed,
+    BooleanChart
 }
 
 const Home = () => {
@@ -154,15 +156,13 @@ const Home = () => {
                         key={index}
                     >
                         <CardCustom
-                            className={`flex flex-col items-center ${
-                                ChartComponentDb === PumpControl
-                                    ? 'h-fit'
-                                    : 'h-80'
-                            } ${
-                                ChartComponentDb === LineChart
+                            className={`flex flex-col items-center ${ChartComponentDb === PumpControl
+                                ? 'h-fit'
+                                : 'h-80'
+                                } ${ChartComponentDb === LineChart
                                     ? 'h-[33rem]'
                                     : ''
-                            } `}
+                                } `}
                         >
                             {ChartComponentDb === LineChart && (
                                 <FiltersChart
@@ -245,6 +245,7 @@ const ChartComponentDbWrapper = ({
         }
     }
 
+    // Función para obtener los datos de gráficos historicos 
     const fetchChartSeriesData = async (ySeries, xConfig, idChart, filters) => {
         try {
             const queries = ySeries.map((series) => {
@@ -284,10 +285,10 @@ const ChartComponentDbWrapper = ({
             const xSeries =
                 referenceSeries && data[referenceSeries]
                     ? data[referenceSeries].map((item) =>
-                          xConfig.dateTimeType === 'date'
-                              ? item.time
-                              : item.time
-                      )
+                        xConfig.dateTimeType === 'date'
+                            ? item.time
+                            : item.time
+                    )
                     : []
 
             const updatedYSeries = ySeries.map((series) => ({
@@ -327,16 +328,16 @@ const ChartComponentDbWrapper = ({
                     // Solo actualiza el estado si los valores realmente cambiaron
                     const hasChanged =
                         JSON.stringify(prevData.xSeries) !==
-                            JSON.stringify(updatedData.xSeries) ||
+                        JSON.stringify(updatedData.xSeries) ||
                         JSON.stringify(prevData.ySeries) !==
-                            JSON.stringify(updatedData.ySeries)
+                        JSON.stringify(updatedData.ySeries)
 
                     return hasChanged
                         ? {
-                              ...prevData,
-                              xSeries: updatedData.xSeries,
-                              ySeries: updatedData.ySeries,
-                          }
+                            ...prevData,
+                            xSeries: updatedData.xSeries,
+                            ySeries: updatedData.ySeries,
+                        }
                         : prevData
                 })
             }
@@ -365,6 +366,7 @@ const ChartComponentDbWrapper = ({
 
             if (initialData?.value) {
                 const data = await fetchChartData(initialData.value)
+
                 if (data) {
                     setChartData((prevData) => ({
                         ...prevData,
