@@ -48,6 +48,10 @@ const ChartsTable = () => {
                             size="small"
                             onClick={() => {
                                 const type = row.original.type
+                                if(type === 'BooleanChart') {
+                                    navigate(`/config/graphic/boolean/${row.original.id}`)
+                                    return
+                                }
                                 if (type === 'PumpControl') {
                                     navigate('/config/pumps')
                                     return

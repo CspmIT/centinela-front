@@ -30,6 +30,10 @@ export const BooleanChartSchema = z
                 message: 'El color no es valido. Debe estar en hexadecimal',
             })
             .trim(),
+        order: z
+            .string()
+            .transform((val) => parseInt(val, 10))
+            .pipe(z.number({ message: 'Debe ser un numero' }).min(1, { message: 'Debe asignar un orden' }))
     })
     .superRefine((data, ctx) => {
         // Verificar que colorOn y colorOff no sean iguales
