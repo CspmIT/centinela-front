@@ -28,6 +28,7 @@ import MapView from './modules/Map/Views/MapView'
 import Maps from './modules/Map/Views/Maps'
 import Vars from './modules/ConfigVars/views/Vars'
 import ProfilePLC from './modules/ProfilePLC/views/ProfilePLC'
+import ConfigBooleanChart from './modules/Charts/views/ConfigBooleanChart'
 
 function App() {
 	const { darkMode } = useContext(MainContext)
@@ -53,6 +54,8 @@ function App() {
 		{ path: '/AddMenu', element: <AddMenu /> },
 		{ path: '/config/graphic', element: <SelectType /> },
 		{ path: '/config/pumps', element: <PumpControl/> },
+        { path: '/config/graphic/boolean', element: <ConfigBooleanChart/>},
+        { path: '/config/graphic/boolean/:id', element: <ConfigBooleanChart/>},
 		{ path: '/config/graphic/:id', element: <ConfigGraphic /> },
 		{ path: '/config/graphic/:id/:idChart', element: <ConfigGraphic /> },
 		{ path: '/config/allGraphic', element: <ChartsTable /> },

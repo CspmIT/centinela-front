@@ -134,4 +134,8 @@ export const configs = {
             order: 1,
         },
     },
+    9: {
+        id: 9,
+        typeGraph: 'BooleanChart',
+    },
 }
