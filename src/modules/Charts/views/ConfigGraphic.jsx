@@ -25,7 +25,11 @@ const ConfigGraphic = () => {
 
     const navigate = useNavigate()
     function isSimpleChart(type) {
-        return type === 'LiquidFillPorcentaje' || type === 'CirclePorcentaje' || type === 'GaugeSpeed'
+        return (
+            type === 'LiquidFillPorcentaje' ||
+            type === 'CirclePorcentaje' ||
+            type === 'GaugeSpeed'
+        )
     }
 
     function isValidXConfig(xAxisConfig) {
@@ -97,8 +101,8 @@ const ConfigGraphic = () => {
             })
             return
         }
-        data.porcentage = data.porcentage == 'true'
-        data.border = data.border == 'true'
+        data.porcentage = data.porcentage === 'true' || data.porcentage === true
+        data.border = data.border === 'true' || data.border === true
         data.maxValue = parseFloat(data.maxValue)
         const endPoint = `${backend['Mas Agua']}/charts`
         try {
