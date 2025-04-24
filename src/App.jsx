@@ -29,6 +29,7 @@ import Maps from './modules/Map/Views/Maps'
 import Vars from './modules/ConfigVars/views/Vars'
 import ProfilePLC from './modules/ProfilePLC/views/ProfilePLC'
 import ConfigBooleanChart from './modules/Charts/views/ConfigBooleanChart'
+import NotFound from './modules/Errors/Not-Found'
 
 function App() {
 	const { darkMode } = useContext(MainContext)
@@ -37,9 +38,12 @@ function App() {
 		{ path: '/ListClients', element: <ListClients /> },
 		{ path: '/ListClients/:action', element: <ListClients /> },
 		{ path: '/LoginCooptech/:token', element: <LoginCooptech /> },
+		{ path: '/*', element: <NotFound/> },
 	]
 	const userRoutes = [
-		{ path: '/*', element: <Home /> },
+		{ path: '/', element: <Home /> },
+		{ path: '/home', element: <Home /> },
+		{ path: '/chart', element: <Home /> },
 		// { path: '/Dashboard', element: <DashBoard /> },
 		{ path: '/tabs', element: <TabDinamic /> },
 		{ path: '/config/security', element: <ConfigSecurity /> },
@@ -65,6 +69,7 @@ function App() {
 		{ path: '/map/edit', element: <MapView create={true} search={true}/> },
 		{ path: '/config/vars', element: <Vars/> },
 		{ path: '/config/plc', element: <ProfilePLC/> },
+		{ path: '/*', element: <NotFound/> },
 	]
 	//Incorporo el theme de mui
 	const lightTheme = createTheme({
