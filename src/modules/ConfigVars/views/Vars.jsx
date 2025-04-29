@@ -21,7 +21,6 @@ const Vars = () => {
             title: 'Atencion!',
             html: 'Esta seguro que desea eliminar esta variable?',
             showConfirmButton: true,
-            showConfirmButton: true,
             confirmButtonText: 'Si, eliminar',
             showCancelButton: true,
             cancelButtonText: 'Cancelar'
