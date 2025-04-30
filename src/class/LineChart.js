@@ -6,10 +6,10 @@ export class LineChartRepository extends SeriesChart {
         try {
             return this.series.map((serie) => ({
                 name: serie.name,
-                type: serie.line,
+                type: serie.line === 'smooth' ? 'line' : serie.line, // Tipo de gráfico
                 data: random ? generarNumerosAleatorios(8) : [],
                 idVar: serie.InfluxVars,
-                smooth: serie.smooth,
+                smooth: serie.line === 'smooth',
                 color: serie.color,
             }))
         } catch (error) {

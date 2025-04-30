@@ -64,7 +64,6 @@ const ConfigMultiple = ({ id, setValue, chartData = false }) => {
             const xType = 'category' // Tipo de datos en el eje X
             const yType = 'value' // Tipo de datos en el eje Y
             if (chartData && Object.keys(chartData).length > 0) {
-                console.log(chartData)
                 const chart = {
                     id: chartData.id,
                     type: chartData.type,
@@ -132,7 +131,7 @@ const ConfigMultiple = ({ id, setValue, chartData = false }) => {
                     setLoader(false)
                 }
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         }
 
