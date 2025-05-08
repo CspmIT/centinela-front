@@ -1,7 +1,22 @@
-// components/DiagramCanvas.jsx
 import React, { Fragment } from 'react';
-import { Stage, Layer, Line, Text, Transformer, Circle, Group, Rect } from 'react-konva';
+import { Stage, Layer, Line, Text, Transformer, Circle, Group, Rect, Label, Tag } from 'react-konva';
 import ImageElement from '../ImageElement/ImageElement';
+
+// Funcion para calcular puntos a la hora de hacer la polilinea
+const distToSegment = (p, v, w) => {
+  const squaredLength = (v.x - w.x) ** 2 + (v.y - w.y) ** 2;
+  if (squaredLength === 0) return Math.sqrt((p.x - v.x) ** 2 + (p.y - v.y) ** 2);
+
+  let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / squaredLength;
+  t = Math.max(0, Math.min(1, t));
+
+  const closestPoint = {
+    x: v.x + t * (w.x - v.x),
+    y: v.y + t * (w.y - v.y)
+  };
+
+  return Math.sqrt((p.x - closestPoint.x) ** 2 + (p.y - closestPoint.y) ** 2);
+};
 
 const DiagramCanvas = ({
   elements,
@@ -72,7 +87,7 @@ const DiagramCanvas = ({
                       dashOffset={el.invertAnimation ? -dashOffset : dashOffset}
                     />
 
-                    {/* Texto alineado a la línea */}
+                    {/* Label para mostrar la variable asignada a la linea */}
                     {el.dataInflux?.name && (() => {
                       const [x1, y1, x2, y2] = el.points;
                       const midX = (x1 + x2) / 2;
@@ -81,24 +96,25 @@ const DiagramCanvas = ({
                       const angleDegrees = (angleRadians * 180) / Math.PI;
 
                       return (
-                        <Group x={midX -25} y={midY - 20} rotation={angleDegrees}>
-                          <Rect
+                        <Label
+                          x={midX - 25} y={midY - 20} rotation={angleDegrees}
+                        >
+                          <Tag
                             fill="white"
-                            height={18}
-                            width={el.dataInflux.name.length * 8}
-                            cornerRadius={4}
-                            offsetX={(el.dataInflux.name.length * 8) / 2}
-                            offsetY={9}
+                            pointerDirection="down"
+                            pointerWidth={10}
+                            pointerHeight={10}
+                            lineJoin="round"
+                            cornerRadius={5}
                           />
                           <Text
-                            text={`[${el.dataInflux.name}]`}
+                            text={el.dataInflux.name}
+                            fontFamily="arial"
                             fontSize={14}
-                            fill="black"
-                            align="center"
-                            offsetX={(el.dataInflux.name.length * 8) / 2}
-                            offsetY={9}
+                            padding={8}
+                            fill="black "
                           />
-                        </Group>
+                        </Label>
                       );
                     })()}
                   </Group>
@@ -109,7 +125,6 @@ const DiagramCanvas = ({
             if (el.type === 'text') {
               return (
                 <Fragment key={el.id}>
-                  {/* Texto principal */}
                   <Group
                     x={el.x}
                     y={el.y}
@@ -147,23 +162,28 @@ const DiagramCanvas = ({
                       hitStrokeWidth={20}
                     />
                   </Group>
+                  {/* Label para mostrar la variable asignada a l texto*/}
                   {el.dataInflux && el.dataInflux.name && (
-                    <Group x={el.x} y={el.y - 30}>
-                      <Group key={el.id}>
-                        <Rect
-                          fill="white"
-                          height={18}
-                          width={(el.dataInflux.name.length * 8)}
-                          cornerRadius={4}
-                        />
-                        <Text
-                          text={`[${el.dataInflux.name}]`}
-                          fontSize={14}
-                          fill="black"
-                          padding={4}
-                        />
-                      </Group>
-                    </Group>
+                    <Label
+                      x={el.x + (el.width || 0) / 2}
+                      y={el.y}
+                    >
+                      <Tag
+                        fill="white"
+                        pointerDirection="down"
+                        pointerWidth={10}
+                        pointerHeight={10}
+                        lineJoin="round"
+                        cornerRadius={5}
+                      />
+                      <Text
+                        text={el.dataInflux.name}
+                        fontFamily="arial"
+                        fontSize={14}
+                        padding={8}
+                        fill="black "
+                      />
+                    </Label>
                   )}
                 </Fragment>
               );
@@ -191,24 +211,187 @@ const DiagramCanvas = ({
                     onTransformEnd={handleTransformEnd}
 
                   />
+                  {/* Label para mostrar la variable asignada a la imagen */}
                   {el.dataInflux && el.dataInflux.name && (
-                    <Group x={el.x} y={el.y - 30}>
-                      <Group key={el.id}>
-                        <Rect
-                          fill="white"
-                          height={18}
-                          width={(el.dataInflux.name.length * 8)}
-                          cornerRadius={4}
-                        />
-                        <Text
-                          text={`[${el.dataInflux.name}]`}
-                          fontSize={14}
-                          fill="black"
-                          padding={4}
-                        />
-                      </Group>
-                    </Group>
+                    <Label
+                      x={el.x + (el.width || 0) / 2}
+                      y={el.y}
+                    >
+                      <Tag
+                        fill="white"
+                        pointerDirection="down"
+                        pointerWidth={10}
+                        pointerHeight={10}
+                        lineJoin="round"
+                        cornerRadius={5}
+                      />
+                      <Text
+                        text={el.dataInflux.name}
+                        fontFamily="arial"
+                        fontSize={14}
+                        padding={8}
+                        fill="black "
+                      />
+                    </Label>
                   )}
+                </Fragment>
+              );
+            }
+
+            if (el.type === 'polyline') {
+              return (
+                <Fragment key={el.id}>
+                  <Group
+                    x={el.x}
+                    y={el.y}
+                    draggable={el.draggable}
+                    id={String(el.id)}
+                    onClick={(e) => handleSelect(e, el.id)}
+                    onDragEnd={(e) => {
+                      const { x, y } = e.target.position();
+
+                      // Actualizar la posición de la polilínea
+                      setElements((prev) =>
+                        prev.map((item) =>
+                          item.id === el.id ? { ...item, x, y } : item
+                        )
+                      );
+
+                      // Actualizar las posiciones de los puntos de control
+                      setCircles((prev) =>
+                        prev.map((circle) =>
+                          circle.lineId === el.id
+                            ? {
+                              ...circle,
+                              x: circle.x + (x - el.x),
+                              y: circle.y + (y - el.y),
+                            }
+                            : circle
+                        )
+                      );
+                    }}
+                    onDblClick={(e) => {
+                      if (el.type !== 'polyline') return;
+
+                      // Obtener la posición del clic relativa al grupo
+                      const stage = stageRef.current;
+                      const pointerPos = stage.getPointerPosition();
+                      const relativePos = {
+                        x: pointerPos.x - el.x,
+                        y: pointerPos.y - el.y
+                      };
+
+                      // Encontrar el segmento más cercano al clic
+                      let minDist = Infinity;
+                      let insertIndex = -1;
+
+                      for (let i = 0; i < el.points.length - 2; i += 2) {
+                        const x1 = el.points[i];
+                        const y1 = el.points[i + 1];
+                        const x2 = el.points[i + 2];
+                        const y2 = el.points[i + 3];
+
+                        // Calcular distancia del punto al segmento
+                        const dist = distToSegment(relativePos, { x: x1, y: y1 }, { x: x2, y: y2 });
+
+                        if (dist < minDist) {
+                          minDist = dist;
+                          insertIndex = i + 2;
+                        }
+                      }
+
+                      // Si está lo suficientemente cerca, insertar un nuevo punto
+                      if (minDist < 20 && insertIndex !== -1) {
+                        const newPoints = [...el.points];
+                        newPoints.splice(insertIndex, 0, relativePos.x, relativePos.y);
+
+                        // Actualizar el elemento
+                        const updatedElements = elements.map(item =>
+                          item.id === el.id ? { ...item, points: newPoints } : item
+                        );
+
+                        // Crear un nuevo círculo para el punto
+                        const newCircleId = `${el.id}-point-${insertIndex / 2}`;
+                        const newCircle = {
+                          id: newCircleId,
+                          x: el.x + relativePos.x,
+                          y: el.y + relativePos.y,
+                          lineId: el.id,
+                          fill: 'green',
+                          visible: false,
+                        };
+
+                        // Actualizar los IDs de los círculos existentes
+                        const updatedCircles = circles
+                          .map(c => {
+                            if (c.lineId === el.id) {
+                              const parts = c.id.split('-point-');
+                              const currentIndex = parseInt(parts[1]);
+                              if (currentIndex >= insertIndex / 2) {
+                                return {
+                                  ...c,
+                                  id: `${parts[0]}-point-${currentIndex + 1}`
+                                };
+                              }
+                            }
+                            return c;
+                          })
+                          .concat(newCircle);
+
+                        setElements(updatedElements);
+                        setCircles(updatedCircles);
+                      }
+                    }}
+                  >
+                    {/* Fondo, borde blanco y línea principal para polilíneas */}
+                    <Line key={`${el.id}-bg`} points={el.points} stroke={el.stroke} strokeWidth={el.strokeWidth + 4} />
+                    <Line key={`${el.id}-white`} points={el.points} stroke="white" strokeWidth={el.strokeWidth + 2} />
+                    <Line
+                      key={`${el.id}-main`}
+                      points={el.points}
+                      stroke={el.stroke}
+                      strokeWidth={el.strokeWidth}
+                      dash={[20, 10]}
+                      dashOffset={el.invertAnimation ? -dashOffset : dashOffset}
+                    />
+
+                    {/* Label para mostrar la variable asignada a la polilinea */}
+                    {el.dataInflux?.name && (() => {
+                     
+                      const segmentIndex = Math.floor(el.points.length / 4) * 2;
+                      const x1 = el.points[segmentIndex];
+                      const y1 = el.points[segmentIndex + 1];
+                      const x2 = el.points[segmentIndex + 2];
+                      const y2 = el.points[segmentIndex + 3];
+
+                      const midX = (x1 + x2) / 2;
+                      const midY = (y1 + y2) / 2;
+                      const angleRadians = Math.atan2(y2 - y1, x2 - x1);
+                      const angleDegrees = (angleRadians * 180) / Math.PI;
+
+                      return (
+                        <Label
+                          x={midX - 25} y={midY - 20} rotation={angleDegrees}
+                        >
+                          <Tag
+                            fill="white"
+                            pointerDirection="down"
+                            pointerWidth={10}
+                            pointerHeight={10}
+                            lineJoin="round"
+                            cornerRadius={5}
+                          />
+                          <Text
+                            text={el.dataInflux.name}
+                            fontFamily="arial"
+                            fontSize={14}
+                            padding={8}
+                            fill="black "
+                          />
+                        </Label>
+                      );
+                    })()}
+                  </Group>
                 </Fragment>
               );
             }
@@ -239,19 +422,46 @@ const DiagramCanvas = ({
                 const updatedCircles = circles.map((c) =>
                   c.id === circle.id ? { ...c, x, y } : c
                 );
-                const updatedElements = elements.map((line) => {
-                  if (line.id === circle.lineId) {
-                    const start = updatedCircles.find((c) => c.id === `${line.id}-start`);
-                    const end = updatedCircles.find((c) => c.id === `${line.id}-end`);
-                    return {
-                      ...line,
-                      points: [start.x, start.y, end.x, end.y],
-                    };
+
+                // Manejar círculos para líneas simples
+                if (circle.id.includes('-start') || circle.id.includes('-end')) {
+                  const updatedElements = elements.map((line) => {
+                    if (line.id === circle.lineId) {
+                      const start = updatedCircles.find((c) => c.id === `${line.id}-start`);
+                      const end = updatedCircles.find((c) => c.id === `${line.id}-end`);
+                      return {
+                        ...line,
+                        points: [start.x, start.y, end.x, end.y],
+                      };
+                    }
+                    return line;
+                  });
+                  setCircles(updatedCircles);
+                  setElements(updatedElements);
+                }
+                // Manejar círculos para polilíneas
+                else if (circle.id.includes('-point-')) {
+                  const lineElement = elements.find(el => el.id === circle.lineId);
+                  if (lineElement && lineElement.type === 'polyline') {
+                    const pointIndex = parseInt(circle.id.split('-point-')[1]);
+
+                    // Calcular la posición relativa al grupo
+                    const relativeX = x - lineElement.x;
+                    const relativeY = y - lineElement.y;
+
+                    // Actualizar los puntos de la polilínea
+                    const updatedPoints = [...lineElement.points];
+                    updatedPoints[pointIndex * 2] = relativeX;
+                    updatedPoints[pointIndex * 2 + 1] = relativeY;
+
+                    const updatedElements = elements.map(el =>
+                      el.id === circle.lineId ? { ...el, points: updatedPoints } : el
+                    );
+
+                    setCircles(updatedCircles);
+                    setElements(updatedElements);
                   }
-                  return line;
-                });
-                setCircles(updatedCircles);
-                setElements(updatedElements);
+                }
               }}
             />
           ))}

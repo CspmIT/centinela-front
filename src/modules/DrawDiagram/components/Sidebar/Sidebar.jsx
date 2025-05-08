@@ -1,9 +1,9 @@
-// Sidebar.jsx
 import React from 'react';
 import { RiImageAddFill } from "react-icons/ri";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdPolyline } from "react-icons/md";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { HiOutlineVariable } from "react-icons/hi";
+
 
 const Sidebar = ({
   tool,
@@ -78,6 +78,24 @@ const Sidebar = ({
         className={`w-full mb-2 p-3 h-14 rounded-lg flex items-center justify-center ${tool === 'text' ? 'bg-slate-800' : 'bg-slate-600'} text-white text-2xl font-bold`}
       >
         T
+      </button>
+      
+      <button
+        onClick={() => {
+          if (tool === 'polyline') {
+            setTool(null);
+            setShowLineStyleSelector(false);
+          } else {
+            setTool('polyline');
+            setShowLineStyleSelector(true);
+            setShowTextStyler(false);
+            setShowImageSelector(false);
+            setShowListField(false);
+          }
+        }}
+        className={`w-full mb-2 p-2 h-14 rounded-lg flex items-center justify-center ${tool === 'polyline' ? 'bg-slate-800' : 'bg-slate-600'} text-white`}
+      >
+        <MdPolyline className="text-2xl" />
       </button>
 
       {selectedId && (
