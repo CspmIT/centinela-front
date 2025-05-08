@@ -1,148 +1,8 @@
 import Swal from 'sweetalert2'
-import * as fabric from 'fabric'
-import { request, requestFile } from '../../../../utils/js/request'
+import { request,  } from '../../../../utils/js/request'
 import { backend } from '../../../../utils/routes/app.routes'
-import { ImageDiagram } from '../../class/ImageClass'
-import { LineDiagram } from '../../class/LineClass'
-import { PolylineDiagram } from '../../class/PolylineClass'
-import { TextDiagram } from '../../class/TextClass'
-import { createLine } from '../../components/DrawLine/utils/js/line'
-import { finalizePolyline } from '../../components/DrawPolyLine/utils/js/polyline'
-import { createImage } from '../../components/DrawImage/utils/js/actionImage'
-import { newText } from '../../components/DrawText/utils/js'
-import axios from 'axios'
-import SwalLoader from '../../../../components/SwalLoader/SwalLoader'
 
-/**
- * Calcula el ancho del texto basado en su tamaño de fuente y contenido.
- *
- * @param {string} texto - El texto a medir.
- * @param {number} [fontSize=20] - Tamaño de la fuente en píxeles.
- * @returns {number} Ancho máximo del texto.
- * @author Jose Romani <jose.romani@hotmail.com>
- */
-export const calcWidthText = (texto, fontSize = 20) => {
-	// Configuración de la fuente
-	const globalTempCanvas = document.createElement('canvas')
-	const globalContext = globalTempCanvas.getContext('2d')
-	globalContext.font = `${fontSize}px Arial`
 
-	// Calcula el ancho de la línea más larga
-	const textLines = texto.split('\n')
-	const maxWidth = Math.max(...textLines.map((line) => globalContext.measureText(line).width)) + 20
-	return maxWidth
-}
-
-const classMap = {
-	TextDiagram,
-	ImageDiagram,
-	LineDiagram,
-	PolylineDiagram,
-}
-
-/**
- * Detecta la clase de una instancia.
- *
- * @param {Object} obj - Objeto a evaluar.
- * @returns {string|null} Clase correspondiente o null si no coincide.
- * @author Jose Romani <jose.romani@hotmail.com>
- */
-export const getInstanceType = (obj) => {
-	// Verificamos el resto de las clases en el mapa
-	for (const [key, value] of Object.entries(classMap)) {
-		if (obj instanceof value) {
-			return key // Devuelve el nombre del tipo (como 'TextDiagram' o 'ImageDiagram')
-		}
-	}
-	return null // Si no coincide con ninguna clase
-}
-
-export const saveDiagram = async (fabricCanvasRef) => {
-	try {
-		SwalLoader()
-		const canvas = fabricCanvasRef.current
-		const objects = canvas.getObjects()
-		const saveObjects = await objects.reduce(
-			(acc, obj) => {
-				if (!obj.metadata || !obj.visible) return acc
-				switch (obj.type) {
-					case 'image':
-						acc.images.push(obj.metadata.getDataSave())
-						break
-					case 'textbox':
-						if (getInstanceType(obj.metadata) === 'TextDiagram') {
-							acc.texts.push(obj.metadata.getDataSave())
-						}
-						break
-					case 'line':
-						acc.lines.push(obj.metadata.getDataSave())
-						break
-					case 'polyline':
-						acc.polylines.push(obj.metadata.getDataSave())
-						break
-				}
-				return acc
-			},
-			{ images: [], texts: [], lines: [], polylines: [] }
-		)
-		if (saveObjects.images.length) {
-			if (validationVariableImg(saveObjects.images)) {
-				Swal.fire({
-					title: 'Atención!',
-					text: 'Falta definir las variables requeridas en imagenes.',
-					icon: 'warning',
-				})
-				return false
-			}
-		}
-		if (!Object.values(saveObjects).some((item) => item.length)) {
-			Swal.close()
-			return false
-		}
-		let imgSave = ''
-		if (canvas.metadata) {
-			const formData = new FormData()
-			formData.append('image', canvas.metadata)
-			formData.append('bucketName', 'mas-agua')
-			imgSave = await requestFile(`${backend.Archivos}/uploadImg`, 'POST', formData)
-		}
-		if (!canvas?.title) {
-			Swal.fire({
-				title: 'Atención!',
-				text: 'Se necesita poner un titulo al diagrama. Clickea la opción de propiedades y escribe un titulo',
-				icon: 'warning',
-			})
-			return false
-		}
-		saveObjects.diagram = {
-			title: canvas.title || 'Prueba',
-			status: 1,
-			backgroundColor: canvas.backgroundColor || '',
-			backgroundImg: canvas.metadata ? imgSave?.data?.fileName : canvas.backgroundImg,
-		}
-		if (canvas.id) {
-			saveObjects.diagram.id = canvas.id
-		}
-		await request(`${backend[import.meta.env.VITE_APP_NAME]}/saveDiagram`, 'POST', saveObjects)
-		Swal.fire({
-			title: 'Perfecto!',
-			text: 'Se guardo correctamente',
-			icon: 'success',
-		})
-	} catch (error) {
-		console.error(error)
-		Swal.fire({
-			title: 'Atención!',
-			text: 'Hubo un problema al guardar el diagrama',
-			icon: 'error',
-		})
-	}
-}
-const validationVariableImg = (images) => {
-	return images.some((item) => {
-		return Object.values(item.variables).some((variable) => variable.require && variable.id_variable === 0)
-	})
-}
 export const uploadCanvaDb = async (id, {
 	setElements,
 	setCircles,
@@ -185,7 +45,7 @@ export const uploadCanvaDb = async (id, {
 					unit: line.variable.unit,
 					varsInflux: vars,
 				};
-				influxVarsToRequest.push({ id: line.id, varsInflux: vars });
+				influxVarsToRequest.push({ id: line.id_influxvars, varsInflux: vars });
 			}
 
 			elements.push({
@@ -198,7 +58,37 @@ export const uploadCanvaDb = async (id, {
 				strokeWidth: line.strokeWidth || 2,
 				draggable: true,
 				invertAnimation: line.invertAnimation,
-				dataInflux,
+				dataInflux, // Asegúrate de que este campo esté correctamente asignado
+			});
+		}
+
+		// === POLILÍNEAS ===
+		for (const poly of objectDiagram?.polylines || []) {
+			const points = poly.points.flatMap(pt => [pt.left, pt.top]);
+
+			let dataInflux = null;
+			if (poly.variable?.varsInflux) {
+				const vars = Object.values(poly.variable.varsInflux)[0];
+				dataInflux = {
+					id: poly.id_influxvars,
+					name: poly.variable.name,
+					unit: poly.variable.unit,
+					varsInflux: vars,
+				};
+				influxVarsToRequest.push({ id: poly.id_influxvars, varsInflux: vars });
+			}
+
+			elements.push({
+				id: poly.id,
+				type: 'polyline',
+				x: 0,
+				y: 0,
+				points,
+				stroke: poly.stroke || '#000',
+				strokeWidth: poly.strokeWidth || 2,
+				draggable: true,
+				invertAnimation: poly.invertAnimation,
+				dataInflux, // Asegúrate de que este campo esté correctamente asignado
 			});
 		}
 
@@ -265,29 +155,30 @@ export const uploadCanvaDb = async (id, {
 				'POST',
 				influxVarsToRequest
 			);
-			
+
 			const valuesResponse = response.data; // <-- acceso correcto
-			
+
 			setElements(
 				elements.map((el) => {
-				  if (el.dataInflux && valuesResponse?.[el.id] !== undefined) {
-					const updatedEl = {
-					  ...el,
-					  dataInflux: {
-						...el.dataInflux,
-						value: valuesResponse[el.id] ?? 'Sin datos',
-					  },
-					};	  
-					return updatedEl;
-				  }
-				  return el;
+					if (el.dataInflux && valuesResponse?.[el.id] !== undefined) {
+						const updatedEl = {
+							...el,
+							dataInflux: {
+								...el.dataInflux,
+								value: valuesResponse[el.id] ?? 'Sin datos',
+							},
+						};
+						return updatedEl;
+					}
+					return el;
 				})
-			  );	
-			
+			);
+
 		} else {
 			setElements(elements);
 		}
 		
+
 		// Los círculos solo si querés editar
 		const circles = elements
 			.filter((el) => el.type === 'line')
@@ -306,31 +197,6 @@ export const uploadCanvaDb = async (id, {
 	}
 };
 
-
-// const getImageBackgroundDb = async (name) => {
-// 	try {
-// 		const image = await axios({
-// 			method: 'GET',
-// 			url: `${backend.Archivos}/getImg/mas-agua/${name}`,
-// 			headers: {
-// 				accesskey: 'ZRJGodMUp2FzrLF9N9fg',
-// 				secretkey: 'KYTjiz1pC6AGM1U07mlDl2mUmDvUSNqnX6iM6DjL',
-// 				Accept: 'image/*', // o el tipo de contenido que esperas recibir
-// 			},
-// 			responseType: 'blob',
-// 		})
-// 		return new Promise((resolve, reject) => {
-// 			const reader = new FileReader()
-// 			reader.onloadend = () => resolve(reader.result)
-// 			reader.onerror = reject
-// 			reader.readAsDataURL(image.data)
-// 		})
-// 	} catch (error) {
-// 		console.error(error)
-// 	}
-// }
-
-// ================= KONVA ==================
 
 export const saveDiagramKonva = async ({
 	elements,
@@ -371,6 +237,42 @@ export const saveDiagramKonva = async ({
 					});
 					break;
 
+				case 'polyline':
+					const points = el.points.map((val, i) =>
+						i % 2 === 0 ? val + el.x : val + el.y
+					);
+
+					const polylinePoints = [];
+					for (let i = 0; i < points.length; i += 2) {
+						polylinePoints.push({ left: points[i], top: points[i + 1] });
+					}
+
+					saveObjects.polylines.push({
+						...(el.id ? { id: el.id } : {}),
+						id_influxvars: el.dataInflux?.id || null,
+						points: polylinePoints,
+						stroke: el.stroke,
+						strokeWidth: el.strokeWidth,
+						dobleLine: 0,
+						colorSecondary: '',
+						animation: 1,
+						invertAnimation: el.invertAnimation,
+						status: 1,
+						showText: 0,
+						text: '',
+						sizeText: 14,
+						colorText: '#000',
+						backgroundText: '',
+						locationText: '',
+						variables: el.dataInflux ? {
+							[el.dataInflux.name]: {
+								id_variable: el.dataInflux.id || null,
+								show: true
+							}
+						} : {}
+					});
+
+					break;
 
 				case 'text':
 					saveObjects.texts.push({
