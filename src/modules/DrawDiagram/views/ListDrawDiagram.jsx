@@ -33,7 +33,7 @@ const ListDrawDiagram = () => {
 					accessorKey: 'status',
 					Cell: ({ row }) => (
 						<span className={`text-sm font-semibold ${row.original.status ? 'text-green-600' : 'text-red-600'}`}>
-							{row.original.status ? 'Habilitado' : 'Deshabilitado'}
+							{row.original.status ? 'Activo' : 'Inactivo'}
 						</span>
 					),
 				},
@@ -58,7 +58,7 @@ const ListDrawDiagram = () => {
 							>
 								Ver
 							</Button>
-							{/* <Button
+							<Button
 								variant="outlined"
 								color={row.original.status ? 'error' : 'success'}
 								size="small"
@@ -75,7 +75,7 @@ const ListDrawDiagram = () => {
 
 									try {
 										const { data: res } = await request(
-											`${url}/diagrams/status`,
+											`${url}/changeStatusDiagram`,
 											'PUT',
 											{
 												id: row.original.id,
@@ -105,7 +105,7 @@ const ListDrawDiagram = () => {
 								}}
 							>
 								{row.original.status ? 'Desactivar' : 'Activar'}
-							</Button> */}
+							</Button>
 						</Box>
 					),
 				},
