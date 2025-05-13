@@ -3,10 +3,18 @@ import React from 'react';
 import { PiBroomBold } from "react-icons/pi";
 import { FaSave } from "react-icons/fa";
 import { IoArrowUndo, IoCaretBackOutline } from "react-icons/io5";
+import { MdOutlineMoveDown, MdOutlineMoveUp } from "react-icons/md";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-const TopNavbar = ({ onClear, onSave, onUndo, elements = [] }) => {
+const TopNavbar = ({ 
+    onClear, 
+    onSave, 
+    onUndo, 
+    elements = [],
+    selectedId,
+    onSendToBack,
+    onBringToFront }) => {
     const navigate = useNavigate()
 
     const listDiagram = async () => {
@@ -53,6 +61,23 @@ const TopNavbar = ({ onClear, onSave, onUndo, elements = [] }) => {
                         <IoArrowUndo className="text-lg" />
                         Deshacer
                     </button>
+
+                    {selectedId && (
+                        <>
+                            <button
+                            onClick={onSendToBack}
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-800 rounded text-sm text-white"
+                            >
+                            <MdOutlineMoveDown className="text-lg" />
+                            </button>
+                            <button
+                            onClick={onBringToFront}
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-800 rounded text-sm text-white"
+                            >
+                            <MdOutlineMoveUp className="text-lg" />
+                            </button>
+                        </>
+                        )}
                 </div>
 
                 <div className="flex items-center gap-4">

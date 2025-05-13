@@ -368,7 +368,6 @@ const DrawDiagram = () => {
     }
   };
 
-
   const handleMouseUp = () => {
     isDrawing.current = false;
   };
@@ -520,6 +519,24 @@ const DrawDiagram = () => {
         el.id === selectedId ? { ...el, dataInflux } : el
       )
     );
+  };
+
+  const moveElementToBack = () => {
+    if (!selectedId) return;
+    setElements((prev) => {
+      const selected = prev.find(el => el.id === selectedId);
+      const remaining = prev.filter(el => el.id !== selectedId);
+      return [selected, ...remaining];
+    });
+  };
+  
+  const moveElementToFront = () => {
+    if (!selectedId) return;
+    setElements((prev) => {
+      const selected = prev.find(el => el.id === selectedId);
+      const remaining = prev.filter(el => el.id !== selectedId);
+      return [...remaining, selected];
+    });
   };
 
   const handleClearCanvas = () => {
@@ -753,6 +770,9 @@ const DrawDiagram = () => {
           onSave={handleSaveDiagram}
           onUndo={handleUndo}
           elements={elements}
+          selectedId={selectedId}
+          onSendToBack={moveElementToBack}
+          onBringToFront={moveElementToFront}
         />
         {/* Contenedor horizontal de sidebar + canvas */}
         <div className="flex w-full min-h-screen">
