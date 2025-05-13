@@ -792,6 +792,7 @@ const DrawDiagram = () => {
                 onChange={setLineStyle}
                 setElements={setElements}
                 elements={elements}
+                setSelectedId={setSelectedId}
               />
             )}
             {/* Panel de estilo de texto */}
