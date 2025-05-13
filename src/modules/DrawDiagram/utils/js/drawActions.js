@@ -202,7 +202,8 @@ export const saveDiagramKonva = async ({
 	elements,
 	circles,
 	diagramMetadata,
-	deleted
+	deleted,
+	navigate
 }) => {
 	try {
 		Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
