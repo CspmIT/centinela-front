@@ -98,7 +98,7 @@ const ConfigPie = () => {
         }
 
         try {
-            const url = `${backend[import.meta.env.VITE_APP_NAME]}/charts`
+            const url = `${backend[import.meta.env.VITE_APP_NAME]}/pie`
             await request(url, 'POST', sendObject)
         } catch (error) {
             Swal.fire({
