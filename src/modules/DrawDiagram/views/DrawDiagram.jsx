@@ -771,7 +771,7 @@ const DrawDiagram = () => {
   useEffect(() => {
     if (id) {
       setIsLoading(true);
-
+  
       uploadCanvaDb(id, {
         setCircles,
         setDiagramMetadata,
@@ -781,6 +781,8 @@ const DrawDiagram = () => {
       }).finally(() => {
         setIsLoading(false);
       });
+    } else {
+      setIsLoading(false);
     }
   }, [id]);
 
