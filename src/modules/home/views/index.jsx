@@ -84,7 +84,6 @@ const Home = () => {
                 }
 
                 if (type === 'PieChart') {
-                    console.log(chart)
                     return {
                         id: `${chart.id}-${chart.type}`,
                         component: type,
@@ -124,7 +123,6 @@ const Home = () => {
     return (
         <Grid container spacing={3}>
             {charts.map((chart, index) => {
-                console.log(chart)
                 const ChartComponentDb = chartComponents[chart.component]
                 return (
                     <Grid item xs={12} sm={6} lg={4} key={index}>
