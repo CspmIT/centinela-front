@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import PumpControl from '../../Charts/views/ConfigBombs'
 import { request } from '../../../utils/js/request'
 import { backend } from '../../../utils/routes/app.routes'
+import { Parser } from 'expr-eval'
 
 export const ChartComponentDbWrapper = ({
     chartId,
@@ -51,17 +52,17 @@ export const ChartComponentDbWrapper = ({
                     '$1$2'
                 )
 
-                // Evaluar la expresión
-                let result
                 try {
-                    result = eval(evaluableExpression) // ⚠️ Considerá sanitizar si recibís esto del usuario
+                    const parser = new Parser()
+                    const value = parser.evaluate(evaluableExpression)
+
                     return {
-                        value: result,
+                        value,
                     }
                 } catch (err) {
-                    console.error('Error al evaluar la expresión:', err)
+                    console.error('Expresion invalida')
                     return {
-                        value: -1,
+                        value: undefined,
                     }
                 }
             } else {
