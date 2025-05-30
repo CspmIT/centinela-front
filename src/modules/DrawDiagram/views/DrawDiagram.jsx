@@ -69,7 +69,7 @@ const DrawDiagram = () => {
     const stage = stageRef.current;
     const pointer = stage.getPointerPosition();
     if (!pointer) return null;
-  
+
     return {
       x: (pointer.x - stagePosition.x) / stageScale,
       y: (pointer.y - stagePosition.y) / stageScale,
@@ -77,7 +77,7 @@ const DrawDiagram = () => {
   };
   const [isDraggingStage, setIsDraggingStage] = useState(false);
   const [dragStartPos, setDragStartPos] = useState(null);
-  
+
 
   const handleSelect = (e, id) => {
 
@@ -113,7 +113,7 @@ const DrawDiagram = () => {
           visible: c.lineId === selectedElement.id,
         }))
       );
-      
+
     } else if (selectedElement?.type === 'line') {
       setTool('simpleLine');
       setShowLineStyleSelector(true);
@@ -252,10 +252,10 @@ const DrawDiagram = () => {
 
     // Polilínea
     if (tool === 'polyline' && !selectedId) {
-      e.cancelBubble = true; 
+      e.cancelBubble = true;
       if (!isDrawingPolyline) {
         setShowLineStyleSelector(false);
-        setSelectedId(null); 
+        setSelectedId(null);
         setIsDrawingPolyline(true);
         setPolylinePoints([pos.x, pos.y]);
         setTempLine({
@@ -529,7 +529,7 @@ const DrawDiagram = () => {
 
         setElements((prev) => [...prev, newImage]);
         setNewElementsIds((prev) => [...prev, newImage.id]);
-        setTool(null); 
+        setTool(null);
         setShowListField(false);
       };
       return;
@@ -692,7 +692,7 @@ const DrawDiagram = () => {
     const scaleBy = 1.05;
     setStageScale((prev) => prev * scaleBy);
   };
-  
+
   const handleZoomOut = () => {
     const scaleBy = 1.05;
     setStageScale((prev) => prev / scaleBy);
@@ -796,7 +796,7 @@ const DrawDiagram = () => {
   useEffect(() => {
     if (id) {
       setIsLoading(true);
-  
+
       uploadCanvaDb(id, {
         setCircles,
         setDiagramMetadata,
@@ -936,7 +936,7 @@ const DrawDiagram = () => {
                   handleTransformEnd={handleTransformEnd}
                   stageScale={stageScale}
                   stagePosition={stagePosition}
-                  setStageScale={setStageScale}         
+                  setStageScale={setStageScale}
                   setStagePosition={setStagePosition}
                   isPanning={isPanning}
                   isDraggingStage={isDraggingStage}

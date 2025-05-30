@@ -296,12 +296,12 @@ function ViewDiagram() {
 										}
 
 										if (el.type === 'line' || el.type === 'polyline') {
-											const value = el.dataInflux?.value;			
+											const value = el.dataInflux?.value;
 											// si el valor es 0 mostrarla gris y sin animacion								
 											const isClosed = value == 0;
-											const strokeColor = isClosed ? '#6b7280' : el.stroke;  
-											const dash = isClosed ? [] : [20, 10];                   
-											
+											const strokeColor = isClosed ? '#6b7280' : el.stroke;
+											const dash = isClosed ? [] : [20, 10];
+
 
 											return (
 												<Group key={`group-${el.type}-${el.id}`}>
