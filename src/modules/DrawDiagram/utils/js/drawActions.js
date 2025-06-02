@@ -139,7 +139,7 @@ export const uploadCanvaDb = async (id, {
 				status: variable.variable.status,
 			  };
 		
-			influxVarsToRequest.push({ id: image.id, varsInflux: vars }); 
+			influxVarsToRequest.push({ id: variable.id_influxvars, varsInflux: vars }); 
 			}
 
 			elements.push({
