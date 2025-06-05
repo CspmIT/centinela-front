@@ -266,6 +266,40 @@ export const ListImg = () => [
     },
     {
         id: 20,
+        name: 'Bomba Centrífuga',
+        src: `${urlBase}/bomba_centrifuga_off.png`,
+        srcView: `${urlBase}/bomba_centrifuga_off.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/bomba_centrifuga_fail.png',
+            success:
+                '/assets/img/Diagram/diagramAction/bomba_centrifuga_on.png',
+            default:
+                '/assets/img/Diagram/diagramAction/bomba_centrifuga_off.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 21,
+        name: 'Led',
+        src: `${urlBase}/led_OFF.png`,
+        srcView: `${urlBase}/led_OFF.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/led_FAIL.png',
+            success:
+                '/assets/img/Diagram/diagramAction/led_ON.png',
+            default:
+                '/assets/img/Diagram/diagramAction/led_OFF.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 22,
         name: 'Img sin fondo',
         src: `${urlBase}/img_sinfondo.PNG`,
         srcView: `${urlBaseView}/img_sinfondo.PNG`,
@@ -273,4 +307,5 @@ export const ListImg = () => [
             variable1: { id_variable: 0, show: false, require: false },
         },
     },
+    
 ]
