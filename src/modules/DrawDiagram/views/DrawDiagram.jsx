@@ -30,8 +30,8 @@ const DrawDiagram = () => {
   const [circles, setCircles] = useState([]);
   const [tempLine, setTempLine] = useState(null);
   const [lineStyle, setLineStyle] = useState({
-    color: '#0ea5e9',
-    strokeWidth: 10,
+    color: '#3b82f6',
+    strokeWidth: 5,
   });
   const [showLineStyleSelector, setShowLineStyleSelector] = useState(false);
   const [dashOffset, setDashOffset] = useState(0);
