@@ -300,6 +300,40 @@ export const ListImg = () => [
     },
     {
         id: 22,
+        name: 'Relé Térmico',
+        src: `${urlBase}/Relé térmico_OK.png`,
+        srcView: `${urlBase}/Relé Térmico_OK.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/Relé térmico_OK.png',
+            success:
+                '/assets/img/Diagram/diagramAction/Relé térmico_FAIL.png',
+            default:
+                '/assets/img/Diagram/diagramAction/Relé térmico_OK.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 23,
+        name: 'Arranque',
+        src: `${urlBase}/Arranque triangulo.png`,
+        srcView: `${urlBase}/Arranque triangulo.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/Arranque estrella.png',
+            success:
+                '/assets/img/Diagram/diagramAction/Arranque triangulo.png',
+            default:
+                '/assets/img/Diagram/diagramAction/Arranque triangulo.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 24,
         name: 'Img sin fondo',
         src: `${urlBase}/img_sinfondo.PNG`,
         srcView: `${urlBaseView}/img_sinfondo.PNG`,
