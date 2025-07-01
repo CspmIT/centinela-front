@@ -334,49 +334,6 @@ export const ListImg = () => [
     },
     {
         id: 24,
-        name: 'Bomba Sumergible 2',
-        src: `${urlBase}/bomba_sumergible_default.png`,
-        srcView: `${urlBase}/bomba_sumergible_default.png`,
-        animation: 'boolean',
-        optionsImage: {
-            error: '/assets/img/Diagram/diagramAction/bomba_sumergible_FAIL.png',
-            success:
-                '/assets/img/Diagram/diagramAction/bomba_sumergible_OK.png',
-            default:
-                '/assets/img/Diagram/diagramAction/bomba_sumergible_default.png',
-        },
-        variables: {
-            variable1: { id_variable: 0, show: false, require: false },
-        },
-    },
-    {
-        id: 25,
-        name: 'Grupo Generador',
-        src: `${urlBase}/grupo_generador_default.png`,
-        srcView: `${urlBase}/grupo_generador_default.png`,
-        animation: 'boolean',
-        optionsImage: {
-            error: '/assets/img/Diagram/diagramAction/grupo_generador_ON.png',
-            success:
-                '/assets/img/Diagram/diagramAction/grupo_generador_OFF.png',
-            default:
-                '/assets/img/Diagram/diagramAction/grupo_generador_default.png',
-        },
-        variables: {
-            variable1: { id_variable: 0, show: false, require: false },
-        },
-    },
-    {
-        id: 26,
-        name: 'Img sin fondo',
-        src: `${urlBase}/img_sinfondo.PNG`,
-        srcView: `${urlBaseView}/img_sinfondo.PNG`,
-        variables: {
-            variable1: { id_variable: 0, show: false, require: false },
-        },
-    },
-    {
-        id: 25,
         name: 'Tanque Elevado',
         src: `${urlBaseView}/Tanque_elevado.png`,
         srcView: `${urlBaseView}/Tanque_elevado.png`,
@@ -397,5 +354,49 @@ export const ListImg = () => [
             nivel: { id_variable: 0, show: false, require: true },
             egreso: { id_variable: 0, show: false, require: false },
         },
-    }
+    },
+    {
+        id: 25,
+        name: 'Bomba Sumergible 2',
+        src: `${urlBase}/bomba_sumergible_default.png`,
+        srcView: `${urlBase}/bomba_sumergible_default.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/bomba_sumergible_FAIL.png',
+            success:
+                '/assets/img/Diagram/diagramAction/bomba_sumergible_OK.png',
+            default:
+                '/assets/img/Diagram/diagramAction/bomba_sumergible_default.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 26,
+        name: 'Grupo Generador',
+        src: `${urlBase}/grupo_generador_default.png`,
+        srcView: `${urlBase}/grupo_generador_default.png`,
+        animation: 'boolean',
+        optionsImage: {
+            error: '/assets/img/Diagram/diagramAction/grupo_generador_ON.png',
+            success:
+                '/assets/img/Diagram/diagramAction/grupo_generador_OFF.png',
+            default:
+                '/assets/img/Diagram/diagramAction/grupo_generador_default.png',
+        },
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    {
+        id: 27,
+        name: 'Img sin fondo',
+        src: `${urlBase}/img_sinfondo.PNG`,
+        srcView: `${urlBaseView}/img_sinfondo.PNG`,
+        variables: {
+            variable1: { id_variable: 0, show: false, require: false },
+        },
+    },
+    
 ]
