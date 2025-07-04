@@ -13,6 +13,7 @@ import { saveDiagramKonva, uploadCanvaDb } from '../utils/js/drawActions';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/material';
 import LoaderComponent from '../../../components/Loader';
+import TooltipPositionPanel from '../components/TooltipPositionPanel/TooltipPositionPanel';
 
 const imageList = ListImg();
 
@@ -77,6 +78,7 @@ const DrawDiagram = () => {
   };
   const [isDraggingStage, setIsDraggingStage] = useState(false);
   const [dragStartPos, setDragStartPos] = useState(null);
+  const [showTooltipPositionPanel, setShowTooltipPositionPanel] = useState(false);
 
 
   const handleSelect = (e, id) => {
@@ -145,6 +147,13 @@ const DrawDiagram = () => {
       setLineStart(null);
       setTempLine(null);
     }
+
+    if (selectedElement?.dataInflux) {
+      setShowTooltipPositionPanel(true);
+    } else {
+      setShowTooltipPositionPanel(false);
+    }
+    
   };
 
   const handleMouseDown = (e) => {
@@ -543,9 +552,42 @@ const DrawDiagram = () => {
         String(el.id) === String(selectedId) ? {
           ...el, dataInflux: {
             ...dataInflux,
-            position: 'top',
+            position: 'Centro',
           }
         } : el
+      )
+    );
+  };
+
+  const handleChangeTooltipPosition = (position) => {
+    if (!selectedId) return;
+    setElements((prev) =>
+      prev.map((el) =>
+        String(el.id) === String(selectedId) && el.dataInflux
+          ? { ...el, dataInflux: { ...el.dataInflux, position } }
+          : el
+      )
+    );
+  };
+
+  const handleHideTooltip = () => {
+    if (!selectedId) return;
+    setElements(prev =>
+      prev.map(el =>
+        String(el.id) === String(selectedId) && el.dataInflux
+          ? { ...el, dataInflux: { ...el.dataInflux, show: false } }
+          : el
+      )
+    );
+  };
+  
+  const handleShowTooltip = () => {
+    if (!selectedId) return;
+    setElements(prev =>
+      prev.map(el =>
+        String(el.id) === String(selectedId) && el.dataInflux
+          ? { ...el, dataInflux: { ...el.dataInflux, show: true } }
+          : el
       )
     );
   };
@@ -920,6 +962,14 @@ const DrawDiagram = () => {
                     />
                   </div>
                 )}
+                {/* Panel posicion de variables */}
+                <TooltipPositionPanel
+                  visible={showTooltipPositionPanel}
+                  selectedElement={elements.find(el => String(el.id) === String(selectedId))}
+                  onChangePosition={handleChangeTooltipPosition}
+                  onHideTooltip={handleHideTooltip}
+                  onShowTooltip={handleShowTooltip}
+                />
                 {/* Canvas */}
                 <DiagramCanvas
                   elements={elements}
