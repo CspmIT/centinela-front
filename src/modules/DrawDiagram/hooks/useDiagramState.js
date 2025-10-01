@@ -11,7 +11,7 @@ export const useDiagramState = () => {
       const idStr = String(id);
       const numericId = parseInt(idStr.split('-').pop(), 10);
       if (!isNaN(numericId)) {
-        const typeKey = idStr.includes('text') ? 'texts' : idStr.includes('image') ? 'images' : idStr.includes('polyline') ? 'polylines' : 'lines';
+        const typeKey = idStr.includes('text') ? 'texts' : idStr.includes('image') ? 'images' : idStr.includes('poly') ? 'polylines' : 'lines';
         setDeletedItems(prev => ({
           ...prev,
           [typeKey]: [...(prev[typeKey] || []), numericId]
