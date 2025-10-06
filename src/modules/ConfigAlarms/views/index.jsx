@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Box, Button, Container, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { request } from '../../../utils/js/request';
 import { backend } from '../../../utils/routes/app.routes';
 import TableCustom from '../../../components/TableCustom';
@@ -9,7 +8,6 @@ import LoaderComponent from '../../../components/Loader';
 import ModalAlarms from '../components/ModalAlarm';
 
 const ConfigAlarms = () => {
-  const navigate = useNavigate();
   const [listAlarm, setListAlarm] = useState([]);
   const [columnsTable, setColumnsTable] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,31 +21,20 @@ const ConfigAlarms = () => {
       const { data } = await request(`${url}/getAlarms`, 'GET');
 
       const columns = [
-        {
-          header: 'ID',
-          accessorKey: 'id',
-          size: 50,
-        },
-        {
-          header: 'Nombre',
-          accessorKey: 'name',
-        },
-        {
-          header: 'Variable',
-          accessorKey: 'var_name',
-        },
-        {
-          header: 'Condicion',
-          accessorKey: 'condition',
-          size: 50,
-        },
-        {
-          header: 'Valor',
-          accessorKey: 'value',
-        },
-        {
-          header: 'Estado',
-          accessorKey: 'status',
+        { header: 'ID', accessorKey: 'id', size: 50 },
+        { header: 'Nombre', accessorKey: 'name' },
+        { header: 'Variable', accessorKey: 'var_name' },
+        { header: 'Condicion', accessorKey: 'condition', size: 50 },
+        { header: 'Valores', accessorKey: 'value',
+          Cell: ({ row }) => (
+            <span className="text-sm">
+              {['entre'].includes(row.original.condition)
+                ? `${row.original.value} y ${row.original.value2}`
+                : row.original.value}
+            </span>
+          ),
+         },
+        { header: 'Estado', accessorKey: 'status',
           Cell: ({ row }) => (
             <span className={`text-sm font-semibold ${row.original.status ? 'text-green-600' : 'text-red-600'}`}>
               {row.original.status ? 'Activo' : 'Inactivo'}
@@ -55,8 +42,7 @@ const ConfigAlarms = () => {
           ),
         },
         {
-          header: 'Acciones',
-          accessorKey: 'actions',
+          header: 'Acciones', accessorKey: 'actions',
           Cell: ({ row }) => (
             <Box display="flex" gap={1}>
               <Button
@@ -64,7 +50,7 @@ const ConfigAlarms = () => {
                 color="primary"
                 size="small"
                 onClick={() => {
-                  setSelectedAlarm(row.original)  
+                  setSelectedAlarm(row.original)
                   setModalAlarms(true)
                 }}
               >
@@ -84,7 +70,6 @@ const ConfigAlarms = () => {
                     cancelButtonText: 'Cancelar',
                   });
                   if (!confirm.isConfirmed) return;
-
                   try {
                     const { data: res } = await request(
                       `${url}/changeStatusAlarm`,
@@ -172,7 +157,7 @@ const ConfigAlarms = () => {
           openModal={modalAlarms}
           setOpenModal={setModalAlarms}
           onSuccess={fetchAlarms}
-          alarmData={selectedAlarm}  
+          alarmData={selectedAlarm}
         />
       </Container>
 
