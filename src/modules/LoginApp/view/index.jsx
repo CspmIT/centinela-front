@@ -1,6 +1,6 @@
 import { Button, Card, IconButton, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
-import LogoBlanco from '/assets/img/logoCooptech.png'
+import LogoBlanco from '../../../../src/assets/img/Logo_Cooptech.png'
 import { useForm } from 'react-hook-form'
 import { TbEye, TbEyeClosed } from 'react-icons/tb'
 import Swal from 'sweetalert2'
@@ -126,7 +126,7 @@ function LoginApp() {
 					<LoaderComponent />
 				) : (
 					<>
-						<img className='w-5/12 max-md:w-8/12 m-0 p-0 mb-5' src={imgApp} alt='logo Cooptech' />
+						<img className='w-3/12 max-md:w-2/12 m-0 p-0 mb-5' src={imgApp} alt='logo Cooptech' />
 						<form
 							className='h-full max-md:w-11/12 w-3/5 flex flex-col gap-4'
 							onSubmit={handleSubmit(onSubmit)}
