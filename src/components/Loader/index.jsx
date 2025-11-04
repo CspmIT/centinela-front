@@ -1,4 +1,4 @@
-import cooptech from '/assets/img/logoCooptech.png'
+import cooptech from '../../../src/assets/img/Logo_Cooptech.png'
 const LoaderComponent = ({ image = true }) => {
 	return (
 		<div className='flex flex-col items-center justify-center min-h-full '>

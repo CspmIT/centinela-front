@@ -1,14 +1,14 @@
-import imgAgua from '../assets/img/MasAgua_Full.png'
+import imgAgua from '../assets/img/MasAgua_cuadrado.png'
 import imgCentinela from '../assets/img/Centinela_Full.png'
-import imgCloud from '../assets/logos/Cloud.png'
+import imgCloud from '../assets/logos/CoopCloud_hexagonal.png'
 import imgOfcicina from '../assets/img/Oficina_Full.png'
 import imgReconecta from '../assets/img/Reconecta_Full.png'
 import imgProVision from '../assets/img/ProVision_Full.png'
-import logoAgua from '../assets/logos/MasAgua.png'
-import logoCentinela from '../assets/logos/Centinela.png'
-import logoOfcicina from '../assets/logos/Oficina.png'
-import logoReconecta from '../assets/logos/Reconecta.png'
-import logoProVision from '../assets/logos/ProVision.png'
+import logoAgua from '../assets/logos/MasAgua_hexagonal.png'
+import logoCentinela from '../assets/logos/Centinela_hexagonal.png'
+import logoOfcicina from '../assets/logos/OficinaVirtual_hexagonal.png'
+import logoReconecta from '../assets/logos/Reconecta_hexagonal.png'
+import logoProVision from '../assets/logos/Provision_hexagonal.png'
 export const getImgApp = () => {
 	const urlMap = {
 		'Oficina Virtual': imgOfcicina,

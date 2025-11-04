@@ -47,19 +47,19 @@ const DropdownImage = () => {
 	}, [])
 
 	return (
-		<div className='relative inline-block text-left ml-3' ref={dropdownRef}>
+		<div className='relative inline-block text-left' ref={dropdownRef}>
 			<div>
 				<button
 					type='button'
-					className='p-2 relative flex rounded-full bg-transparent shadow-none text-sm '
+					className='p-1 relative flex rounded-full bg-transparent shadow-none border-1 border-slate-500'
 					id='user-menu-button'
 					aria-expanded='false'
 					aria-haspopup='true'
 					onClick={toggleDropdown}
 				>
 					<img
-						className='h-6 w-6 rounded-full'
-						src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+						className='h-7 w-7 rounded-full'
+						src='../../../src/assets/img/Iso_Cooptech.png'
 						alt='imagen de perfil'
 					/>
 				</button>
