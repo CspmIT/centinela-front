@@ -9,7 +9,7 @@ export default function NotFound() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
         <div className="flex justify-center mb-6">
-          <img src="/assets/img/Logo/MasAgua.png" alt="MAS AGUA Logo" width={200} height={200} priority />
+          <img src="/assets/img/Logo/MasAgua_cuadrado.png" alt="MAS AGUA Logo" width={200} height={200} priority />
         </div>
 
         <h1 className="text-6xl font-bold text-blue-600 mb-4">404</h1>
@@ -35,7 +35,7 @@ export default function NotFound() {
       </div>
 
       <div className="mt-8">
-        <img src="/assets/img/logoCooptech.png" alt="COOPTECH Logo" width={160} height={80} />
+        <img src="../../../src/assets/img/Logo_Cooptech.png" alt="COOPTECH Logo" width={160} height={80} />
       </div>
     </div>
   )

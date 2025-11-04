@@ -162,7 +162,7 @@ function NavBarCustom({ setLoading }) {
 						<MenuIcon />
 					</IconButton>
 
-					<img onClick={() => navigate('home')} className=' max-h-7 cursor-pointer' src={Logo} />
+					<img onClick={() => navigate('home')} className='max-h-36 cursor-pointer' src={Logo} />
 					{/* <Typography variant='h6' noWrap component='div'>
 						Reconecta
 					</Typography> */}
