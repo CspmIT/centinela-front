@@ -141,7 +141,7 @@ function NavBarCustom({ setLoading }) {
 		const clienteName =
 			user?.cliente?.[0]?.name ||	 // 
 			coop?.cliente?.find?.((item) => item.selected) || 
-			coop?.cliente?.[0]?.name || 
+			coop?.cliente?.name || 
 			''
 	
 		if (clienteName) setNameCoop(clienteName)	
