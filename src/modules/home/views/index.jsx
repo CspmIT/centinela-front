@@ -31,44 +31,44 @@ const Home = () => {
     // Extrae todas las variables influx de todos los charts dinámicamente
     function extractInfluxVars(chartsData) {
         const vars = []
-    
+
         chartsData.forEach((chart) => {
             if (chart.component === 'PumpControl') {
-    
+
                 const normalizePumpVar = (item) => ({
                     dataInflux: {
-                        id: item.varId,          
-                        name: item.name,         
+                        id: item.varId,
+                        name: item.name,
                         unit: item.unit ?? null,
-                        type: 'last',            
+                        type: 'last',
                         calc: item.calc || false,
-                        varsInflux: item.value,  
+                        varsInflux: item.value,
                         equation: item.equation || null,
                         status: true
                     }
                 })
-    
+
                 chart.data.initialPumps.forEach((pump) => {
                     vars.push(normalizePumpVar(pump))
                 })
-    
+
                 chart.data.initialStates.forEach((state) => {
                     vars.push(normalizePumpVar(state))
                 })
-    
+
                 return
             }
-    
+
             Object.values(chart.data).forEach((value) => {
                 if (value && value.varsInflux) {
                     vars.push({ dataInflux: value })
                 }
             })
         })
-    
+
         return vars
     }
-    
+
     // Obtiene la configuración de charts desde el backend
     async function getCharts() {
         try {
@@ -129,12 +129,19 @@ const Home = () => {
                 }
 
                 const dataReduce = chart.ChartData.reduce((acc, data) => {
-                    const { key, value } = data
+                    const { key, value, label, InfluxVars } = data
+
                     return {
                         ...acc,
-                        [key]: value ? value : data.InfluxVars,
+                        [key]: value !== null
+                            ? value
+                            : {
+                                ...InfluxVars,
+                                label,
+                            },
                     }
                 }, {})
+
                 return {
                     id: `${chart.id}-${chart.type}`,
                     component: type,
@@ -194,14 +201,14 @@ const Home = () => {
                         lg={isPump ? 4 : 2}
                         key={index}
                     >
-                        <CardCustom className={`flex flex-col rounded-xl h-[40dvh] overflow-hidden`}>
-                            <div className="h-[8dvh] flex items-center justify-center text-center mt-1">
+                        <CardCustom className={`flex flex-col rounded-xl h-[44dvh] overflow-hidden`}>
+                            <div className="h-[7dvh] flex items-center justify-center text-center mt-1">
                                 <h1 className="text-xl leading-tight line-clamp-2">
                                     {chart?.props?.title}
                                 </h1>
                             </div>
-                
-                            <div className="flex-1 flex items-center justify-center mx-1">
+
+                            <div className="flex-1 flex items-center justify-center">
                                 <ChartComponentDbWrapper
                                     chartId={chart.id}
                                     ChartComponent={ChartComponentDb}
