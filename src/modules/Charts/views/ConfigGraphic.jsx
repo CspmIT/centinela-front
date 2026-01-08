@@ -27,7 +27,6 @@ const ConfigGraphic = () => {
     const navigate = useNavigate()
     function isSimpleChart(type) {
         return (
-            type === 'LiquidFillPorcentaje' ||
             type === 'CirclePorcentaje' ||
             type === 'GaugeSpeed'
         )
@@ -50,6 +49,7 @@ const ConfigGraphic = () => {
     }
 
     const saveLineChart = async (data) => {
+        
         const { title, type, xAxisConfig, yData } = data
         if (!title.trim()) {
             Swal.fire({
@@ -96,6 +96,70 @@ const ConfigGraphic = () => {
             console.error(error.message)
         }
     }
+
+    const saveLiquidChart = async (data) => {
+        
+        const { title, chartData, maxValue, color, shape, border, porcentage, order, unidad } = data
+    
+        if (!title?.trim()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atención!',
+                html: 'El título no puede estar vacío',
+            })
+            return
+        }
+    
+        if (!chartData || chartData.length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Atención!',
+                html: 'Debe configurar al menos una variable',
+            })
+            return
+        }
+    
+        const payload = {
+            id: idChart ?? undefined,
+            title,
+            type: 'LiquidFillPorcentaje',
+            maxValue: Number(maxValue),
+            color,
+            shape,
+            order,
+            unidad,
+            border: border === true || border === 'true',
+            porcentage: porcentage === true || porcentage === 'true',
+            chartData: chartData,
+        }
+    
+        
+        const baseUrl = backend['Mas Agua']
+        const endpoint = idChart
+            ? `${baseUrl}/charts/${idChart}`
+            : `${baseUrl}/charts`
+    
+        try {
+            const response = await request(endpoint, 'POST', payload)
+    
+            if (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    html: 'Se guardó correctamente la configuración',
+                })
+                navigate('/')
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: 'No se pudo guardar el gráfico',
+            })
+            console.error(error)
+        }
+    }
+    
 
     const saveSimpleChart = async (data) => {
         if (data?.idVar === undefined) {
@@ -148,6 +212,10 @@ const ConfigGraphic = () => {
         const { type } = data
         if (type === 'LineChart') {
             await saveLineChart(data)
+        }
+
+        if (type === 'LiquidFillPorcentaje') {
+            saveLiquidChart(data)
         }
 
         if (isSimpleChart(type)) {
