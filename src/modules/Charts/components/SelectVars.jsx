@@ -20,6 +20,7 @@ const SelectVars = ({
     setValueState = false,
     initialVar = false,
     className = false,
+    onSelect = null,
 }) => {
     const [anchorEl, setAnchorEl] = useState(null)
     const [searchTerm, setSearchTerm] = useState('')
@@ -72,11 +73,15 @@ const SelectVars = ({
 
     const handleSelectOption = (option) => {
         setSelectedOption(option)
-        if (setValueState) {
+    
+        if (onSelect) {
+            onSelect(option)          
+        } else if (setValueState) {
             setValueState(option)
         } else {
             setValue('idVar', option.id)
         }
+    
         handleClose()
     }
 

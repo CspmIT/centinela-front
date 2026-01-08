@@ -1,18 +1,21 @@
 import { Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import PumpControl from '../../Charts/views/ConfigBombs'
+import LiquidFillBottomInfo from './LiquidFillBottomInfo'
 import logo from '../../../assets/img/Logo/MasAgua_hexagonal.png'
+import LiquidFillPorcentaje from '../../Charts/components/LiquidFillPorcentaje'
 
 export const ChartComponentDbWrapper = ({
     chartId,
     ChartComponent,
     initialProps,
     initialData,
-    inflValues,          
+    inflValues,
 }) => {
-
     const [chartData, setChartData] = useState(initialData)
+    const [LiquidButtomData, setLiquidButtomData] = useState({})
     const [loading, setLoading] = useState(true)
+    const isLiquidPorcentaje = ChartComponent === LiquidFillPorcentaje
 
     // Extrae valor simple desde inflValues (gráficos normales)
     const resolveSimpleValue = (influxVar) => {
@@ -31,10 +34,33 @@ export const ChartComponentDbWrapper = ({
         })
     }
 
+    const resolveLiquidProps = (data) => {
+        const result = { ...data }
+
+        const slots = ['value', 'secondary', 'bottom1', 'bottom2', 'maxValue']
+
+        slots.forEach((k) => {
+            const infl = data[k]
+            if (!infl?.id) {
+                result[k] = infl ?? ''
+                return
+            }
+
+            result[k] = {
+                ...infl,
+                value: inflValues[infl.id] ?? 0,
+                
+            }
+        })
+
+        return result
+    }
+
     useEffect(() => {
+
         if (!inflValues || Object.keys(inflValues).length === 0) return
 
-        // PumpControl
+        // 1) PumpControl — igual que antes
         if (ChartComponent === PumpControl) {
             const updatedPumps = resolvePumpOrState(initialData.initialPumps)
             const updatedStates = resolvePumpOrState(initialData.initialStates)
@@ -48,15 +74,24 @@ export const ChartComponentDbWrapper = ({
             setLoading(false)
             return
         }
+        // 2) LIQUID — adapter por slots
+        if (initialData?.secondary || initialData?.bottom1) {
+            const multipleValues = resolveLiquidProps(initialData)
+            setChartData({ ...initialData, multipleValues })
+            setLiquidButtomData(multipleValues)
+            setLoading(false)
+            return
+        }
 
-        // Gráficos simples
-        if (initialData?.value) {
+        // 3) Simples clásicos
+        if (initialData?.value?.id) {
             const value = resolveSimpleValue(initialData.value)
             setChartData({ ...initialData, value })
             setLoading(false)
         }
 
     }, [inflValues])
+
 
     if (loading) {
         return (
@@ -77,5 +112,22 @@ export const ChartComponentDbWrapper = ({
         )
     }
 
-    return <ChartComponent {...initialProps} {...chartData} />
+    if (!isLiquidPorcentaje){
+        return <ChartComponent {...initialProps} {...chartData} />
+    }else {
+        const bottom1 = LiquidButtomData?.bottom1
+        const bottom2 = LiquidButtomData?.bottom2
+      
+        return (
+          <div className="flex flex-col h-full w-full">
+            <div className="flex-1 flex items-center justify-center">
+              <ChartComponent {...initialProps} {...chartData} />
+            </div>
+            <div className='w-full px-2 flex items-center justify-center'>
+                <LiquidFillBottomInfo bottom1={bottom1} bottom2={bottom2} />
+            </div>
+          </div>
+        )
+    }
+    
 }
