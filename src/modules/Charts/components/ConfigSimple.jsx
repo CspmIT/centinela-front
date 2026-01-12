@@ -23,10 +23,16 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData, getValues }) 
     const [bottom1Enabled, setBottom1Enabled] = useState(
         !!chartData?.ChartData?.find((d) => d.key === 'bottom1')
     )
-
     const [bottom1Label, setBottom1Label] = useState(
         chartData?.ChartData?.find(d => d.key === 'bottom1')?.label || ''
-    )    
+    )
+    
+    const [bottom2Enabled, setBottom2Enabled] = useState(
+        !!chartData?.ChartData?.find((d) => d.key === 'bottom2')
+    )
+    const [bottom2Label, setBottom2Label] = useState(
+        chartData?.ChartData?.find(d => d.key === 'bottom2')?.label || ''
+    )
  
 
     const [config, setConfig] = useState(() =>
@@ -264,7 +270,7 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData, getValues }) 
                                             }
                                         />
                                     }
-                                    label="Mostrar valor inferior"
+                                    label="Mostrar valor inferior 1"
                                 />
 
                                 {bottom1Enabled && (
@@ -298,6 +304,56 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData, getValues }) 
                                     </>
                                 )}
                                 </CardContent>
+
+                                <CardContent className=" bg-slate-50 border-2 border-slate-100 rounded-md shadow-sm">
+                                {/* BOTTOM 2 */}
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={bottom2Enabled}
+                                            onChange={(e) =>
+                                                setBottom2Enabled(
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                    }
+                                    label="Mostrar valor inferior 2"
+                                />
+
+                                {bottom2Enabled && (
+                                    <>
+                                    <div className='!bg-white mb-2'>
+                                        <TextField
+                                            label="Texto del valor inferior"
+                                            value={bottom2Label}
+                                            onChange={(e) => setBottom2Label(e.target.value)}
+                                            fullWidth
+                                        />
+                                    </div>
+                                    <div className='!bg-white'>
+                                    <SelectVars
+                                        label="Variable inferior"
+                                        initialVar={
+                                            chartData?.ChartData?.find(
+                                                (d) => d.key === 'bottom2'
+                                            )?.InfluxVars
+                                        }
+                                        onSelect={(v) =>
+                                            upsertChartData({
+                                                key: 'bottom2',
+                                                label: bottom2Label,
+                                                idVar: v.id,
+                                            })
+                                        }
+                                        setValue={setValue}
+                                    />
+                                    </div>
+                                    </>
+                                )}
+                                </CardContent>
+
+                                
                             </>
                         )}
 
