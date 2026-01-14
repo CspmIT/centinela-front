@@ -9,7 +9,7 @@ const BooleanChart = ({
   colorOff = '#444',
 }) => {
 
-  const hasValue = typeof value === 'boolean'
+  const hasValue = value !== 'Sin datos'
 
   const option = {
     xAxis: { show: false, min: 0, max: 1 },
