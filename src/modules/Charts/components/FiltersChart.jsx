@@ -75,8 +75,8 @@ const FiltersChart = ({ id_chart, setFilters }) => {
 
     return (
         <>
-            <CardCustom className="w-5/6 bg-slate-100 p-4 rounded-md border-2 border-slate-200 shadow-md shadow-slate-100 items-center">
-                <div className={`grid sm:grid-cols-1 ${mode === 'relative' ? 'md:grid-cols-4' : 'md:grid-cols-5'} gap-3 items-center`}>
+            <CardCustom className="w-5/6 bg-slate-100 p-3 rounded-md border-2 border-slate-200 shadow-md shadow-slate-100 items-center">
+                <div className={`grid sm:grid-cols-1 ${mode === 'relative' ? 'md:grid-cols-4' : 'md:grid-cols-5'} gap-2 items-center`}>
                     <TextField
                         select
                         label="Tipo de rango"
@@ -90,8 +90,8 @@ const FiltersChart = ({ id_chart, setFilters }) => {
                         fullWidth
                         size='small'
                     >
-                        <MenuItem value="relative">Relativo</MenuItem>
-                        <MenuItem value="absolute">Personalizado</MenuItem>
+                        <MenuItem value="relative">Predefinido</MenuItem>
+                        <MenuItem value="absolute">Específico</MenuItem>
                     </TextField>
 
                     {mode === 'relative' ? (

@@ -5,7 +5,7 @@ import {
   AccordionSummary,
   Typography,
 } from '@mui/material'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import FiltersChart from '../../Charts/components/FiltersChart'
 import { ChartFactory } from './ChartFactory'
 import { chartQueryBuilderMap } from '../factories/chartQueryBuilderMap'
@@ -26,7 +26,9 @@ const pickSamplingPeriod = (rangeMs) => {
   if (rangeMs <= 7 * day) return '5m'
   if (rangeMs <= 30 * day) return '30m'
   if (rangeMs <= 90 * day) return '1h'
-  return '6h'
+  if (rangeMs <= 365 * day) return '1h'
+  //mas de un año doce horas
+  return '12h'
 }
 
 const msToDatetimeLocal = (ms) => {
@@ -44,10 +46,9 @@ const ChartAccordion = ({ chart }) => {
   const [chartData, setChartData] = useState(undefined)
   const [expanded, setExpanded] = useState(false)
 
-  // para no spamear el backend en zoom
   const zoomTimeoutRef = useRef(null)
 
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     try {
       const fetchChartFunction = chartQueryBuilderMap[chart?.type]
       if (!fetchChartFunction) {
@@ -64,68 +65,56 @@ const ChartAccordion = ({ chart }) => {
       setChartData(undefined)
       setLoader(false)
     }
-  }
+  }, [chart, filters])
 
   const handleAccordionChange = (event, isExpanded) => {
     setExpanded(isExpanded)
   }
 
-  // 🔥 Zabbix-like: cuando zoom, recalculamos filtros y re-consultamos
-  const handleZoomRange = ({ startMs, endMs, reset }) => {
-    console.log(reset)
-    if (!expanded) return
+  //ZOOM: recalculamos filtros y re-consultamos
+  const handleZoomRange = useCallback(
+    ({ startMs, endMs }) => {
+      if (!expanded) return
+      if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) return
+      if (endMs <= startMs) return
 
-    // ✅ RESTORE / RESET
-    if (reset) {
+      const rangeMs = endMs - startMs
+      const newSampling = pickSamplingPeriod(rangeMs)
+
+      const dateFrom = msToDatetimeLocal(startMs)
+      const dateTo = msToDatetimeLocal(endMs)
+
       if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current)
 
-      setLoader(true)
-      setFilters((prev) => ({
-        ...(prev || {}),
-        [chart.id]: {}, // volvés al default del config del chart
-      }))
-      return
-    }
+      zoomTimeoutRef.current = setTimeout(() => {
+        setLoader(true)
+        setFilters((prev) => ({
+          ...(prev || {}),
+          [chart.id]: {
+            type: 'absolute',
+            dateFrom,
+            dateTo,
+            samplingPeriod: newSampling,
+          },
+        }))
+      }, 250)
+    },
+    [expanded, chart.id]
+  )
 
-    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) return
-    if (endMs <= startMs) return
+  const handleRestore = useCallback(() => {
+    if (!expanded) return
 
-    const rangeMs = endMs - startMs
-    const newSampling = pickSamplingPeriod(rangeMs)
-
-    const dateFrom = msToDatetimeLocal(startMs)
-    const dateTo = msToDatetimeLocal(endMs)
-
-    // debounce para no hacer 200 requests mientras arrastrás
     if (zoomTimeoutRef.current) clearTimeout(zoomTimeoutRef.current)
 
-    zoomTimeoutRef.current = setTimeout(() => {
-      setLoader(true)
-      setFilters((prev) => ({
-        ...(prev || {}),
-        [chart.id]: {
-          type: 'absolute',
-          dateFrom,
-          dateTo,
-          samplingPeriod: newSampling,
-        },
-      }))
-    }, 250)
-  }
-  
-  const handleRestore = () => {
-    if (!expanded) return
-  
     setLoader(true)
-  
+
     setFilters((prev) => {
       const copy = { ...(prev || {}) }
-  
-      delete copy[chart.id]
-  
+      delete copy[chart.id] // volvés al default
       return copy
     })
-  }
+  }, [expanded, chart.id])
 
   useEffect(() => {
     if (expanded) {
@@ -141,7 +130,7 @@ const ChartAccordion = ({ chart }) => {
       setChartData(undefined)
       setLoader(true)
     }
-  }, [expanded, chart, filters])
+  }, [expanded, fetchChartData])
 
   return (
     <Accordion
@@ -169,7 +158,6 @@ const ChartAccordion = ({ chart }) => {
       </AccordionSummary>
 
       <AccordionDetails className="flex flex-col items-center justify-center gap-4 h-auto !rounded-2xl !border-transparent">
-        {/* por ahora lo dejás, después lo podés sacar */}
         {chart.type === 'LineChart' && (
           <FiltersChart id_chart={chart.id} setFilters={setFilters} />
         )}

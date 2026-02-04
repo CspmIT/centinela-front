@@ -22,8 +22,12 @@ const chartComponentMap = {
   ),
 }
 
-export const ChartFactory = ({ type, chartData, chart, loader, onZoomRange, onRestore  }) => {
-  if (loader) return <LoaderComponent />
+export const ChartFactory = ({ type, chartData, chart, loader, onZoomRange, onRestore }) => {
+  if (loader) return (
+    <div className='h-[50dvh] 2xl:h-[55dvh]'>
+      <LoaderComponent />
+    </div>
+  )
 
   const ChartComponent = chartComponentMap[type]
 

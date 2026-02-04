@@ -61,8 +61,8 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
           const timeMs = params[0]?.value?.[0]
           const title = Number.isFinite(timeMs)
             ? new Date(timeMs).toLocaleString('es-AR', {
-                timeZone: 'America/Argentina/Buenos_Aires',
-              })
+              timeZone: 'America/Argentina/Buenos_Aires',
+            })
             : ''
 
           let html = `<div style="font-weight:600;margin-bottom:4px;">${title}</div>`
@@ -72,9 +72,9 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
 
             const valueText =
               rawValue === null ||
-              rawValue === undefined ||
-              rawValue === '-' ||
-              Number.isNaN(rawValue)
+                rawValue === undefined ||
+                rawValue === '-' ||
+                Number.isNaN(rawValue)
                 ? 'Sin datos'
                 : rawValue
 
@@ -106,6 +106,76 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
       toolbox: {
         feature: {
           dataZoom: { yAxisIndex: 'none' },
+          dataView: {
+            readOnly: true,
+            title: 'Tabla',
+            optionToContent: (opt) => {
+              const formatDateTime = (ms) => {
+                if (!Number.isFinite(ms)) return '-'
+                return new Date(ms).toLocaleString('es-AR', {
+                  timeZone: 'America/Argentina/Buenos_Aires',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })
+              }
+
+              const series = opt.series || []
+              if (!series.length) return `<div style="padding:12px;">Sin datos</div>`
+
+              // Tomamos como base el eje X desde la primer serie
+              const baseData = series[0]?.data || []
+
+              let html = `
+                <div style="padding:10px;max-height:60vh;font-family:Arial;">
+                  <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Fecha</th>
+              `
+
+              // headers por serie
+              series.forEach((s) => {
+                html += `<th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">${s.name}</th>`
+              })
+
+              html += `
+                      </tr>
+                    </thead>
+                    <tbody>
+              `
+
+              // filas
+              for (let i = 0; i < baseData.length; i++) {
+                const rowTime = baseData[i]?.[0]
+                html += `<tr>`
+                html += `<td style="border-bottom:1px solid #eee;padding:6px;white-space:nowrap;">${formatDateTime(rowTime)}</td>`
+
+                series.forEach((s) => {
+                  const v = s.data?.[i]?.[1]
+                  const valueText =
+                    v === null || v === undefined || v === '-' || Number.isNaN(v)
+                      ? 'Sin datos'
+                      : v
+
+                  html += `<td style="border-bottom:1px solid #eee;padding:6px;">${valueText}</td>`
+                })
+
+                html += `</tr>`
+              }
+
+              html += `
+                    </tbody>
+                  </table>
+                </div>
+              `
+
+              return html
+            },
+          },
           restore: {},
           saveAsImage: {},
         },
@@ -114,11 +184,11 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
       xAxis: {
         type: 'time',
         axisLabel: {
-            show: !isMobile,
-            rotate: 25,
-            formatter: formatDateTime,
-          },
+          show: !isMobile,
+          rotate: 25,
+          formatter: formatDateTime,
         },
+      },
 
       yAxis: {
         type: yType || 'value',
@@ -130,14 +200,10 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
           type: 'inside',
           xAxisIndex: 0,
           throttle: 80,
-      
           zoomOnMouseWheel: false,
           moveOnMouseMove: true,
           moveOnMouseWheel: false,
-      
           filterMode: 'none',
-      
-          // Para time: mejor en ms (ej: mínimo 2 minutos)
           minValueSpan: 2 * 60 * 1000,
           start: 0,
           end: 100,
@@ -147,29 +213,20 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
           xAxisIndex: 0,
           height: 28,
           bottom: 0,
-      
           filterMode: 'none',
-      
-          // mínimo 2 minutos también
           minValueSpan: 2 * 60 * 1000,
-      
           showDetail: true,
           handleSize: 16,
-      
           left: '8%',
           right: '8%',
-      
-          // Opcionales facheros
           showDataShadow: true,
           brushSelect: false,
-          
           labelFormatter: formatDateTime,
           start: 0,
           end: 100,
-          
         },
       ],
-      
+
       series: memoizedYSeries,
     }
   }, [memoizedYSeries, yType, isMobile, formatDateTime])

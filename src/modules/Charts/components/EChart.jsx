@@ -29,7 +29,6 @@ const EChart = ({ config, onZoomRange, onRestore }) => {
     })
   }, [config])
 
-  // zoom listener
   useEffect(() => {
     if (!chartRef.current) return
     if (!onZoomRange) return
@@ -56,7 +55,6 @@ const EChart = ({ config, onZoomRange, onRestore }) => {
     }
   }, [onZoomRange])
 
-  // ✅ restore listener (toolbox restore)
   useEffect(() => {
     if (!chartRef.current) return
     if (!onRestore) return
