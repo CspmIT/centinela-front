@@ -1,6 +1,114 @@
 import { memo, useMemo, useCallback } from 'react'
 import EChart from './EChart'
 
+const TIMEZONE = 'America/Argentina/Buenos_Aires'
+
+const isEmptyValue = (v) =>
+  v === null || v === undefined || v === '-' || Number.isNaN(v)
+
+const formatMsToDateTime = (ms) => {
+  if (!Number.isFinite(ms)) return '-'
+  return new Date(ms).toLocaleString('es-AR', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
+const formatMsAxisLabel = (ms) => {
+  if (!Number.isFinite(ms)) return '-'
+
+  const d = new Date(ms)
+
+  const date = d.toLocaleDateString('es-AR', { timeZone: TIMEZONE })
+  const time = d.toLocaleTimeString('es-AR', {
+    timeZone: TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+
+  return `${time}\n${date}`
+}
+
+const buildTooltipHtml = (params) => {
+  if (!params?.length) return ''
+
+  const timeMs = params[0]?.value?.[0]
+  const title = formatMsToDateTime(timeMs)
+
+  let html = `<div style="font-weight:600;margin-bottom:4px;">${title}</div>`
+
+  params.forEach((p) => {
+    const rawValue = p?.value?.[1]
+    const valueText = isEmptyValue(rawValue) ? 'Sin datos' : rawValue
+
+    html += `
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};"></span>
+        <span>${p.seriesName}:</span>
+        <b>${valueText}</b>
+      </div>
+    `
+  })
+
+  return html
+}
+
+const buildDataViewTableHtml = (opt) => {
+  const series = opt?.series || []
+  if (!series.length) return `<div style="padding:12px;">Sin datos</div>`
+
+  const baseData = series[0]?.data || []
+
+  let html = `
+    <div style="padding:5px;max-height:60vh;font-family:Arial;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Fecha</th>
+  `
+
+  series.forEach((s) => {
+    html += `<th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">${s.name}</th>`
+  })
+
+  html += `
+          </tr>
+        </thead>
+        <tbody>
+  `
+
+  for (let i = 0; i < baseData.length; i++) {
+    const rowTime = baseData[i]?.[0]
+
+    html += `<tr>`
+    html += `<td style="border-bottom:1px solid #eee;padding:6px;white-space:nowrap;">${formatMsToDateTime(
+      rowTime
+    )}</td>`
+
+    series.forEach((s) => {
+      const v = s.data?.[i]?.[1]
+      const valueText = isEmptyValue(v) ? 'Sin datos' : v
+      html += `<td style="border-bottom:1px solid #eee;padding:6px;">${valueText}</td>`
+    })
+
+    html += `</tr>`
+  }
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+  `
+
+  return html
+}
+
 const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => {
   const isMobile = useMemo(
     () => window.matchMedia('(max-width: 768px)').matches,
@@ -9,7 +117,7 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
 
   const memoizedXSeries = useMemo(() => [...(xSeries || [])], [xSeries])
 
-  // Convertimos series data a formato [timeMs, value]
+  // ySeries => formato [timeMs, value]
   const memoizedYSeries = useMemo(() => {
     return (ySeries || []).map((series) => {
       const data = (series.data || []).map((v, i) => {
@@ -26,28 +134,21 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
         showAllSymbol: 'auto',
         symbolSize: 2,
         sampling: 'none',
-        ...(series.areaStyle && {
-          areaStyle: { opacity: 0.15 },
-        }),
+        ...(series.areaStyle && { areaStyle: { opacity: 0.15 } }),
       }
     })
   }, [ySeries, memoizedXSeries])
 
-  const formatDateTime = useCallback((valueMs) => {
-    const d = new Date(valueMs)
+  const axisLabelFormatter = useCallback((valueMs) => {
+    return formatMsAxisLabel(valueMs)
+  }, [])
 
-    const date = d.toLocaleDateString('es-AR', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-    })
+  const tooltipFormatter = useCallback((params) => {
+    return buildTooltipHtml(params)
+  }, [])
 
-    const time = d.toLocaleTimeString('es-AR', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    })
-
-    return `${time}\n${date}`
+  const dataViewContent = useCallback((opt) => {
+    return buildDataViewTableHtml(opt)
   }, [])
 
   const options = useMemo(() => {
@@ -55,40 +156,7 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'line' },
-        formatter: (params) => {
-          if (!params?.length) return ''
-
-          const timeMs = params[0]?.value?.[0]
-          const title = Number.isFinite(timeMs)
-            ? new Date(timeMs).toLocaleString('es-AR', {
-              timeZone: 'America/Argentina/Buenos_Aires',
-            })
-            : ''
-
-          let html = `<div style="font-weight:600;margin-bottom:4px;">${title}</div>`
-
-          params.forEach((p) => {
-            const rawValue = p?.value?.[1]
-
-            const valueText =
-              rawValue === null ||
-                rawValue === undefined ||
-                rawValue === '-' ||
-                Number.isNaN(rawValue)
-                ? 'Sin datos'
-                : rawValue
-
-            html += `
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${p.color};"></span>
-                <span>${p.seriesName}:</span>
-                <b>${valueText}</b>
-              </div>
-            `
-          })
-
-          return html
-        },
+        formatter: tooltipFormatter,
       },
 
       legend: {
@@ -105,88 +173,35 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
 
       toolbox: {
         feature: {
-          dataZoom: { yAxisIndex: 'none' },
+          dataZoom: { 
+            yAxisIndex: 'none',
+           },
+
           dataView: {
             readOnly: true,
             title: 'Tabla',
-            optionToContent: (opt) => {
-              const formatDateTime = (ms) => {
-                if (!Number.isFinite(ms)) return '-'
-                return new Date(ms).toLocaleString('es-AR', {
-                  timeZone: 'America/Argentina/Buenos_Aires',
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })
-              }
-
-              const series = opt.series || []
-              if (!series.length) return `<div style="padding:12px;">Sin datos</div>`
-
-              // Tomamos como base el eje X desde la primer serie
-              const baseData = series[0]?.data || []
-
-              let html = `
-                <div style="padding:10px;max-height:60vh;font-family:Arial;">
-                  <table style="width:100%;border-collapse:collapse;">
-                    <thead>
-                      <tr>
-                        <th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">Fecha</th>
-              `
-
-              // headers por serie
-              series.forEach((s) => {
-                html += `<th style="text-align:left;border-bottom:1px solid #ddd;padding:6px;">${s.name}</th>`
-              })
-
-              html += `
-                      </tr>
-                    </thead>
-                    <tbody>
-              `
-
-              // filas
-              for (let i = 0; i < baseData.length; i++) {
-                const rowTime = baseData[i]?.[0]
-                html += `<tr>`
-                html += `<td style="border-bottom:1px solid #eee;padding:6px;white-space:nowrap;">${formatDateTime(rowTime)}</td>`
-
-                series.forEach((s) => {
-                  const v = s.data?.[i]?.[1]
-                  const valueText =
-                    v === null || v === undefined || v === '-' || Number.isNaN(v)
-                      ? 'Sin datos'
-                      : v
-
-                  html += `<td style="border-bottom:1px solid #eee;padding:6px;">${valueText}</td>`
-                })
-
-                html += `</tr>`
-              }
-
-              html += `
-                    </tbody>
-                  </table>
-                </div>
-              `
-
-              return html
-            },
+            lang: ['Tabla de datos', 'Cerrar'],
+            optionToContent: dataViewContent,
           },
-          restore: {},
-          saveAsImage: {},
+
+          restore: {
+            title: 'Restablecer'
+          },
+          saveAsImage: {
+            name: "Gráfico +Agua",
+            title: 'Guardar imagen'
+          }
         },
       },
 
       xAxis: {
         type: 'time',
+        splitNumber: isMobile ? 4 : 10,
+        offset: 5,
         axisLabel: {
           show: !isMobile,
-          rotate: 25,
-          formatter: formatDateTime,
+          rotate: 20,
+          formatter: axisLabelFormatter,
         },
       },
 
@@ -207,7 +222,9 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
           minValueSpan: 2 * 60 * 1000,
           start: 0,
           end: 100,
+          moveHandleSize: 12
         },
+
         {
           type: 'slider',
           xAxisIndex: 0,
@@ -221,7 +238,7 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
           right: '8%',
           showDataShadow: true,
           brushSelect: false,
-          labelFormatter: formatDateTime,
+          labelFormatter: axisLabelFormatter,
           start: 0,
           end: 100,
         },
@@ -229,9 +246,18 @@ const LineChart = memo(({ yType, xSeries, ySeries, onZoomRange, onRestore }) => 
 
       series: memoizedYSeries,
     }
-  }, [memoizedYSeries, yType, isMobile, formatDateTime])
+  }, [
+    memoizedYSeries,
+    yType,
+    isMobile,
+    tooltipFormatter,
+    axisLabelFormatter,
+    dataViewContent,
+  ])
 
-  return <EChart config={options} onZoomRange={onZoomRange} onRestore={onRestore} />
+  return (
+    <EChart config={options} onZoomRange={onZoomRange} onRestore={onRestore} />
+  )
 })
 
 export default LineChart

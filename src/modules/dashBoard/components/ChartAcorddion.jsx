@@ -27,7 +27,6 @@ const pickSamplingPeriod = (rangeMs) => {
   if (rangeMs <= 30 * day) return '30m'
   if (rangeMs <= 90 * day) return '1h'
   if (rangeMs <= 365 * day) return '1h'
-  //mas de un año doce horas
   return '12h'
 }
 
