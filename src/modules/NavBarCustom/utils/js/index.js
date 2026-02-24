@@ -29,6 +29,7 @@ export const getPermissionDb = async () => {
 		import.meta.env.VITE_WIFI == 'sin'
 			? { data: list_menu }
 			: await request(`${backend[`${import.meta.env.VITE_APP_NAME}`]}/getAllMenu`, 'GET')
+			console.log(menus); 
 	const permisos = menus.data
 		.map((item) => {
 			const findPermissions = Object.values(combinedPermissions).find((perm) => perm.id_menu == item.id)

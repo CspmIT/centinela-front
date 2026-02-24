@@ -16,7 +16,7 @@ import { getPermissionDb } from '../utils/js'
 import { PiTabsFill } from 'react-icons/pi'
 import ListIcon from '../../../components/ListIcon'
 import styles from '../utils/css/styles.module.css'
-import Logo from '/src/assets/img/Logo/LogoTextAgua2.png'
+import Logo from '/src/assets/img/Logo/LogoTextCentinela.png'
 import { list_menu } from '../../ConfigMenu/components/PermissionMenu/components/data'
 import { isTauri } from '@tauri-apps/api/core'
 import ButtonDownloads from '../../core/components/ButtonDownloads'
@@ -157,7 +157,7 @@ function NavBarCustom({ setLoading }) {
 
 					<img onClick={() => navigate('home')} className='max-h-10 cursor-pointer' src={Logo} />
 					<div className='absolute right-5 flex flex-row items-center'>
-						<p className={`bg-blue-600 rounded-md shadow-sm px-3 py-1 mr-2 text-white select-none ${isMobile ? 'hidden' : ''}`}>
+						<p className={`bg-amber-600 rounded-md shadow-sm px-3 py-1 mr-2 text-white select-none ${isMobile ? 'hidden' : ''}`}>
 							{nameCoop}
 						</p>
 						{!isTauri() && (
@@ -265,14 +265,14 @@ function NavBarCustom({ setLoading }) {
 														minWidth: 0,
 														mr: !isMobile && open ? 3 : 'auto',
 														justifyContent: 'center',
-														color: buttonActive?.includes(item.link) ? 'blue' : '',
+														color: buttonActive?.includes(item.link) ? '#d05e00' : '',
 														marginRight: !isMobile ? 'auto' : '0',
 													}}
 												>
 													{item.link === 'alert' ? (
 														<Badge
 															badgeContent={unreadCount}
-															color="primary"
+															color="#d05e00"
 															invisible={!unreadCount || unreadCount === 0}
 															overlap="circular"
 															anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
@@ -289,7 +289,7 @@ function NavBarCustom({ setLoading }) {
 													primary={item.name}
 													sx={{
 														opacity: !isMobile && open ? 1 : 0,
-														color: buttonActive?.includes(item.link) ? 'blue' : '',
+														color: buttonActive?.includes(item.link) ? '#d05e00' : '',
 														display: isMobile ? 'none !important' : 'block',
 													}}
 												/>
@@ -328,7 +328,7 @@ function NavBarCustom({ setLoading }) {
 												minWidth: 0,
 												mr: !isMobile && open ? 3 : 'auto',
 												justifyContent: 'center',
-												color: buttonActive == '/tabs' ? 'blue' : '',
+												color: buttonActive == '/tabs' ? '#d05e00' : '',
 											}}
 										>
 											<Badge badgeContent={tabActive} color='primary'>
@@ -339,7 +339,7 @@ function NavBarCustom({ setLoading }) {
 											primary={'Paginas'}
 											sx={{
 												opacity: !isMobile && open ? 1 : 0,
-												color: buttonActive == '/tabs' ? 'blue' : '',
+												color: buttonActive == '/tabs' ? '#d05e00' : '',
 												display: isMobile ? 'none !important' : 'block',
 											}}
 										/>

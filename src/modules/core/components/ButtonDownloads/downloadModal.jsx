@@ -44,7 +44,7 @@ const DesktopDownloadModal = ({ open, onClose }) => {
                 {/* Header */}
                 <Box display="flex" justifyContent="space-between">
                     <Typography variant="h6" fontWeight={600}>
-                        Descargar Mas Agua {downloads?.version || ""}
+                        Descargar Centinela {downloads?.version || ""}
                     </Typography>
                     <IconButton size="small" onClick={onClose}>
                         <MdClose />

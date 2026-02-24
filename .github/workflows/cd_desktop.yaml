@@ -48,6 +48,6 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
               with:
                   tagName: v__VERSION__
-                  releaseName: 'Mas Agua v__VERSION__'
+                  releaseName: 'Centinela v__VERSION__'
                   releaseBody: 'Modulo de Tableros y cambios en gráficos lineales.'
                   prerelease: false

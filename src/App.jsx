@@ -24,17 +24,13 @@ import ConfigGraphic from './modules/Charts/views/ConfigGraphic'
 import ViewDiagram from './modules/DrawDiagram/views/ViewDiagram'
 import PumpControl from './modules/Charts/views/ConfigBombs'
 import ChartsTable from './modules/Charts/views/ChartsTable'
-import MapView from './modules/Map/Views/MapView'
-import Maps from './modules/Map/Views/Maps'
 import Vars from './modules/ConfigVars/views/Vars'
-import ProfilePLC from './modules/ProfilePLC/views/ProfilePLC'
 import ConfigBooleanChart from './modules/Charts/views/ConfigBooleanChart'
 import NotFound from './modules/Errors/Not-Found'
 import ChartsDashboard from './modules/dashBoard/views/ChartsDashboard'
 import ConfigPie from './modules/Charts/views/ConfigPie'
 import Alert from './modules/alert/views'
 import ConfigAlarms from './modules/ConfigAlarms/views/index'
-import PumpsTable from './modules/PumpsTable/views/index'
 import ConfigMultipleBooleanChart from './modules/Charts/views/ConfigMultipleBooleanChart'
 
 import ExternalUser from './modules/ExternalUsers/views/index'
@@ -85,16 +81,10 @@ function App() {
 		{ path: '/config/graphic/multipleBoolean/:id', element: <ConfigMultipleBooleanChart /> },
 		{ path: '/config/graphic/board', element: <ConfigBoardChart /> },
 		{ path: '/config/graphic/board/:id', element: <ConfigBoardChart /> },
-		{ path: '/map', element: <MapView /> },
-		{ path: '/maps', element: <Maps /> },
-		{ path: '/map/create', element: <MapView create={true} /> },
-		{ path: '/map/edit', element: <MapView create={true} search={true} /> },
 		{ path: '/config/vars', element: <Vars /> },
-		{ path: '/config/plc', element: <ProfilePLC /> },
 		{ path: '/alert', element: <Alert /> },
 		{ path: '/config/alarm', element: <ConfigAlarms /> },
 		{ path: '/external', element: <ExternalUser /> },
-		{ path: '/list/pumps', element: <PumpsTable/>},
 		{ path: '/boards', element: <Boards />},
 	]
 

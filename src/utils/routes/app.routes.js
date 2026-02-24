@@ -18,7 +18,11 @@ export const front = {
             : import.meta.env.VITE_ENTORNO === 'desarrollo'
             ? 'http://172.26.5.17:32000'
             : 'https://masagua.cooptech.com.ar',
-    Centinela: 'http://localhost:8082',
+    Centinela: import.meta.env.VITE_ENTORNO === 'local'
+    ? 'http://localhost:1420'
+    : import.meta.env.VITE_ENTORNO === 'desarrollo'
+    ? 'http://172.26.5.17:32000'
+    : 'https://masagua.cooptech.com.ar',
     Cloud: 'http://localhost:8082',
     Provision: 'http://localhost:8082',
 }
@@ -33,7 +37,11 @@ export const backend = {
             : import.meta.env.VITE_ENTORNO === 'desarrollo'
             ? `http://172.26.5.17:32001/api`
             : 'https://masagua.cooptech.com.ar/api',
-    Centinela: `${front.Centinela}/api`,
+    Centinela:  import.meta.env.VITE_ENTORNO == 'local'
+    ? 'http://localhost:4000/api'
+    : import.meta.env.VITE_ENTORNO === 'desarrollo'
+    ? `http://172.26.5.17:32001/api`
+    : 'https://masagua.cooptech.com.ar/api',
     Cloud: `${front.Cloud}/api`,
     Provision: `${front.Provision}/api`,
     Archivos:

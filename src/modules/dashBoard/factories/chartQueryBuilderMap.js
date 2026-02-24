@@ -64,7 +64,7 @@ const parseEsArTimeToMs = (timeStr) => {
   
       const query = lineChart.generateQuery(filters)
       const { data } = await request(
-        `${backend['Mas Agua']}/seriesDataInflux`,
+        `${backend['Centinela']}/seriesDataInflux`,
         'POST',
         query
       )
@@ -147,7 +147,7 @@ const parseEsArTimeToMs = (timeStr) => {
         const updatedPies = await Promise.all(
             chart.ChartPieData.map(async (item) => {
                 const { data } = await request(
-                    `${backend['Mas Agua']}/dataInflux`,
+                    `${backend['Centinela']}/dataInflux`,
                     'POST',
                     item?.InfluxVars?.varsInflux
                 )

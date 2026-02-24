@@ -17,16 +17,6 @@ import { RiAlertFill, RiDashboardFill } from 'react-icons/ri'
 
 const ListIcon = () => [
     {
-        title: 'SCADA',
-        name: 'MdSchema',
-        icon: <MdSchema className=" text-3xl" />,
-    },
-    {
-        title: 'Mapa',
-        name: 'FaMapMarkedAlt',
-        icon: <FaMapMarkedAlt className=" text-3xl" />,
-    },
-    {
         title: 'Diagrama',
         name: 'FaProjectDiagram',
         icon: <FaProjectDiagram className=" text-3xl" />,
@@ -85,20 +75,10 @@ const ListIcon = () => [
         name: 'HiVariable',
         icon: <HiVariable className=" text-3xl" />,
     },
-    {
-        title: 'Perfil PLC',
-        name: 'FaMicrochip',
-        icon: <FaMicrochip className=" text-3xl" />,
-    },
     { 
         title: 'Alarma', 
         name: 'FaBell', 
         icon: <FaBell className=' text-3xl' /> 
-    },
-    { 
-        title: 'Bombeo de succión', 
-        name: 'FaTable', 
-        icon: <FaTable className=' text-3xl' /> 
     }
 ]
 

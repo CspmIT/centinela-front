@@ -134,7 +134,7 @@ const ConfigGraphic = () => {
         }
     
         
-        const baseUrl = backend['Mas Agua']
+        const baseUrl = backend['Centinela']
         const endpoint = idChart
             ? `${baseUrl}/charts/${idChart}`
             : `${baseUrl}/charts`
@@ -173,10 +173,11 @@ const ConfigGraphic = () => {
         data.porcentage = data.porcentage === 'true' || data.porcentage === true
         data.border = data.border === 'true' || data.border === true
         data.maxValue = parseFloat(data.maxValue)
-        const endPoint = `${backend['Mas Agua']}/charts`
+        data.order = Number(data.order);
+        const endPoint = `${backend['Centinela']}/charts`
         try {
             if (idChart) {
-                const editEndPoint = `${backend['Mas Agua']}/charts/${idChart}`
+                const editEndPoint = `${backend['Centinela']}/charts/${idChart}`
                 data.id = idChart
                 const response = await request(editEndPoint, 'POST', data)
                 if (response) {

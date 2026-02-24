@@ -1,5 +1,5 @@
 import imgAgua from '../assets/img/MasAgua_cuadrado.png'
-import imgCentinela from '../assets/img/Centinela_Full.png'
+import imgCentinela from '../../../assets/img/Logo/Centinela_cuadrado.png'
 import imgCloud from '../assets/logos/CoopCloud_hexagonal.png'
 import imgOfcicina from '../assets/img/Oficina_Full.png'
 import imgReconecta from '../assets/img/Reconecta_Full.png'
@@ -14,7 +14,7 @@ export const getImgApp = () => {
 		'Oficina Virtual': imgOfcicina,
 		Reconecta: imgReconecta,
 		'Mas Agua': imgAgua,
-		Centinela: imgCentinela,
+		'Centinela': imgCentinela,
 		Cloud: imgCloud,
 		Provision: imgProVision,
 	}
@@ -26,7 +26,7 @@ export const getLogo = (name) => {
 		'Oficina Virtual': logoOfcicina,
 		Reconecta: logoReconecta,
 		'Mas Agua': logoAgua,
-		Centinela: logoCentinela,
+		'Centinela': logoCentinela,
 		Cloud: imgCloud,
 		Provision: logoProVision,
 	}
