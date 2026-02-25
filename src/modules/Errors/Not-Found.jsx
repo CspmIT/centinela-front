@@ -1,6 +1,7 @@
 import { Button } from "@mui/material"
 import { useNavigate } from "react-router-dom"
-import logo from "/src/assets/img/Logo/Centinela_cuadrado.png"
+import logo from "../../../src/assets/img/Logo/Centinela_cuadrado.png"
+import logoCooptech from "../../../src/assets/img/Logo_Cooptech.png"
 
 export default function NotFound() {
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export default function NotFound() {
         <h1 className="text-6xl font-bold text-amber-600 mb-4">404</h1>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Página no encontrada</h2>
         <p className="text-gray-600 mb-8">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
-
+ 
         <Button
           variant="contained"
           color="primary"
@@ -36,7 +37,7 @@ export default function NotFound() {
       </div>
 
       <div className="mt-8">
-        <img src="../../../src/assets/img/Logo_Cooptech.png" alt="COOPTECH Logo" width={160} height={80} />
+        <img src={logoCooptech} alt="COOPTECH Logo" width={160} height={80} />
       </div>
     </div>
   )
