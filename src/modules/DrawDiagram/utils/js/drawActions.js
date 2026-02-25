@@ -12,7 +12,7 @@ export const uploadCanvaDb = async (id, {
 }) => {
 	try {
 		const objectDiagram = await request(
-			`${backend['Mas Agua']}/getObjectCanva?id=${id}`,
+			`${backend['Centinela']}/getObjectCanva?id=${id}`,
 			'GET'
 		).then((res) => res?.data?.[0]);
 
@@ -173,7 +173,7 @@ export const uploadCanvaDb = async (id, {
 
 		if (influxVarsToRequest.length > 0) {
 			const response = await request(
-				`${backend['Mas Agua']}/multipleDataInflux`,
+				`${backend['Centinela']}/multipleDataInflux`,
 				'POST',
 				influxVarsToRequest
 			);

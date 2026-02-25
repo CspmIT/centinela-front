@@ -73,7 +73,7 @@ function ViewDiagram() {
       if (!influxPayload.length) return;
 
       try {
-        const response = await request(`${backend['Mas Agua']}/multipleDataInflux`, 'POST', influxPayload);
+        const response = await request(`${backend['Centinela']}/multipleDataInflux`, 'POST', influxPayload);
         const result = response.data;
         // actualizar solo elementos que cambian (funcional update)
         setElements(prev =>

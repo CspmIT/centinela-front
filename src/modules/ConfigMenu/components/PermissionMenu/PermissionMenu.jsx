@@ -186,7 +186,7 @@ const PermissionMenu = ({ data, id_user, profile }) => {
 					id_user: id_user || null,
 				}
 			})
-			await request(backend['Mas Agua'] + '/savePermission', 'POST', result)
+			await request(backend['Centinela'] + '/savePermission', 'POST', result)
 			setPermission(await getPermissionDb())
 			Swal.fire({
 				title: 'Perfecto!',

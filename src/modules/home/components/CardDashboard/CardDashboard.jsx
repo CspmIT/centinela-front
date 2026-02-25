@@ -23,7 +23,7 @@ function CardDashboard() {
 			for (let i = 0; i < recloserIds.length; i += maxConcurrentRequests) {
 				const chunk = recloserIds.slice(i, i + maxConcurrentRequests)
 				const responses = await Promise.all(
-					chunk.map((id) => request(`${backend['Mas Agua']}/getAcRecloser?id=${id}`, 'GET'))
+					chunk.map((id) => request(`${backend['Centinela']}/getAcRecloser?id=${id}`, 'GET'))
 				)
 				recloserACStatuses.push(...responses)
 			}

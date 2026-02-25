@@ -84,7 +84,7 @@ const Home = () => {
     async function getCharts() {
         try {
             const { data } = await request(
-                `${backend['Mas Agua']}/indicatorCharts`,
+                `${backend['Centinela']}/indicatorCharts`,
                 'GET'
             )
            
@@ -226,7 +226,7 @@ const Home = () => {
     async function fetchMultipleData(allVars) {
         try {
             const { data } = await request(
-                `${backend['Mas Agua']}/multipleDataInflux`,
+                `${backend['Centinela']}/multipleDataInflux`,
                 'POST',
                 allVars
             )

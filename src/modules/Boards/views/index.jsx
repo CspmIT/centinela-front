@@ -29,7 +29,7 @@ const Boards = () => {
   const getBoards = async () => {
     try {
       const { data } = await request(
-        `${backend['Mas Agua']}/indicatorCharts`,
+        `${backend['Centinela']}/indicatorCharts`,
         'GET'
       )
 
@@ -71,7 +71,7 @@ const Boards = () => {
   const fetchMultipleData = async (allVars) => {
     try {
       const { data } = await request(
-        `${backend['Mas Agua']}/multipleDataInflux`,
+        `${backend['Centinela']}/multipleDataInflux`,
         'POST',
         allVars
       )

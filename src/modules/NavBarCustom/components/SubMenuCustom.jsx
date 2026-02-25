@@ -36,7 +36,7 @@ const SubMenuCustom = ({ item, openSideBar, activeButton, buttonActive }) => {
 				<ListItemIcon
 					className={`${
 						item.subMenus.some((value) => buttonActive?.includes(value.link))
-							? ' !text-blue-500 dark:!text-blue-500'
+							? ' !text-[#d05e00] dark:!text-[#d05e00]'
 							: ''
 					}`}
 					sx={{
@@ -54,7 +54,7 @@ const SubMenuCustom = ({ item, openSideBar, activeButton, buttonActive }) => {
 					}}
 					className={`${
 						item.subMenus.some((value) => buttonActive?.includes(value.link))
-							? ' !text-blue-500 dark:!text-blue-500'
+							? ' !text-[#d05e00] dark:!text-[#d05e00]'
 							: ''
 					}`}
 					primary={item.name}
@@ -69,7 +69,7 @@ const SubMenuCustom = ({ item, openSideBar, activeButton, buttonActive }) => {
 									<ListItemIcon
 										className={`${
 											buttonActive?.includes(submenu.link)
-												? ' !text-blue-500 dark:!text-blue-500'
+												? ' !text-[#d05e00] dark:!text-[#d05e00]'
 												: ''
 										}`}
 									>
@@ -78,7 +78,7 @@ const SubMenuCustom = ({ item, openSideBar, activeButton, buttonActive }) => {
 									<ListItemText
 										className={`${
 											buttonActive?.includes(submenu.link)
-												? ' !text-blue-500 dark:!text-blue-500'
+												? ' !text-[#d05e00] dark:!text-[#d05e00]'
 												: ''
 										}`}
 										primary={submenu.name}
@@ -106,7 +106,7 @@ const SubMenuCustom = ({ item, openSideBar, activeButton, buttonActive }) => {
 					{item.subMenus?.map((item2, index) => (
 						<MenuItem
 							className={`gap-3  ${
-								buttonActive.includes(item2.link) ? ' !text-blue-500' : ' !text-gray-500'
+								buttonActive.includes(item2.link) ? ' !text-[#d05e00]' : ' !text-gray-500'
 							}`}
 							key={index}
 							onClick={() => activeButton(item2.link)}
