@@ -1,5 +1,6 @@
 import { Button } from "@mui/material"
 import { useNavigate } from "react-router-dom"
+import logo from "/src/assets/img/Logo/Centinela_cuadrado.png"
 
 export default function NotFound() {
   const navigate = useNavigate()
@@ -9,10 +10,10 @@ export default function NotFound() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
         <div className="flex justify-center mb-6">
-          <img src="/assets/img/Logo/MasAgua_cuadrado.png" alt="Centinela Logo" width={200} height={200} priority />
+          <img src={logo} alt="Centinela Logo" width={200} height={200} priority />
         </div>
 
-        <h1 className="text-6xl font-bold text-blue-600 mb-4">404</h1>
+        <h1 className="text-6xl font-bold text-amber-600 mb-4">404</h1>
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Página no encontrada</h2>
         <p className="text-gray-600 mb-8">Lo sentimos, la página que estás buscando no existe o ha sido movida.</p>
 
@@ -22,8 +23,8 @@ export default function NotFound() {
           size="large"
           onClick={() => {returnHome()}}
           sx={{
-            backgroundColor: "#1976d2",
-            "&:hover": { backgroundColor: "#1565c0" },
+            backgroundColor: "#d97706",
+            "&:hover": { backgroundColor: "#ae6005" },
             textTransform: "none",
             fontWeight: "bold",
             padding: "10px 24px",

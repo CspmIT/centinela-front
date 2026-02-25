@@ -13,7 +13,6 @@ import Home from './modules/home/views'
 import './App.css'
 import ConfigMenu from './modules/ConfigMenu/view'
 import Profile from './modules/profile/views'
-import Notifications from './modules/ConfigNotifications/views/index'
 import ConfigSecurity from './modules/configSecurity/views'
 import LoginCooptech from './modules/LoginApp/view/LoginCooptech'
 import AddMenu from './modules/ConfigMenu/components/AddMenu'
@@ -62,7 +61,6 @@ function App() {
 		{ path: '/config/menu', element: <ConfigMenu /> },
 		{ path: '/notificaciones', element: <Notification /> },
 		{ path: '/profile', element: <Profile /> },
-		{ path: '/config/notifications', element: <Notifications /> },
 		{ path: '/config/diagram', element: <ListDrawDiagram /> },
 		{ path: '/newDiagram', element: <DrawDiagram /> },
 		{ path: '/newDiagram/:id', element: <DrawDiagram /> },
