@@ -10,6 +10,7 @@ import { backend } from '../../../utils/routes/app.routes'
 import { storage } from '../../../storage/storage'
 import PumpControl from '../../Charts/views/ConfigBombs'
 import GaugeSpeed from '../../Charts/components/GaugeSpeed'
+import GaugeTemperature from '../../Charts/components/GaugeTemperature'
 import BooleanChart from '../../Charts/components/BooleanChart'
 import MultipleBooleanChart from '../../Charts/components/MultipleBooleanChart'
 import { ChartComponentDbWrapper } from '../components/ChartComponentDbWrapper'
@@ -50,6 +51,7 @@ const chartComponents = {
     PieChart: DoughnutChart,
     PumpControl,
     GaugeSpeed,
+    GaugeTemperature,
     BooleanChart,
     MultipleBooleanChart
 }

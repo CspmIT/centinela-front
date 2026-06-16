@@ -75,15 +75,34 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData, getValues }) 
         )
 
         const maxValue = chartData.ChartData.find(d => d.key === 'maxValue')?.value
+        const minValue = chartData.ChartData.find(d => d.key === 'minValue')?.value
         const unidad = chartData.ChartData.find(d => d.key === 'unidad')?.value
 
         if (maxValue !== undefined) {
             setValue('maxValue', maxValue)
         }
 
+        if (minValue !== undefined) {
+            setValue('minValue', minValue)
+        }
+
         if (unidad !== undefined) {
             setValue('unidad', unidad)
         }
+
+        // Vuelca los valores de ChartData al estado del preview (no vienen en ChartConfig)
+        const sampleValue =
+            minValue !== undefined && maxValue !== undefined
+                ? (Number(minValue) + Number(maxValue)) / 2
+                : undefined
+
+        setConfig(prev => ({
+            ...prev,
+            ...(maxValue !== undefined && { maxValue }),
+            ...(minValue !== undefined && { minValue }),
+            ...(unidad !== undefined && { unidad }),
+            ...(sampleValue !== undefined && { value: sampleValue }),
+        }))
     }, [chartData])
 
 
@@ -399,6 +418,26 @@ const ConfigSimple = ({ register, errors, id, setValue, chartData, getValues }) 
                         )}
 
 
+
+                        {configs[id].minValue && (
+                            <TextField
+                                type="number"
+                                className="w-full"
+                                label="Valor minimo del gráfico"
+                                {...register('minValue', {
+                                    required: 'Este campo es requerido',
+                                })}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'e' || e.key === '+') {
+                                        e.preventDefault()
+                                    }
+                                }}
+                                onChange={handleChange}
+                                error={!!errors.minValue}
+                                helperText={errors.minValue?.message}
+                                size="small"
+                            />
+                        )}
 
                         <TextField
                             type="number"

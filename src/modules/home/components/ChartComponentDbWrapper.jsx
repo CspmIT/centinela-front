@@ -7,6 +7,7 @@ import LiquidFillPorcentaje from '../../Charts/components/LiquidFillPorcentaje'
 import MultipleBooleanChart from '../../Charts/components/MultipleBooleanChart'
 import CirclePorcentaje from '../../Charts/components/CirclePorcentaje'
 import GaugeSpeed from '../../Charts/components/GaugeSpeed'
+import GaugeTemperature from '../../Charts/components/GaugeTemperature'
 
 const BOTTOM_KEYS = ['bottom1', 'bottom2', 'bottom3', 'bottom4', 'bottom5', 'bottom6']
 
@@ -24,11 +25,13 @@ export const ChartComponentDbWrapper = ({
     const isLiquidFill =
         ChartComponent === LiquidFillPorcentaje ||
         ChartComponent === CirclePorcentaje ||
-        ChartComponent === GaugeSpeed
+        ChartComponent === GaugeSpeed ||
+        ChartComponent === GaugeTemperature
 
     const isScalarValue =
         ChartComponent === CirclePorcentaje ||
-        ChartComponent === GaugeSpeed
+        ChartComponent === GaugeSpeed ||
+        ChartComponent === GaugeTemperature
 
     // Extrae valor simple desde inflValues (gráficos normales)
     const resolveSimpleValue = (influxVar) => {
@@ -50,7 +53,7 @@ export const ChartComponentDbWrapper = ({
     const resolveLiquidProps = (data) => {
         const result = { ...data }
  
-        const slots = ['value', 'secondary', 'bottom1', 'bottom2', 'bottom3', 'bottom4', 'bottom5', 'bottom6', 'maxValue']
+        const slots = ['value', 'secondary', 'bottom1', 'bottom2', 'bottom3', 'bottom4', 'bottom5', 'bottom6', 'maxValue', 'minValue']
  
         slots.forEach((k) => {
             const infl = data[k]

@@ -75,6 +75,21 @@ const ChartPreviews = {
             <circle cx="40" cy="58" r="4" fill="#1e293b" />
         </svg>
     ),
+    GaugeTemperature: () => (
+        <svg viewBox="0 0 80 80" fill="none">
+            <defs>
+                <linearGradient id="tempArc" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stopColor="#2563eb" />
+                    <stop offset="0.5" stopColor="#22c55e" />
+                    <stop offset="1" stopColor="#ef4444" />
+                </linearGradient>
+            </defs>
+            <path d="M12 58 A30 30 0 0 1 68 58" stroke="url(#tempArc)" strokeWidth="8" strokeLinecap="round" />
+            <line x1="40" y1="58" x2="50" y2="34" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />
+            <circle cx="40" cy="58" r="3.5" fill="#1e293b" />
+            <text x="40" y="74" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#1e293b">24°C</text>
+        </svg>
+    ),
     BooleanChart: () => (
         <svg viewBox="0 0 80 80" fill="none">
             <circle cx="40" cy="35" r="12" fill="#22c55e" opacity="0.2" />
@@ -111,6 +126,7 @@ const CHART_LABELS = {
     PieChart: { label: "Torta" },
     PumpControl: { label: "Control de bombas" },
     GaugeSpeed: { label: "Velocímetro" },
+    GaugeTemperature: { label: "Temperatura" },
     BooleanChart: { label: "Booleano" },
     MultipleBooleanChart: { label: "Multi-booleano" },
 }

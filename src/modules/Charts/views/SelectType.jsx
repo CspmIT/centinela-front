@@ -84,6 +84,12 @@ const chartTypes = [
         description: 'Tablero para visualizacion de gráficos, estados de bombas y estado de sala.',
         board: true
     },
+    {
+        id: 12,
+        title: 'Indicador de temperatura',
+        image: '/assets/img/charts/gauge-speed.png?height=200&width=200',
+        description: 'Arco con zonas de color (frío / templado / caliente). Se define la temperatura mínima y máxima del rango, y muestra la temperatura real tomada de Influx.',
+    },
 ]
 
 function SelectType() {
