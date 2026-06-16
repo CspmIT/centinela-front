@@ -3,11 +3,17 @@ import { request } from '../../../../utils/js/request'
 import { backend } from '../../../../utils/routes/app.routes'
 import { list_menu } from '../../../ConfigMenu/components/PermissionMenu/components/data'
 
+/* =========================================================
+   API PUBLICA PARA NAVBAR
+   ========================================================= */
 export const getPermissionDb = async () => {
-	let usuario = storage.get('usuario')
+	const usuario = storage.get('usuario')
 
+	/* =========================
+	   1) Traer permisos backend
+	   ========================= */
 	const permissiondata =
-		import.meta.env.VITE_WIFI == 'sin'
+		import.meta.env.VITE_WIFI === 'sin'
 			? datapermisos
 			: await request(
 					`${backend[`${import.meta.env.VITE_APP_NAME}`]}/getPermission?id=${
@@ -16,28 +22,63 @@ export const getPermissionDb = async () => {
 					'GET'
 			  )
 
-	const combinedPermissions = permissiondata.data.reduce((acc, current) => {
-		const existingIndex = acc.findIndex((item) => item.id_menu === current.id_menu)
-		if (existingIndex === -1) {
-			acc.push({ ...current })
-		} else {
-			acc[existingIndex].status = acc[existingIndex].status || current.status
-		}
-		return acc
-	}, [])
-	const menus =
-		import.meta.env.VITE_WIFI == 'sin'
+	const permissions = permissiondata?.data || []
+
+	/* =========================
+	   2) Traer menú completo
+	   ========================= */
+	const menusResponse =
+		import.meta.env.VITE_WIFI === 'sin'
 			? { data: list_menu }
 			: await request(`${backend[`${import.meta.env.VITE_APP_NAME}`]}/getAllMenu`, 'GET')
-			console.log(menus); 
-	const permisos = menus.data
-		.map((item) => {
-			const findPermissions = Object.values(combinedPermissions).find((perm) => perm.id_menu == item.id)
-			item.status = findPermissions?.status || 0
-			return item
+
+	const menus = menusResponse?.data || []
+
+	/* =========================
+	   3) Motor RBAC + override
+	   ========================= */
+
+	// Mapa por id_menu
+	const permissionMap = {}
+
+	for (const perm of permissions) {
+		const id = perm.id_menu
+
+		// si no existe, lo creo
+		if (!permissionMap[id]) {
+			permissionMap[id] = { ...perm }
+			continue
+		}
+
+		// 🔴 prioridad absoluta: permiso por usuario
+		if (perm.id_user) {
+			permissionMap[id].status = perm.status
+			permissionMap[id].id_user = perm.id_user
+			continue
+		}
+
+		// 🟢 perfil: OR lógico
+		permissionMap[id].status = permissionMap[id].status || perm.status
+	}
+
+	/* =========================
+	   4) Aplicar permisos al menú
+	   ========================= */
+	const finalMenu = menus
+		.map(menu => {
+			const perm = permissionMap[menu.id]
+
+			return {
+				...menu,
+				status: perm ? Boolean(perm.status) : false
+			}
 		})
-		.filter((item) => item.status)
-	return permisos
+		.filter(menu => menu.status === true)
+
+	/* =========================
+	   5) Devolver listo para navbar
+	   ========================= */
+	return finalMenu
 }
 
 const datapermisos = {
