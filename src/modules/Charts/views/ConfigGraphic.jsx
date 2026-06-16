@@ -28,7 +28,8 @@ const ConfigGraphic = () => {
     function isSimpleChart(type) {
         return (
             type === 'CirclePorcentaje' ||
-            type === 'GaugeSpeed'
+            type === 'GaugeSpeed' ||
+            type === 'GaugeTemperature'
         )
     }
 
@@ -173,6 +174,9 @@ const ConfigGraphic = () => {
         data.porcentage = data.porcentage === 'true' || data.porcentage === true
         data.border = data.border === 'true' || data.border === true
         data.maxValue = parseFloat(data.maxValue)
+        if (data.minValue !== undefined) {
+            data.minValue = parseFloat(data.minValue)
+        }
         data.order = Number(data.order);
         const endPoint = `${backend['Centinela']}/charts`
         try {

@@ -193,16 +193,27 @@ function NavBarCustom({ setLoading }) {
 					}),
 				}}
 			>
-				<div className='bg-white dark:bg-gray-800 h-full w-full sm:w-auto'>
-					<DrawerHeaderCustom className='!min-h-11 !h-11' style={{ display: isMobile ? 'none' : '' }}>
+				<div className='bg-white dark:bg-gray-800 h-full w-full flex flex-col border-r border-slate-200 dark:border-slate-700'>
+					<DrawerHeaderCustom className='!min-h-11 !h-11 shrink-0' style={{ display: isMobile ? 'none' : '' }}>
 						<IconButton onClick={handleDrawerClose}>
 							<ChevronLeftIcon className='dark:text-white' />
 						</IconButton>
 					</DrawerHeaderCustom>
-					<Divider />
+					<Divider className='shrink-0' />
 
 					<List
+						className='navbar-scroll'
 						sx={{
+							flex: 1,
+							minHeight: 0,
+							overflowY: 'auto',
+							overflowX: 'hidden',
+							'&::-webkit-scrollbar': { width: 6 },
+							'&::-webkit-scrollbar-thumb': {
+								backgroundColor: 'rgba(208, 94, 0, 0.35)',
+								borderRadius: 3,
+							},
+							'&::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
 							...(isMobile && {
 								display: 'flex',
 								flexDirection: 'row',
@@ -228,6 +239,7 @@ function NavBarCustom({ setLoading }) {
 									key={index}
 									disablePadding
 									sx={{
+										overflow: 'hidden',
 										...(isMobile && {
 											flexGrow: 1,
 											flexBasis: 0,
@@ -247,10 +259,10 @@ function NavBarCustom({ setLoading }) {
 										<Link to={item.link} className={`!w-full text-black dark:text-white`}>
 											<ListItemButton
 												sx={{
-													minHeight: 48,
+													minHeight: 32,
 													justifyContent: !isMobile && open ? 'initial' : 'center',
-													padding: !isMobile ? '1.25rem' : '0.2rem',
-													py: 1.8
+													padding: !isMobile ? '1rem' : '0.2rem',
+													py: 1.2
 												}}
 												className={`!w-full ${item.link === '/Alert' && newEvent ? styles.backgroundAlert : ''
 													}`}
@@ -263,10 +275,8 @@ function NavBarCustom({ setLoading }) {
 														position: 'relative',
 														zIndex: 2000,
 														minWidth: 0,
-														mr: !isMobile && open ? 3 : 'auto',
 														justifyContent: 'center',
 														color: buttonActive?.includes(item.link) ? '#d05e00' : '',
-														marginRight: !isMobile ? 'auto' : '0',
 													}}
 												>
 													{item.link === 'alert' ? (
