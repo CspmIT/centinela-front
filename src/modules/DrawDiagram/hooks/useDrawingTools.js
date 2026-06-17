@@ -105,7 +105,7 @@ export const useDrawingTools = ({
       setTempLine(null);
     }
 
-    if (selectedElement?.dataInflux) {
+    if (selectedElement?.type === 'image' || selectedElement?.dataInflux) {
       setShowTooltipPositionPanel(true);
     } else {
       setShowTooltipPositionPanel(false);

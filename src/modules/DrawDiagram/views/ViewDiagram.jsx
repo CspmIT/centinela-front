@@ -7,6 +7,7 @@ import { IconButton, Box } from '@mui/material';
 import { request } from '../../../utils/js/request';
 import { backend } from '../../../utils/routes/app.routes';
 import RenderImage from '../components/RenderImage/RenderImage';
+import VariableLabels from '../components/VariableLabels/VariableLabels';
 import LoaderComponent from '../../../components/Loader';
 import { LuZoomOut, LuZoomIn, LuArrowLeft } from "react-icons/lu";
 import { storage } from '../../../storage/storage';
@@ -67,21 +68,36 @@ function ViewDiagram() {
   useEffect(() => {
     const updateInflux = async () => {
       const currentElements = elementsRef.current;
-      const influxPayload = currentElements
-        .filter(el => el.dataInflux)
-        .map(el => ({ id: el.dataInflux.id, dataInflux: el.dataInflux }));
+
+      // Reúne todas las variables (varias por imagen) + el dataInflux de líneas/textos/polilíneas
+      const influxPayload = [];
+      currentElements.forEach((el) => {
+        if (el.type === 'image' && Array.isArray(el.variables)) {
+          el.variables.forEach((v) => {
+            if (v?.id != null) influxPayload.push({ id: v.id, dataInflux: v });
+          });
+        } else if (el.dataInflux?.id != null) {
+          influxPayload.push({ id: el.dataInflux.id, dataInflux: el.dataInflux });
+        }
+      });
       if (!influxPayload.length) return;
 
       try {
         const response = await request(`${backend['Centinela']}/multipleDataInflux`, 'POST', influxPayload);
         const result = response.data;
-        // actualizar solo elementos que cambian (funcional update)
         setElements(prev =>
-          prev.map(el =>
-            el.dataInflux?.id && result[el.dataInflux.id] !== undefined
-              ? { ...el, dataInflux: { ...el.dataInflux, value: result[el.dataInflux.id] } }
-              : el
-          )
+          prev.map(el => {
+            if (el.type === 'image' && Array.isArray(el.variables) && el.variables.length) {
+              const variables = el.variables.map(v =>
+                result[v.id] !== undefined ? { ...v, value: result[v.id] } : v
+              );
+              return { ...el, variables, dataInflux: variables[0] || null };
+            }
+            if (el.dataInflux?.id && result[el.dataInflux.id] !== undefined) {
+              return { ...el, dataInflux: { ...el.dataInflux, value: result[el.dataInflux.id] } };
+            }
+            return el;
+          })
         );
       } catch (err) {
         console.error('Error actualizando datos desde Influx:', err);
@@ -237,7 +253,9 @@ function ViewDiagram() {
         return null;
       })();
 
-      const tooltip = el.dataInflux?.name ? renderTooltipLabel(el) : null;
+      const tooltip = el.type === 'image'
+        ? <VariableLabels el={el} mode="value" key={`vl-${el.id}`} />
+        : (el.dataInflux?.name ? renderTooltipLabel(el) : null);
 
       return (
         <React.Fragment key={`frag-${el.id}`}>
