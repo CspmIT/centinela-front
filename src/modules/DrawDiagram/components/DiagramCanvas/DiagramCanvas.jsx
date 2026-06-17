@@ -1,6 +1,7 @@
 import React, { Fragment } from 'react';
 import { Stage, Layer, Line, Text, Transformer, Circle, Group, Rect, Label, Tag } from 'react-konva';
 import ImageElement from '../ImageElement/ImageElement';
+import VariableLabels from '../VariableLabels/VariableLabels';
 
 // Funcion para calcular puntos a la hora de hacer la polilinea
 const distToSegment = (p, v, w) => {
@@ -292,34 +293,6 @@ const DiagramCanvas = ({
               }
 
               if (el.type === 'image') {
-                const offset = 5;
-                let labelX = el.x + (el.width || 0) / 2;
-                let labelY = el.y + (el.height || 0) / 2;
-
-                let pointerDir = 'down';
-                switch (el.dataInflux?.position) {
-                  case 'Arriba':
-                    labelY = el.y - offset;
-                    pointerDir = 'down';
-                    break;
-                  case 'Abajo':
-                    labelY = el.y + (el.height || 0) + offset;
-                    pointerDir = 'up';
-                    break;
-                  case 'Izquierda':
-                    labelX = el.x - offset;
-                    pointerDir = 'right';
-                    break;
-                  case 'Derecha':
-                    labelX = el.x + (el.width || 0) + offset;
-                    pointerDir = 'left';
-                    break;
-                  case 'Centro':
-                  default:
-                    pointerDir = 'down';
-                    break;
-                }
-
                 return (
                   <Fragment key={el.id}>
                     <ImageElement
@@ -343,29 +316,7 @@ const DiagramCanvas = ({
                       onTransformEnd={(e) => handleTransformEnd(el.id, e.target)}
                     />
 
-                    {el.dataInflux && el.dataInflux.name && (
-                      <Label x={labelX} y={labelY} opacity={el.dataInflux.show ? 1 : 0.5}>
-                        <Tag
-                          fill="white"
-                          pointerDirection={pointerDir}
-                          pointerWidth={10}
-                          pointerHeight={10}
-                          lineJoin="round"
-                          cornerRadius={5}
-                        />
-                        <Text
-                          text={
-                            el.dataInflux.bit_name
-                              ? `${el.dataInflux.name} - (${el.dataInflux.bit_name})`
-                              : el.dataInflux.name
-                          }
-                          fontFamily="arial"
-                          fontSize={14}
-                          padding={8}
-                          fill="black"
-                        />
-                      </Label>
-                    )}
+                    <VariableLabels el={el} mode="name" />
                   </Fragment>
                 );
               }

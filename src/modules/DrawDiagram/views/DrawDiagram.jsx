@@ -19,6 +19,7 @@ import { useDrawingTools } from '../hooks/useDrawingTools';
 import { useTooltipManager } from '../hooks/useTooltipManager';
 import { useDiagramState } from '../hooks/useDiagramState';
 import { useTextTools } from '../hooks/useTextTools';
+import { buildVariableEntry, varId } from '../utils/js/variableHelpers';
 
 const imageList = ListImg();
 
@@ -113,11 +114,13 @@ const DrawDiagram = () => {
     setLineStyle
   });
 
-  const { handleShowTooltip, handleHideTooltip, handleChangeTooltipPosition, handleSetMaxValue, handleBooleanColorChange, handleSetBinaryBit } = useTooltipManager({ selectedId, elements, setElements });
+  const { handleShowTooltip, handleHideTooltip, handleChangeTooltipPosition, handleSetMaxValue, handleBooleanColorChange, handleSetBinaryBit, removeVariable } = useTooltipManager({ selectedId, elements, setElements });
 
   const { saveText } = useTextTools({ elements, setElements, textStyle, setTextInput, setTextPosition, setEditingTextId, setNewElementsIds });
 
-  const handleAssignVariable = (dataInflux) => {
+  const handleAssignVariable = (raw) => {
+    const entry = buildVariableEntry(raw);
+
     if (tool === 'floatingVariable') {
       const img = new window.Image();
       img.src = '/assets/img/Diagram/newDiagram/img_sinfondo.PNG';
@@ -134,7 +137,8 @@ const DrawDiagram = () => {
           width,
           height,
           draggable: true,
-          dataInflux: dataInflux,
+          variables: [entry],
+          dataInflux: entry,
         };
 
         setElements((prev) => [...prev, newImage]);
@@ -147,17 +151,26 @@ const DrawDiagram = () => {
 
     if (!selectedId) return;
 
+    // Agrega la variable al array del elemento seleccionado (sin duplicar)
     setElements((prev) =>
-      prev.map((el) =>
-        String(el.id) === String(selectedId) ? {
-          ...el, dataInflux: {
-            ...dataInflux,
-            position: 'Centro',
-            show: true,
-          }
-        } : el
-      )
+      prev.map((el) => {
+        if (String(el.id) !== String(selectedId)) return el;
+        const existing = el.variables || (el.dataInflux ? [el.dataInflux] : []);
+        if (existing.some((v) => varId(v) === varId(entry))) return el;
+        const variables = [...existing, entry];
+        return { ...el, variables, dataInflux: variables[0] };
+      })
     );
+    setShowTooltipPositionPanel(true);
+  };
+
+  // Abre la lista de variables (mismo flujo que el botón del sidebar) desde el panel
+  const handleOpenVariableList = () => {
+    setTool('fields');
+    setShowListField(true);
+    setShowImageSelector(false);
+    setShowLineStyleSelector(false);
+    setShowTextStyler(false);
   };
 
   const handleClearCanvas = () => {
@@ -497,6 +510,8 @@ const DrawDiagram = () => {
                   onSetMaxValue={handleSetMaxValue}
                   onSetBooleanColors={handleBooleanColorChange}
                   onSetBinaryBit={handleSetBinaryBit}
+                  onRemoveVariable={removeVariable}
+                  onAddVariable={handleOpenVariableList}
                 />
                 )}
                 {/* Canvas */}

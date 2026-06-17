@@ -1,4 +1,136 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { MdDelete, MdAdd } from 'react-icons/md';
+import { varId } from '../../utils/js/variableHelpers';
+
+const POSITIONS = ['Arriba', 'Abajo', 'Izquierda', 'Derecha', 'Centro'];
+
+const VariableRow = ({
+  v,
+  onChangePosition,
+  onHideTooltip,
+  onShowTooltip,
+  onSetMaxValue,
+  onSetBooleanColors,
+  onSetBinaryBit,
+  onRemoveVariable,
+}) => {
+  const id = varId(v);
+  const unit = (v.unit || '').toLowerCase();
+  const isBooleanUnit = ['booleano', 'binario', 'bool'].includes(unit);
+  const isBinaryCompressed = v.binary_compressed || false;
+  const booleanColors = v.boolean_colors || { false: '-', true: '-' };
+
+  // bits para binario comprimido (creación: v.bits | edición: v.value array)
+  const bits = Array.isArray(v.bits)
+    ? v.bits
+    : Array.isArray(v.value)
+      ? v.value.map((b) => ({ id: b.id_bit, name: b.bit }))
+      : [];
+
+  return (
+    <div className="border border-gray-200 rounded-md p-2 mb-2">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-sm font-semibold truncate" title={v.name}>{v.name}</span>
+        <button
+          title="Quitar variable"
+          onClick={() => onRemoveVariable(id)}
+          className="text-red-500 hover:text-red-700"
+        >
+          <MdDelete />
+        </button>
+      </div>
+
+      <label className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          checked={v.show === false}
+          onChange={(e) => (e.target.checked ? onHideTooltip(id) : onShowTooltip(id))}
+        />
+        <span className="text-xs">Ocultar</span>
+      </label>
+
+      <div className="grid grid-cols-3 gap-1 my-2 text-xs">
+        <div></div>
+        <button className={`px-1 py-1 rounded ${v.position === 'Arriba' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Arriba')}>Arriba</button>
+        <div></div>
+        <button className={`px-1 py-1 rounded ${v.position === 'Izquierda' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Izquierda')}>Izq.</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Centro' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Centro')}>Centro</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Derecha' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Derecha')}>Der.</button>
+        <div></div>
+        <button className={`px-1 py-1 rounded ${v.position === 'Abajo' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Abajo')}>Abajo</button>
+        <div></div>
+      </div>
+
+      <label className="flex items-center space-x-2">
+        <input
+          type="checkbox"
+          checked={!!v.calculatePercentage}
+          onChange={(e) =>
+            onSetMaxValue(id, e.target.checked ? (parseFloat(v.max_value_var) || 0) : null, e.target.checked)
+          }
+        />
+        <span className="text-xs">Calcular % sobre máximo</span>
+      </label>
+
+      {v.calculatePercentage && (
+        <div className="mt-1">
+          <label className="text-xs">Valor máximo:</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={v.max_value_var ?? ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value) && value > 0) onSetMaxValue(id, value, true);
+            }}
+            placeholder="Ej: 300"
+            className="bg-gray-100 border rounded p-1 w-full text-sm"
+          />
+        </div>
+      )}
+
+      {isBinaryCompressed && (
+        <div className="mt-2 border-t pt-2">
+          <h5 className="text-xs font-semibold mb-1">Bit</h5>
+          <select
+            value={String(v.id_bit ?? '')}
+            onChange={(e) => onSetBinaryBit(id, { id_bit: Number(e.target.value) })}
+            className="w-full border rounded p-1 bg-gray-100 text-sm"
+          >
+            <option value="" disabled>Elegí el bit</option>
+            {bits.map((b) => (
+              <option key={b.id} value={String(b.id)}>{b.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {isBooleanUnit && (
+        <div className="mt-2 border-t pt-2">
+          <h5 className="text-xs font-semibold mb-1">Colores por estado</h5>
+          <div className="flex flex-col gap-1">
+            {['false', 'true'].map((state) => (
+              <div className="flex items-center justify-between" key={state}>
+                <span className="text-xs capitalize">{state}:</span>
+                <select
+                  value={booleanColors[state] ?? '-'}
+                  onChange={(e) => onSetBooleanColors(id, { ...booleanColors, [state]: e.target.value })}
+                  className="border rounded px-2 py-1 text-xs bg-gray-100"
+                >
+                  <option value="-">Seleccione...</option>
+                  <option value="default">Apagado (gris)</option>
+                  <option value="success">Encendido (verde)</option>
+                  <option value="error">En falla (rojo)</option>
+                </select>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const TooltipPositionPanel = ({
   selectedElement,
@@ -7,228 +139,44 @@ const TooltipPositionPanel = ({
   onShowTooltip,
   onSetMaxValue,
   onSetBooleanColors,
-  onSetBinaryBit
+  onSetBinaryBit,
+  onRemoveVariable,
+  onAddVariable,
 }) => {
-  if (!selectedElement?.dataInflux || selectedElement.type !== 'image') return null;
+  if (!selectedElement || selectedElement.type !== 'image') return null;
 
-  const positions = ['Arriba', 'Abajo', 'Izquierda', 'Derecha', 'Centro'];
-  const isTooltipShow = selectedElement.dataInflux.show;
-
-  const [localMaxValue, setLocalMaxValue] = useState(selectedElement.dataInflux.max_value_var || '');
-  const [calculatePercentage, setCalculatePercentage] = useState(
-    selectedElement.dataInflux.calculatePercentage || false
-  );
-
-  const unit = selectedElement.dataInflux.unit?.toLowerCase() || '';
-  const isBooleanUnit = ['booleano', 'binario', 'bool'].includes(unit);
-  const isBinaryCompressed = selectedElement.dataInflux.binary_compressed || false;
-
-  const [booleanColors, setBooleanColors] = useState(
-    selectedElement.dataInflux.boolean_colors || { false: '-', true: '-' }
-  );
-
-  const [binaryBits, setBinaryBits] = useState([]);
-
-  useEffect(() => {
-    if (!isBinaryCompressed) return;
-
-    const creationBits = selectedElement.dataInflux.bits;
-    const editBits = selectedElement.dataInflux.value;
-
-    if (Array.isArray(creationBits)) {
-      setBinaryBits(creationBits);
-    } else if (Array.isArray(editBits)) {
-      const normalizedBits = editBits.map(b => ({
-        id: b.id_bit,
-        name: b.bit
-      }));
-      setBinaryBits(normalizedBits);
-    } else {
-      setBinaryBits([]);
-    }
-  }, [selectedElement, isBinaryCompressed]);
-
-  const selectedBitId = String(
-    selectedElement.dataInflux.binary?.id_bit ?? // creación
-    selectedElement.dataInflux.id_bit ?? ''       // edición
-  );
-  const handleBinaryBitSelect = (e) => {
-    const id_bit = Number(e.target.value);
-    
-    const selectedBit = binaryBits.find(b => Number(b.id) === id_bit);
-    if (!selectedBit) return;
-
-    onSetBinaryBit?.({
-      id_var: selectedElement.dataInflux.id,
-      id_bit: selectedBit.id,
-      name: selectedBit.name
-    });
-  };
-
-  const handleMaxValueChange = (e) => {
-    const value = parseFloat(e.target.value);
-    setLocalMaxValue(e.target.value);
-    if (!isNaN(value) && value > 0) {
-      onSetMaxValue(value);
-    }
-  };
-
-  const handleCalculatePercentageToggle = () => {
-    setCalculatePercentage(prev => {
-      const newValue = !prev;
-      // Guardar en el elemento que se debe calcular porcentaje
-      onSetMaxValue(newValue ? parseFloat(localMaxValue) || 0 : null, newValue);
-      return newValue;
-    });
-  };
+  const vars = selectedElement.variables || (selectedElement.dataInflux ? [selectedElement.dataInflux] : []);
 
   return (
-    <div className="absolute top-72 left-1 m-1 p-4 bg-white border border-gray-300 shadow-lg rounded-lg max-w-md z-10">
-      <h4 className="text-sm font-bold mb-2">Personalizar variable</h4>
-
-      <label className="flex items-center space-x-2 mt-2">
-        <input
-          type="checkbox"
-          checked={!isTooltipShow}
-          onChange={(e) => {
-            if (e.target.checked) onHideTooltip();
-            else onShowTooltip?.();
-          }}
-        />
-        <span className="text-sm">Ocultar</span>
-      </label>
-
-      <div className="grid grid-cols-3 gap-2 my-3 text-xs">
-        <div></div>
+    <div className="absolute top-2 left-1 m-1 p-3 bg-white border border-gray-300 shadow-lg rounded-lg w-64 z-10 max-h-[80vh] overflow-y-auto">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-bold">Variables ({vars.length})</h4>
         <button
-          className={`px-2 py-1 rounded ${selectedElement.dataInflux.position === 'Arriba' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          onClick={() => onChangePosition('Arriba')}
+          onClick={() => onAddVariable?.()}
+          title="Agregar variable"
+          className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded"
         >
-          Arriba
+          <MdAdd /> Agregar
         </button>
-        <div></div>
-
-        <button
-          className={`px-2 py-1 rounded ${selectedElement.dataInflux.position === 'Izquierda' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          onClick={() => onChangePosition('Izquierda')}
-        >
-          Izquierda
-        </button>
-
-        <button
-          className={`px-2 py-1 rounded ${selectedElement.dataInflux.position === 'Centro' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          onClick={() => onChangePosition('Centro')}
-        >
-          Centro
-        </button>
-
-        <button
-          className={`px-2 py-1 rounded ${selectedElement.dataInflux.position === 'Derecha' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          onClick={() => onChangePosition('Derecha')}
-        >
-          Derecha
-        </button>
-
-        <div></div>
-
-        <button
-          className={`px-2 py-1 rounded ${selectedElement.dataInflux.position === 'Abajo' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          onClick={() => onChangePosition('Abajo')}
-        >
-          Abajo
-        </button>
-
-        <div></div>
       </div>
 
-      {/* Check Calcular valor */}
-      <label className="flex items-center space-x-2 mt-4">
-        <input
-          type="checkbox"
-          checked={calculatePercentage}
-          onChange={handleCalculatePercentageToggle}
+      {!vars.length && (
+        <p className="text-xs text-gray-500 mb-1">Sin variables. Usá “Agregar”.</p>
+      )}
+
+      {vars.map((v) => (
+        <VariableRow
+          key={varId(v)}
+          v={v}
+          onChangePosition={onChangePosition}
+          onHideTooltip={onHideTooltip}
+          onShowTooltip={onShowTooltip}
+          onSetMaxValue={onSetMaxValue}
+          onSetBooleanColors={onSetBooleanColors}
+          onSetBinaryBit={onSetBinaryBit}
+          onRemoveVariable={onRemoveVariable}
         />
-        <span className="text-sm">Calcular valor de la variable</span>
-      </label>
-
-      {/* Valor máximo habilitable */}
-      {calculatePercentage && (
-        <div className="mt-1 grid grid-cols-1 gap-1">
-          <label className="text-sm">Valor máximo:</label>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={localMaxValue}
-            onChange={handleMaxValueChange}
-            placeholder="Ej: 300"
-            className="bg-gray-100 border rounded p-1"
-          />
-        </div>
-      )}
-
-      {isBinaryCompressed && (
-        <div className="mt-4 border-t pt-3">
-          <h5 className="text-sm font-semibold mb-2">Asignación de Bits</h5>
-
-          <select
-            onChange={handleBinaryBitSelect}
-            value={selectedBitId}
-            className="w-full border rounded p-1 bg-gray-100 text-sm"
-          >
-            <option value="" disabled>Elegí el bit</option>
-            {binaryBits.map(b => (
-              <option key={b.id} value={String(b.id)}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {isBooleanUnit && (
-        <div className="mt-4 border-t pt-3">
-          <h5 className="text-sm font-semibold mb-2">Colores por estado</h5>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium">False:</span>
-              <select
-                value={booleanColors.false}
-                onChange={(e) => {
-                  const newColors = { ...booleanColors, false: e.target.value };
-                  setBooleanColors(newColors);
-                  onSetBooleanColors?.(newColors);
-                }}
-                className="border rounded px-2 py-1 text-sm bg-gray-100"
-              >
-                <option value="-">Seleccione...</option>
-                <option value="default">Apagado (gris)</option>
-                <option value="success">Encendido (verde)</option>
-                <option value="error">En falla (rojo)</option>
-              </select>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium">True:</span>
-              <select
-                value={booleanColors.true}
-                onChange={(e) => {
-                  const newColors = { ...booleanColors, true: e.target.value };
-                  setBooleanColors(newColors);
-                  onSetBooleanColors?.(newColors);
-                }}
-                className="border rounded px-2 py-1 text-sm bg-gray-100"
-              >
-                <option value="-">Seleccione...</option>
-                <option value="default">Apagado (gris)</option>
-                <option value="success">Encendido (verde)</option>
-                <option value="error">En falla (rojo)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
+      ))}
     </div>
   );
 };

@@ -125,33 +125,31 @@ export const uploadCanvaDb = async (id, {
 			});
 		}
 
-		// === IMÁGENES ===
+		// === IMÁGENES === (varias variables por imagen)
 		for (const image of objectDiagram?.images || []) {
-			let dataInflux = null;
-			const variable = image.variables?.[0];
-			if (variable?.variable?.varsInflux) {
-				dataInflux = {
-					id: variable.id_influxvars,
-					id_variable: variable.id_influxvars,
-					name: Object.keys(variable.variable.varsInflux)[0],
-					unit: variable.variable.unit,
-					type: variable.variable.type,
-					calc: variable.variable.calc,
-					varsInflux: variable.variable.varsInflux,
-					equation: variable.variable.equation,
-					status: variable.variable.status,
-					show: variable.show_var,
-					position: variable.position_var,
-					max_value_var: variable.max_value_var,
-					calculatePercentage: variable.max_value_var ? true : false,
-					boolean_colors: variable.boolean_colors || {},
-					binary_compressed: variable.variable.binary_compressed,
-					id_bit: variable.id_bit,
-					bit_name: variable.bit?.name || null,
-				};
+			const variables = (image.variables || [])
+				.filter((v) => v?.variable?.varsInflux)
+				.map((v) => ({
+					id: v.id_influxvars,
+					id_variable: v.id_influxvars,
+					name: v.name_var || Object.keys(v.variable.varsInflux)[0],
+					unit: v.variable.unit,
+					type: v.variable.type,
+					calc: v.variable.calc,
+					varsInflux: v.variable.varsInflux,
+					equation: v.variable.equation,
+					status: v.variable.status,
+					show: v.show_var,
+					position: v.position_var || 'Centro',
+					max_value_var: v.max_value_var,
+					calculatePercentage: v.max_value_var ? true : false,
+					boolean_colors: v.boolean_colors || {},
+					binary_compressed: v.variable.binary_compressed,
+					id_bit: v.id_bit,
+					bit_name: v.bit?.name || null,
+				}));
 
-				influxVarsToRequest.push({ dataInflux: dataInflux });
-			}
+			variables.forEach((entry) => influxVarsToRequest.push({ dataInflux: entry }));
 
 			elements.push({
 				id: `image-${image.id}`,
@@ -163,7 +161,8 @@ export const uploadCanvaDb = async (id, {
 				height: parseFloat(image.height) || 0,
 				draggable: true,
 				rotation: parseFloat(image.angle) || 0,
-				dataInflux,
+				variables,
+				dataInflux: variables[0] || null, // primaria (swap de imagen booleana)
 			});
 		}
 
@@ -180,6 +179,12 @@ export const uploadCanvaDb = async (id, {
 			const valuesResponse = response.data;
 
 			finalElements = elements.map((el) => {
+				if (el.type === 'image' && Array.isArray(el.variables) && el.variables.length) {
+					const variables = el.variables.map((v) =>
+						valuesResponse?.[v.id] !== undefined ? { ...v, value: valuesResponse[v.id] } : v
+					);
+					return { ...el, variables, dataInflux: variables[0] || null };
+				}
 				if (el.dataInflux && valuesResponse?.[el.dataInflux.id] !== undefined) {
 					return {
 						...el,
@@ -240,7 +245,6 @@ export const saveDiagramKonva = async ({
 		elements.forEach((el) => {
 			switch (el.type) {
 				case 'image':
-					console.log(el);
 					saveObjects.images.push({
 						...(el.id ? { id: getNumericId(el.id) } : {}),
 						name: el.name || '',
@@ -251,16 +255,19 @@ export const saveDiagramKonva = async ({
 						width: el.width,
 						height: el.height,
 						status: 1,
-						variables: el.dataInflux ? {
-							[el.dataInflux.name]: {
-								id_variable: el.dataInflux.id || null,
-								show: el.dataInflux.show,
-								position: el.dataInflux.position,
-								max_value: el.dataInflux.max_value_var,
-								boolean_colors: el.dataInflux.boolean_colors,
-								id_bit: el.dataInflux.id_bit,
-							}
-						} : {}
+						// Una key por variable (el back crea N filas). Nombre = name_var único.
+						variables: (el.variables || []).reduce((acc, v) => {
+							if (!v?.name) return acc;
+							acc[v.name] = {
+								id_variable: v.id ?? v.id_variable ?? null,
+								show: v.show,
+								position: v.position,
+								max_value: v.max_value_var,
+								boolean_colors: v.boolean_colors,
+								id_bit: v.id_bit,
+							};
+							return acc;
+						}, {}),
 					});
 					break;
 
