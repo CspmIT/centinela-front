@@ -10,7 +10,7 @@ const ImageSelector = ({ visible, images, onSelectImage }) => {
           <div
             key={img.name}
             className="cursor-pointer p-1 hover:shadow-md max-h-36"
-            onClick={() => onSelectImage(img.src)}
+            onClick={() => onSelectImage(img)}
           >
             <img
               src={img.src}

@@ -53,7 +53,6 @@ export const useDrawingTools = ({
     }
 
     const selectedElement = elements.find((el) => String(el.id) === String(id));
-    console.log(selectedElement);
 
     if (selectedElement?.type === 'polyline') {
       setTool('polyline');
@@ -349,11 +348,13 @@ export const useDrawingTools = ({
   }, [polylinePoints, lineStyle]);
 
   //FUNCION PARA AGREGAR UNA IMAGEN AL CANVAS
-  const addImageToCanvas = useCallback((src) => {
+  const addImageToCanvas = useCallback((item) => {
+    // Acepta el item completo de ListImg o un string (compatibilidad)
+    const src = typeof item === 'string' ? item : item.src;
+    const maxSize = (typeof item === 'object' && item.defaultSize) || 100;
     const img = new window.Image();
     img.src = src;
     img.onload = () => {
-      const maxSize = 100;
       let width = img.width;
       let height = img.height;
 
