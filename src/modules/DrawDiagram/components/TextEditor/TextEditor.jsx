@@ -6,9 +6,15 @@ const TextEditor = ({
   textInput,
   onChange,
   onSave,
-  onCancel
+  onCancel,
+  stageScale = 1,
+  stagePosition = { x: 0, y: 0 },
 }) => {
   if (!textPosition) return null;
+
+  // textPosition está en coordenadas del stage (mundo); lo paso a píxeles del DOM
+  const left = textPosition.x * stageScale + stagePosition.x;
+  const top = textPosition.y * stageScale + stagePosition.y;
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -23,8 +29,8 @@ const TextEditor = ({
     <textarea
       style={{
         position: 'absolute',
-        top: textPosition.y,
-        left: textPosition.x,
+        top,
+        left,
         fontSize: `${textStyle.fontSize}px`,
         fontStyle: textStyle.fontStyle,
         color: textStyle.fill,
