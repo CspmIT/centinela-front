@@ -418,7 +418,7 @@ const Home = ({ targetUserId = null }) => {
     async function getAvailableCharts(userId) {
         try {
             const { data } = await request(
-                `${backend['Mas Agua']}/chartbyuser/${userId}`,
+                `${backend['Centinela']}/chartbyuser/${userId}`,
                 'GET'
             )
     
