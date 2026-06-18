@@ -11,8 +11,8 @@ function CardDashboard() {
 	useEffect(() => {
 		const dataDashboard = async () => {
 			const [dataRecloser, dataAlarm] = await Promise.all([
-				// request(`${backend['Mas Agua']}/getAllReclosers`, 'GET'),
-				// request(`${backend['Mas Agua']}/recloserAlarm`, 'GET'),
+				// request(`${backend['Centinela']}/getAllReclosers`, 'GET'),
+				// request(`${backend['Centinela']}/recloserAlarm`, 'GET'),
 			])
 			if (!dataRecloser) return false
 			const recloserIds = dataRecloser.data.map((item) => item.id)
