@@ -90,7 +90,7 @@ const Profile = () => {
 							</div>
 							<div className='w-full flex flex-row justify-center mt-8'>
 								<input
-									className='bg-blue-900 hover:bg-blue-800 text-white cursor-pointer'
+									className='bg-primary hover:bg-secondary text-white cursor-pointer'
 									type='submit'
 									value='Guardar cambios'
 								/>

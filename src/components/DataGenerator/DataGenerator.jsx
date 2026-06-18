@@ -449,7 +449,7 @@ const DataGenerator = ({ handleClose, data = null, onSaved }) => {
 
 			</div>
 			<div className='flex flex-col gap-4 items-center'>
-				<Button variant='contained' color='info' onClick={handleSubmit(onSubmit)}>
+				<Button variant='contained' color='primary' onClick={handleSubmit(onSubmit)}>
 					Guardar variable
 				</Button>
 			</div>
