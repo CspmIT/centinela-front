@@ -51,13 +51,13 @@ const VariableRow = ({
 
       <div className="grid grid-cols-3 gap-1 my-2 text-xs">
         <div></div>
-        <button className={`px-1 py-1 rounded ${v.position === 'Arriba' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Arriba')}>Arriba</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Arriba' ? 'bg-primary text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Arriba')}>Arriba</button>
         <div></div>
-        <button className={`px-1 py-1 rounded ${v.position === 'Izquierda' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Izquierda')}>Izq.</button>
-        <button className={`px-1 py-1 rounded ${v.position === 'Centro' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Centro')}>Centro</button>
-        <button className={`px-1 py-1 rounded ${v.position === 'Derecha' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Derecha')}>Der.</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Izquierda' ? 'bg-primary text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Izquierda')}>Izq.</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Centro' ? 'bg-primary text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Centro')}>Centro</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Derecha' ? 'bg-primary text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Derecha')}>Der.</button>
         <div></div>
-        <button className={`px-1 py-1 rounded ${v.position === 'Abajo' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Abajo')}>Abajo</button>
+        <button className={`px-1 py-1 rounded ${v.position === 'Abajo' ? 'bg-primary text-white' : 'bg-gray-200'}`} onClick={() => onChangePosition(id, 'Abajo')}>Abajo</button>
         <div></div>
       </div>
 
@@ -154,7 +154,7 @@ const TooltipPositionPanel = ({
         <button
           onClick={() => onAddVariable?.()}
           title="Agregar variable"
-          className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded"
+          className="flex items-center gap-1 bg-primary hover:bg-secondary text-white text-xs px-2 py-1 rounded"
         >
           <MdAdd /> Agregar
         </button>

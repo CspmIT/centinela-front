@@ -468,7 +468,7 @@ const DrawDiagram = () => {
                 )}
                 {/* Panel de estilo de texto */}
                 <TextStyler
-                  visible={showTextStyler}
+                  visible={!!textPosition}
                   textStyle={textStyle}
                   onStyleChange={setTextStyle}
                   onApply={() => {
@@ -501,7 +501,7 @@ const DrawDiagram = () => {
                   </div>
                 )}
                 {/* Panel posicion de variables */}
-                {showTooltipPositionPanel && (
+                {showTooltipPositionPanel && !textPosition && (
                 <TooltipPositionPanel
                   selectedElement={elements.find(el => String(el.id) === String(selectedId))}
                   onChangePosition={handleChangeTooltipPosition}
@@ -551,6 +551,8 @@ const DrawDiagram = () => {
                   textPosition={textPosition}
                   textStyle={textStyle}
                   textInput={textInput}
+                  stageScale={stageScale}
+                  stagePosition={stagePosition}
                   onChange={setTextInput}
                   onSave={() => saveText(textInput, textPosition, editingTextId)}
                   onCancel={() => {

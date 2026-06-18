@@ -35,19 +35,19 @@ const TextStyler = ({
       <label className="block text-sm font-medium mb-1">Estilo</label>
       <div className="flex gap-2">
         <button
-          className={`px-3 py-1 rounded ${textStyle.fontStyle === 'normal' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          className={`px-3 py-1 rounded ${textStyle.fontStyle === 'normal' ? 'bg-primary text-white' : 'bg-gray-200'}`}
           onClick={() => onStyleChange({ ...textStyle, fontStyle: 'normal' })}
         >
           Normal
         </button>
         <button
-          className={`px-3 py-1 rounded font-bold ${textStyle.fontStyle === 'bold' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          className={`px-3 py-1 rounded font-bold ${textStyle.fontStyle === 'bold' ? 'bg-primary text-white' : 'bg-gray-200'}`}
           onClick={() => onStyleChange({ ...textStyle, fontStyle: 'bold' })}
         >
           Negrita
         </button>
         <button
-          className={`px-3 py-1 rounded italic ${textStyle.fontStyle === 'italic' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          className={`px-3 py-1 rounded italic ${textStyle.fontStyle === 'italic' ? 'bg-primary text-white' : 'bg-gray-200'}`}
           onClick={() => onStyleChange({ ...textStyle, fontStyle: 'italic' })}
         >
           Cursiva
@@ -56,7 +56,7 @@ const TextStyler = ({
 
       {isEditing && (
         <button
-          className="w-full mt-3 bg-blue-500 text-white py-1 rounded"
+          className="w-full mt-3 bg-primary text-white py-1 rounded"
           onClick={onApply}
         >
           Aplicar cambios

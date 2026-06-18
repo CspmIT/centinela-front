@@ -71,7 +71,7 @@ const TopNavbar = ({
                     <button
                         onClick={() => setIsPanning((prev) => !prev)}
                         title="Mover diagrama"
-                        className={`flex items-center gap-2 px-3 py-2 rounded text-sm text-white ${isPanning ? 'bg-blue-700' : 'bg-slate-600 hover:bg-slate-800'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded text-sm text-white ${isPanning ? 'bg-primary' : 'bg-slate-600 hover:bg-slate-800'}`}
                         >
                         <IoMdMove className="text-lg" />
                     </button>

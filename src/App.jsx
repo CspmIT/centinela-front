@@ -94,15 +94,25 @@ function App() {
 	]
 
 	//Incorporo el theme de mui
+	// Naranja de la navbar como color primario (afecta todos los Button color="primary")
+	const primaryOrange = {
+		main: '#e36a00',
+		dark: '#c85800',
+		light: '#ff8c2e',
+		contrastText: '#ffffff',
+	}
+
 	const lightTheme = createTheme({
 		palette: {
 			mode: 'light',
+			primary: primaryOrange,
 		},
 	})
 
 	const darkTheme = createTheme({
 		palette: {
 			mode: 'dark',
+			primary: primaryOrange,
 		},
 	})
 	const [theme, setTheme] = useState(!darkMode ? darkTheme : lightTheme)

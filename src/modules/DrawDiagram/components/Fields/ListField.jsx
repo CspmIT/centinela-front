@@ -40,7 +40,7 @@ function ListField({ onSelectVariable, onClose }) {
 				</Typography>
 				<IconButton
 					color='primary'
-					className='!bg-blue-200 !absolute top-0 right-5'
+					className='!bg-orange-200 !absolute top-0 right-5'
 					onClick={() => {
 						setOpenModal(true)
 						setVarSelected(null)
