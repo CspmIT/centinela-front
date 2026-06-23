@@ -282,11 +282,16 @@ function NavBarCustom({ setLoading }) {
 													{item.link === 'alert' ? (
 														<Badge
 															badgeContent={unreadCount}
-															color="#d05e00"
 															invisible={!unreadCount || unreadCount === 0}
 															overlap="circular"
 															anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-															sx={{ pointerEvents: 'none' }}
+															sx={{
+																pointerEvents: 'none',
+																'& .MuiBadge-badge': {
+																	backgroundColor: '#d05e00',
+																	color: '#fff',
+																},
+															}}
 														>
 															{componentIcon.icon}
 														</Badge>
