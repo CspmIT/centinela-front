@@ -2,15 +2,90 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Stage, Layer, Text, Line, Label, Tag, Group } from 'react-konva';
 import { uploadCanvaDb } from '../utils/js/drawActions';
-import CardCustom from '../../../components/CardCustom';
-import { IconButton, Box } from '@mui/material';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import { request } from '../../../utils/js/request';
 import { backend } from '../../../utils/routes/app.routes';
 import RenderImage from '../components/RenderImage/RenderImage';
 import VariableLabels from '../components/VariableLabels/VariableLabels';
 import LoaderComponent from '../../../components/Loader';
-import { LuZoomOut, LuZoomIn, LuArrowLeft } from "react-icons/lu";
+import CardCustom from '../../../components/CardCustom';
+import { LuZoomOut, LuZoomIn, LuArrowLeft } from 'react-icons/lu';
 import { storage } from '../../../storage/storage';
+import { canvasAreaSx, iconButtonSx, pillButtonSx, headerGradient } from '../utils/js/diagramTheme';
+
+// --- Estimación del tamaño de los tooltips para que el autoFit no los corte ---
+// (debe coincidir aproximadamente con VariableLabels / renderTooltipLabel)
+const L_FONT = 14, L_PAD = 8, L_LH = 1.35, L_POINTER = 10, L_OFFSET = 5, L_CHARW = 8, L_MIN_CHARS = 9;
+
+// Devuelve los rectángulos {minX,minY,maxX,maxY} que ocupan las etiquetas de un elemento.
+const getLabelRects = (el) => {
+  const w = el.width || 0;
+  const h = el.height || 0;
+  const cx = el.x + w / 2;
+  const cy = el.y + h / 2;
+
+  // Agrupa las variables por posición (igual que VariableLabels para imágenes).
+  const groups = {};
+  if (el.type === 'image' && Array.isArray(el.variables)) {
+    el.variables
+      .filter((v) => v && v.show !== false && v.name)
+      .forEach((v) => {
+        const pos = v.position || 'Centro';
+        (groups[pos] = groups[pos] || []).push(v);
+      });
+  } else if (el.dataInflux?.name && el.dataInflux?.show !== false) {
+    groups[el.dataInflux.position || 'Centro'] = [el.dataInflux];
+  }
+
+  return Object.entries(groups).map(([pos, list]) => {
+    const lines = list.length;
+    const maxChars = Math.max(L_MIN_CHARS, ...list.map((v) => String(v.name || '').length));
+    const boxW = maxChars * L_CHARW + L_PAD * 2;
+    const boxH = lines * L_FONT * L_LH + L_PAD * 2;
+
+    switch (pos) {
+      case 'Abajo': {
+        const ay = el.y + h + L_OFFSET;
+        return { minX: cx - boxW / 2, maxX: cx + boxW / 2, minY: ay, maxY: ay + L_POINTER + boxH };
+      }
+      case 'Izquierda': {
+        const ax = el.x - L_OFFSET;
+        return { minX: ax - L_POINTER - boxW, maxX: ax, minY: cy - boxH / 2, maxY: cy + boxH / 2 };
+      }
+      case 'Derecha': {
+        const ax = el.x + w + L_OFFSET;
+        return { minX: ax, maxX: ax + L_POINTER + boxW, minY: cy - boxH / 2, maxY: cy + boxH / 2 };
+      }
+      case 'Arriba': {
+        const ay = el.y - L_OFFSET;
+        return { minX: cx - boxW / 2, maxX: cx + boxW / 2, minY: ay - L_POINTER - boxH, maxY: ay };
+      }
+      default: { // 'Centro' → etiqueta sobre el centro, apuntando hacia abajo
+        return { minX: cx - boxW / 2, maxX: cx + boxW / 2, minY: cy - L_POINTER - boxH, maxY: cy };
+      }
+    }
+  });
+};
+
+// Bounding box del diagrama contemplando elementos + sus etiquetas.
+const getDiagramBounds = (elements) => {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const el of elements) {
+    const w = el.width || 0;
+    const h = el.height || 0;
+    minX = Math.min(minX, el.x);
+    minY = Math.min(minY, el.y);
+    maxX = Math.max(maxX, el.x + w);
+    maxY = Math.max(maxY, el.y + h);
+    for (const r of getLabelRects(el)) {
+      minX = Math.min(minX, r.minX);
+      minY = Math.min(minY, r.minY);
+      maxX = Math.max(maxX, r.maxX);
+      maxY = Math.max(maxY, r.maxY);
+    }
+  }
+  return { minX, minY, maxX, maxY };
+};
 
 function ViewDiagram() {
   const { id } = useParams();
@@ -23,9 +98,11 @@ function ViewDiagram() {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const [scale, setScale] = useState(1);
+  const [rotation, setRotation] = useState(0);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [dimensions, setDimensions] = useState({ width: window.innerWidth - 10, height: window.innerHeight - 10 });
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const usuario = storage.get('usuario');
+  const containerRef = useRef(null);
 
   // Mantener ref sincronizada
   useEffect(() => { elementsRef.current = elements; }, [elements]);
@@ -40,8 +117,6 @@ function ViewDiagram() {
         setTool: () => { },
       }).then((updatedElements) => {
         setElements(updatedElements || []);
-        // autoFit (calculado en función de elementos cargados)
-        autoFitDiagram(updatedElements || []);
       }).finally(() => setIsLoading(false));
     }
   }, [id]);
@@ -57,14 +132,22 @@ function ViewDiagram() {
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  // resize
+  // medir el contenedor (encaja dentro de la card, no de la ventana)
   useEffect(() => {
-    const handleResize = () => setDimensions({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (!containerRef.current) return;
 
-  // ---------- Mejor: interval separado que NO depende de `elements` ----------
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDimensions({ width, height });
+      }
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, [isLoading]);
+
+  // ---------- interval separado que NO depende de `elements` ----------
   useEffect(() => {
     const updateInflux = async () => {
       const currentElements = elementsRef.current;
@@ -129,10 +212,9 @@ function ViewDiagram() {
     setPosition(newPos);
   }, [scale, position, dimensions]);
 
-  // render tooltip (extraer fuera para evitar repetir lógica)
+  // render tooltip para líneas / textos (las imágenes usan VariableLabels)
   const renderTooltipLabel = useCallback((el) => {
     if (!el.dataInflux?.show) return null;
-    // ... lógica de cálculo compacta (igual a la original)
     const offset = 5;
     let labelX = el.x + (el.width || 0) / 2;
     let labelY = el.y + (el.height || 0) / 2;
@@ -150,48 +232,13 @@ function ViewDiagram() {
     const unit = el.dataInflux?.unit || '';
     let text = '';
 
-    if (el.dataInflux.binary_compressed && Array.isArray(rawValue)) {
-      const selectedBitId = el.dataInflux.id_bit;
-      const bitData = rawValue.find(b => b.id_bit === selectedBitId);
-      text = bitData ? bitData.bit : (el.dataInflux.name || 'Bit desconocido');
-    } else if (maxValue && !isNaN(maxValue) && Number(maxValue) !== 0 && rawValue != null && !isNaN(rawValue)) {
+    if (maxValue && !isNaN(maxValue) && Number(maxValue) !== 0 && rawValue != null && !isNaN(rawValue)) {
       const percentage = ((Number(rawValue) * 100) / Number(maxValue)).toFixed(1);
       text = `${percentage}%`;
     } else if (rawValue != null) {
       text = !isNaN(rawValue) ? `${Number(rawValue).toFixed(2)} ${unit}` : `${rawValue}`;
     } else {
       text = 'No hay datos';
-    }
-
-    const isSondaConductimetro = el.src?.includes('Sonda_conductimetro.png');
-    if (isSondaConductimetro) {
-      const relX = 0.29, relY = 0.15, boxWidth = 0.70;
-      const fontSize = el.width * 0.13;
-      return (
-        <Group rotation={el.rotation || 0} key={`tooltip-${el.id}`}>
-          <Text text={text} x={el.x + el.width * relX} y={el.y + el.height * relY} width={el.width * boxWidth} align="center" fontSize={fontSize} fontFamily="Arial" fill="yellow" />
-        </Group>
-      );
-    }
-
-    const tanqueImages = ['Estanque_cloro.png','Cisterna.png','Tanques_agua_multiple.png','Tanques_agua_simple.png','tanque_horizontal.png','Tanque_elevado.png'];
-    const isEstanque = tanqueImages.some(name => el.src?.includes(name));
-    if (isEstanque) {
-      const percentage = (maxValue && !isNaN(maxValue) && Number(maxValue) !== 0 && rawValue != null && !isNaN(rawValue)) ? `${((Number(rawValue) * 100) / Number(maxValue)).toFixed(1)}%` : `${Math.round(rawValue)}${unit}`;
-      const baseFontSize = el.width * 0.12;
-      const fontSize = Math.min(baseFontSize, 18);
-      const padding = 5;
-      const maxTextWidth = 80;
-      const textWidth = Math.min(el.width * 0.45, maxTextWidth);
-      const textHeight = fontSize + padding * 1;
-      return (
-        <Group rotation={el.rotation || 0} key={`tooltip-${el.id}`}>
-          <Label x={el.x + el.width / 2 - textWidth / 2} y={el.y + el.height / 2 - textHeight / 1.3}>
-            <Tag fill="#fff" cornerRadius={2} lineJoin="round" shadowColor="#27272a" shadowBlur={5} />
-            <Text text={percentage} fontFamily="Arial" fontSize={fontSize} padding={padding} width={textWidth} align="center" fill="black" />
-          </Label>
-        </Group>
-      );
     }
 
     return (
@@ -202,25 +249,44 @@ function ViewDiagram() {
     );
   }, []);
 
-  // autoFit (separada por claridad)
+  // autoFit con rotación 90° en mobile (diagrama horizontal + contenedor vertical)
   const autoFitDiagram = useCallback((elementsParam) => {
     if (!elementsParam?.length) return;
-    const minX = Math.min(...elementsParam.map(el => el.x));
-    const minY = Math.min(...elementsParam.map(el => el.y));
-    const maxX = Math.max(...elementsParam.map(el => (el.x + (el.width || 0))));
-    const maxY = Math.max(...elementsParam.map(el => (el.y + (el.height || 0))));
+    if (dimensions.width === 0 || dimensions.height === 0) return;
+    const { minX, minY, maxX, maxY } = getDiagramBounds(elementsParam);
     const diagramWidth = maxX - minX;
     const diagramHeight = maxY - minY;
-    const padding = 0;
-    const availableWidth = dimensions.width - padding;
-    const availableHeight = dimensions.height - padding;
-    const scaleX = availableWidth / diagramWidth;
-    const scaleY = availableHeight / diagramHeight;
-    const newScale = Math.min(scaleX, scaleY);
-    const offsetX = (availableWidth - diagramWidth * newScale) / 2;
-    const offsetY = (availableHeight - diagramHeight * newScale) / 2;
+    if (diagramWidth === 0 || diagramHeight === 0) return;
+    const padding = 16;
+    const availableWidth = dimensions.width - padding * 2;
+    const availableHeight = dimensions.height - padding * 2;
+
+    // Si el diagrama es horizontal pero el contenedor es vertical (mobile),
+    // lo rotamos 90° para aprovechar el alto de la pantalla.
+    const diagramIsLandscape = diagramWidth >= diagramHeight;
+    const containerIsPortrait = dimensions.height > dimensions.width;
+    const shouldRotate = diagramIsLandscape && containerIsPortrait;
+    setRotation(shouldRotate ? 90 : 0);
+
+    if (shouldRotate) {
+      // Rotado 90°: el ancho del diagrama ocupa el alto del contenedor y viceversa.
+      const newScale = Math.min(availableWidth / diagramHeight, availableHeight / diagramWidth);
+      setScale(newScale);
+      setPosition({
+        x: dimensions.width / 2 + (newScale * (minY + maxY)) / 2,
+        y: dimensions.height / 2 - (newScale * (minX + maxX)) / 2,
+      });
+      return;
+    }
+
+    const newScale = Math.min(availableWidth / diagramWidth, availableHeight / diagramHeight);
+    const offsetX = (dimensions.width - diagramWidth * newScale) / 2;
+    const offsetY = (dimensions.height - diagramHeight * newScale) / 2;
     setScale(newScale);
-    setPosition({ x: offsetX - minX * newScale + padding / 2, y: offsetY - minY * newScale + padding / 2 });
+    setPosition({
+      x: offsetX - minX * newScale,
+      y: offsetY - minY * newScale,
+    });
   }, [dimensions]);
 
   const renderElementsAndTooltips = () => {
@@ -236,14 +302,36 @@ function ViewDiagram() {
         if (el.type === 'line' || el.type === 'polyline') {
           const value = el.dataInflux?.value;
           const isClosed = value == 0;
-          const strokeColor = el.stroke;
-          const dash = isClosed ? [] : [20, 10];
-          const strokeLine = isClosed ? el.stroke : 'white';
           return (
             <Group key={`group-${el.type}-${el.id}`}>
-              <Line points={el.points} stroke={strokeColor} strokeWidth={el.strokeWidth + 4} />
-              <Line points={el.points} stroke={strokeLine} strokeWidth={el.strokeWidth + 2} />
-              <Line points={el.points} stroke={strokeColor} strokeWidth={el.strokeWidth} dash={dash} dashOffset={el.invertAnimation ? -dashOffset : dashOffset} />
+              {/* Borde exterior del caño */}
+              <Line
+                points={el.points}
+                stroke='#94a3b8'
+                strokeWidth={el.strokeWidth + 5}
+                lineCap='round'
+                lineJoin='round'
+              />
+              {/* Cuerpo del caño */}
+              <Line
+                points={el.points}
+                stroke='#e2e8f0'
+                strokeWidth={el.strokeWidth + 3}
+                lineCap='round'
+                lineJoin='round'
+              />
+              {/* Flujo animado — sólo cuando hay caudal */}
+              {!isClosed && (
+                <Line
+                  points={el.points}
+                  stroke={el.stroke}
+                  strokeWidth={el.strokeWidth}
+                  dash={[10, 8]}
+                  dashOffset={el.invertAnimation ? -dashOffset : dashOffset}
+                  lineCap='round'
+                  lineJoin='round'
+                />
+              )}
             </Group>
           );
         }
@@ -266,45 +354,84 @@ function ViewDiagram() {
     });
   };
 
+  useEffect(() => {
+    if (elements.length && dimensions.width > 0) {
+      autoFitDiagram(elements);
+    }
+  }, [dimensions, autoFitDiagram]);
+
   return (
-    <>
-      {isLoading ? (
-        <Box className="absolute inset-0 flex items-center justify-center" style={{ zIndex: 1000 }}>
+    <div className='w-full h-[88vh] flex flex-col'>
+      <div className='flex items-end justify-between gap-3'>
+        <div
+          className='inline-flex items-center gap-2 text-white rounded-t-md shadow-md min-w-0'
+          style={{
+            padding: '4px 20px',
+            background: headerGradient,
+            boxShadow: '0 4px 20px rgba(227, 106, 0, 0.3)',
+          }}
+        >
+          <span className='hidden sm:inline text-[9px] font-semibold uppercase tracking-[0.18em] text-white/75'>
+            Diagrama
+          </span>
+          <span className='hidden sm:inline text-white/40'>·</span>
+          <span className='text-sm font-semibold text-white truncate'>
+            {diagramMetadata.title || 'Diagrama sin nombre'}
+          </span>
+        </div>
+
+        {usuario?.profile === 4 && (
+          <Button
+            variant='contained'
+            startIcon={<LuArrowLeft />}
+            onClick={() => navigate('/config/diagram')}
+            sx={{ ...pillButtonSx, mb: 0.5 }}
+          >
+            Volver
+          </Button>
+        )}
+      </div>
+
+      <CardCustom className='rounded-xl rounded-tl-none h-auto w-auto flex-1 overflow-hidden relative'>
+        {isLoading ? (
           <LoaderComponent />
-        </Box>
-      ) : (
-        <div className="h-[85vh] w-full flex flex-col items-center mb-10">
-          <div className="w-full">
-            <div className="absolute ms-2 px-3 z-30 bg-[#e36a00] text-white font-semibold rounded-t-md shadow-md">
-              {diagramMetadata.title}
-            </div>
-          </div>
-
-          <CardCustom className="w-full h-full flex flex-col items-center justify-center !bg-gray-300/50 text-black relative mt-6 pt-2 rounded-md border-gray-400 border-2 !overflow-clip" >
-            <div className="flex-1 w-full h-full rounded-br-lg relative text-end">
-              <div className="absolute top-2 left-0 right-0 flex justify-between items-start px-4 z-10">
-                <div className="flex flex-col gap-2">
-                  <IconButton onClick={zoomIn} title="Acercar" className="!bg-[#e36a00] !text-white !shadow-lg"><LuZoomIn /></IconButton>
-                  <IconButton onClick={zoomOut} title="Alejar" className="!bg-[#e36a00] !text-white !shadow-lg"><LuZoomOut /></IconButton>
-                </div>
-
-                {usuario.profile === 4 && (
-                  <IconButton title="Volver" onClick={() => navigate('/config/diagram')} className="!bg-[#e36a00] !text-white !shadow-sm">
-                    <LuArrowLeft />
+        ) : (
+          <Box sx={canvasAreaSx} className='w-full h-full relative rounded-lg overflow-hidden'>
+            <div ref={containerRef} className='w-full h-full relative'>
+              <div className='absolute top-2 left-2 z-10 flex flex-col gap-2'>
+                <Tooltip title='Acercar' placement='right'>
+                  <IconButton onClick={zoomIn} sx={iconButtonSx}>
+                    <LuZoomIn size={18} />
                   </IconButton>
-                )}
+                </Tooltip>
+                <Tooltip title='Alejar' placement='right'>
+                  <IconButton onClick={zoomOut} sx={iconButtonSx}>
+                    <LuZoomOut size={18} />
+                  </IconButton>
+                </Tooltip>
               </div>
 
-              <Stage width={dimensions.width} height={dimensions.height} scaleX={scale} scaleY={scale} x={position.x} y={position.y} ref={stageRef} draggable onDragEnd={(e) => setPosition({ x: e.target.x(), y: e.target.y() })}>
-                <Layer>
-                  {renderElementsAndTooltips()}
-                </Layer>
-              </Stage>
+              {dimensions.width > 0 && (
+                <Stage
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  scaleX={scale}
+                  scaleY={scale}
+                  rotation={rotation}
+                  x={position.x}
+                  y={position.y}
+                  ref={stageRef}
+                  draggable
+                  onDragEnd={(e) => setPosition({ x: e.target.x(), y: e.target.y() })}
+                >
+                  <Layer>{renderElementsAndTooltips()}</Layer>
+                </Stage>
+              )}
             </div>
-          </CardCustom>
-        </div>
-      )}
-    </>
+          </Box>
+        )}
+      </CardCustom>
+    </div>
   );
 }
 
