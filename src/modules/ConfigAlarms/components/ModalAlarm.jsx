@@ -1,382 +1,468 @@
 import { useState, useEffect } from 'react'
 import {
-    Modal,
-    Box,
-    TextField,
-    MenuItem,
-    Button,
-    Typography,
-    IconButton,
-    CircularProgress,
-    FormControlLabel,
-    Switch
+	Box,
+	TextField,
+	MenuItem,
+	Button,
+	CircularProgress,
+	FormControlLabel,
+	Switch,
 } from '@mui/material'
-import { Close } from '@mui/icons-material'
+import { Save } from '@mui/icons-material'
 import Swal from 'sweetalert2'
 import { request } from '../../../utils/js/request'
 import { backend } from '../../../utils/routes/app.routes'
 import { getVarsInflux } from '../../DrawDiagram/components/Fields/actions'
+import ModalShell from '../../../components/ModalShell'
+
+const emptyForm = {
+	name: '',
+	id_influxvars: '',
+	condition: '',
+	value: '',
+	value2: '',
+	repeatInterval: 0,
+	type: 'single',
+	logicOperator: 'AND',
+	secondaryVariableId: '',
+	secondaryCondition: '',
+	secondaryValue: '',
+	hasTimeRange: false,
+	startime: '',
+	endtime: '',
+}
+
+const sectionBoxSx = {
+	backgroundColor: 'transparent',
+	border: '1px solid rgba(15, 42, 68, 0.06)',
+	borderRadius: '10px',
+	p: { xs: 1.25, sm: 1.5 },
+	'body.dark &': {
+		border: '1px solid rgba(255, 255, 255, 0.06)',
+	},
+}
+
+const primarySaveSx = {
+	background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+	color: '#ffffff',
+	textTransform: 'none',
+	fontWeight: 600,
+	px: 2.5,
+	py: 0.75,
+	borderRadius: '999px',
+	boxShadow: '0 6px 14px -6px rgba(161, 75, 0, 0.55)',
+	transition: 'transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease',
+	'&:hover': {
+		background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+		transform: 'translateY(-1px)',
+		boxShadow: '0 10px 22px -8px rgba(161, 75, 0, 0.65)',
+		filter: 'brightness(1.03)',
+	},
+	'&:disabled': {
+		background: 'linear-gradient(135deg, #6b8faf 0%, #547394 100%)',
+		color: 'rgba(255, 255, 255, 0.8)',
+	},
+}
+
+const secondarySx = {
+	color: '#475569',
+	textTransform: 'none',
+	fontWeight: 500,
+	px: 2,
+	py: 0.75,
+	borderRadius: '999px',
+	'&:hover': { backgroundColor: 'rgba(15, 42, 68, 0.06)' },
+	'body.dark &': {
+		color: '#cbd5e1',
+		'&:hover': { backgroundColor: 'rgba(255,255,255,0.06)' },
+	},
+}
+
+function SectionHeader({ eyebrow, title, hint }) {
+	return (
+		<div className='mb-1.5'>
+			<div className='text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e36a00]/80 dark:text-[#fb923c]/90'>
+				{eyebrow}
+			</div>
+			{title && (
+				<div className='text-sm font-semibold text-slate-800 dark:text-gray-100 leading-tight'>
+					{title}
+				</div>
+			)}
+			{hint && <div className='text-[11px] text-slate-500 dark:text-gray-400'>{hint}</div>}
+		</div>
+	)
+}
 
 const ModalAlarm = ({ openModal, setOpenModal, onSuccess, alarmData }) => {
-    const [loading, setLoading] = useState(false)
-    const [variables, setVariables] = useState([])
+	const [loading, setLoading] = useState(false)
+	const [variables, setVariables] = useState([])
+	const [form, setForm] = useState(emptyForm)
 
-    const [form, setForm] = useState({
-        name: '',
-        id_influxvars: '',
-        condition: '',
-        value: '',
-        value2: '',
-        repeatInterval: 0,
-        type: 'single',
-        logicOperator: 'AND',
-        secondaryVariableId: '',
-        secondaryCondition: '',
-        secondaryValue: '',
-        hasTimeRange: false,
-        startime: '',
-        endtime: '',
-    })
+	useEffect(() => {
+		if (alarmData) {
+			setForm({
+				name: alarmData.name || '',
+				id_influxvars: alarmData.id_influxvars || '',
+				condition: alarmData.condition || '',
+				value: alarmData.value ?? '',
+				value2: alarmData.value2 ?? '',
+				repeatInterval: alarmData.repeatInterval ?? 0,
+				type: alarmData.type || 'single',
+				logicOperator: alarmData.logicOperator || 'AND',
+				secondaryVariableId: alarmData.secondaryVariableId || '',
+				secondaryCondition: alarmData.secondaryCondition || '',
+				secondaryValue: alarmData.secondaryValue || '',
+				hasTimeRange: !!(alarmData.startime && alarmData.endtime),
+				startime: alarmData.startime || '',
+				endtime: alarmData.endtime || '',
+			})
+		} else {
+			setForm(emptyForm)
+		}
+	}, [alarmData, openModal])
 
-    useEffect(() => {
-        if (alarmData) {
-            setForm({
-                name: alarmData.name || '',
-                id_influxvars: alarmData.id_influxvars || '',
-                condition: alarmData.condition || '',
-                value: alarmData.value ?? '',
-                value2: alarmData.value2 ?? '',
-                repeatInterval: alarmData.repeatInterval ?? 0,
-                type: alarmData.type || 'single',
-                logicOperator: alarmData.logicOperator || 'AND',
-                secondaryVariableId: alarmData.secondaryVariableId || '',
-                secondaryCondition: alarmData.secondaryCondition || '',
-                secondaryValue: alarmData.secondaryValue || '',
-                hasTimeRange: !!(alarmData.startime && alarmData.endtime),
-                startime: alarmData.startime || '',
-                endtime: alarmData.endtime || '',
-            })
-        } else {
-            setForm({
-                name: '',
-                id_influxvars: '',
-                condition: '',
-                value: '',
-                value2: '',
-                repeatInterval: 0,
-                type: 'single',
-                logicOperator: 'AND',
-                secondaryVariableId: '',
-                secondaryCondition: '',
-                secondaryValue: '',
-                hasTimeRange: false,
-                startime: '',
-                endtime: '',
-            })
-        }
-    }, [alarmData, openModal])
+	useEffect(() => {
+		const fetchVars = async () => {
+			const variables = await getVarsInflux()
+			setVariables(variables)
+		}
+		if (openModal) fetchVars()
+	}, [openModal])
 
-    useEffect(() => {
-        const fetchVars = async () => {
-            const variables = await getVarsInflux()
-            setVariables(variables)
-        }
-        if (openModal) fetchVars()
-    }, [openModal])
+	const handleChange = (field, value) => {
+		setForm((prev) => ({ ...prev, [field]: value }))
+	}
 
-    const handleChange = (field, value) => {
-        setForm((prev) => ({ ...prev, [field]: value }))
-    }
+	const handleClose = () => {
+		setForm({
+			name: '',
+			id_influxvars: '',
+			condition: '',
+			value: '',
+			value2: '',
+			repeatInterval: 0,
+			type: 'single',
+			logicOperator: 'AND',
+			secondaryVariableId: '',
+			secondaryCondition: '',
+			secondaryValue: '',
+			startime: '',
+			endtime: '',
+		})
+		setOpenModal(false)
+	}
 
-    const handleClose = () => {
-        setForm({
-            name: '',
-            id_influxvars: '',
-            condition: '',
-            value: '',
-            value2: '',
-            repeatInterval: 0,
-            type: 'single',
-            logicOperator: 'AND',
-            secondaryVariableId: '',
-            secondaryCondition: '',
-            secondaryValue: '',
-            startime: '',
-            endtime: '',
-        })
-        setOpenModal(false)
-    }
+	const handleSubmit = async (e) => {
+		e?.preventDefault?.()
+		setLoading(true)
+		try {
+			const url = backend[import.meta.env.VITE_APP_NAME]
+			const payload = { ...form }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setLoading(true)
-        try {
-            const url = backend[import.meta.env.VITE_APP_NAME]
-            const payload = { ...form }
+			// Si no es "entre", limpiamos value2
+			if (form.condition !== 'entre') delete payload.value2
 
-            // Si no es "entre", limpiamos value2
-            if (form.condition !== 'entre') delete payload.value2
+			// Si es simple, no mandamos campos de la segunda condición
+			if (form.type === 'single') {
+				delete payload.secondaryVariableId
+				delete payload.secondaryCondition
+				delete payload.secondaryValue
+				delete payload.logicOperator
+			}
 
-            // Si es simple, no mandamos campos de la segunda condición
-            if (form.type === 'single') {
-                delete payload.secondaryVariableId
-                delete payload.secondaryCondition
-                delete payload.secondaryValue
-                delete payload.logicOperator
-            }
+			// Si no tiene rango horario, limpiamos los campos de tiempo
+			if (!form.hasTimeRange) {
+				delete payload.startime
+				delete payload.endtime
+				delete payload.hasTimeRange
+			}
 
-            // Si no tiene rango horario, limpiamos los campos de tiempo
-            if (!form.hasTimeRange) {
-                delete payload.startime
-                delete payload.endtime
-                delete payload.hasTimeRange
-            }
+			if (alarmData?.id) {
+				await request(`${url}/updateAlarm/${alarmData.id}`, 'PUT', payload)
+				await Swal.fire({
+					showConfirmButton: false,
+					timer: 1500,
+					icon: 'success',
+					text: 'Alarma editada correctamente',
+				})
+			} else {
+				await request(`${url}/createAlarm`, 'POST', payload)
+				await Swal.fire({
+					showConfirmButton: false,
+					timer: 1500,
+					icon: 'success',
+					text: 'Alarma creada correctamente',
+				})
+			}
 
-            if (alarmData?.id) {
-                await request(`${url}/updateAlarm/${alarmData.id}`, 'PUT', payload)
-                await Swal.fire({
-                    showConfirmButton: false,
-                    timer: 1500,
-                    icon: 'success',
-                    text: 'Alarma editada correctamente',
-                })
-            } else {
-                await request(`${url}/createAlarm`, 'POST', payload)
-                await Swal.fire({
-                    showConfirmButton: false,
-                    timer: 1500,
-                    icon: 'success',
-                    text: 'Alarma creada correctamente',
-                })
-            }
+			onSuccess?.()
+			handleClose()
+		} catch (err) {
+			console.error(err)
+			Swal.fire('Error', 'No se pudo guardar la alarma', 'error')
+		} finally {
+			setLoading(false)
+		}
+	}
 
-            onSuccess?.()
-            handleClose()
-        } catch (err) {
-            console.error(err)
-            Swal.fire('Error', 'No se pudo guardar la alarma', 'error')
-        } finally {
-            setLoading(false)
-        }
-    }
+	const isEdit = !!alarmData?.id
 
-    return (
-        <Modal open={openModal} onClose={handleClose} className="flex justify-center items-center align-middle">
-            <Box className="relative bg-white p-6 rounded-lg shadow-lg max-w-[95vw]">
-                <IconButton onClick={handleClose} className="!absolute top-3 right-3">
-                    <Close color="error" />
-                </IconButton>
+	return (
+		<ModalShell
+			open={openModal}
+			onClose={handleClose}
+			eyebrow={isEdit ? 'Editar alarma' : 'Nueva alarma'}
+			title='Configuración de alarma'
+			subtitle='Define condiciones, umbrales y horarios de activación'
+			maxWidth='88vw'
+			footer={
+				<>
+					<Button onClick={handleClose} disabled={loading} sx={secondarySx}>
+						Cancelar
+					</Button>
+					<Button
+						type='submit'
+						form='alarm-form'
+						disabled={loading}
+						startIcon={
+							loading ? (
+								<CircularProgress size={16} sx={{ color: 'inherit' }} />
+							) : (
+								<Save sx={{ fontSize: 18 }} />
+							)
+						}
+						sx={primarySaveSx}
+					>
+						{loading ? 'Guardando…' : isEdit ? 'Guardar cambios' : 'Crear alarma'}
+					</Button>
+				</>
+			}
+		>
+			<form id='alarm-form' onSubmit={handleSubmit} className='flex flex-col gap-2'>
+				{/* INFO BÁSICA */}
+				<Box sx={sectionBoxSx}>
+					<SectionHeader eyebrow='Información' title='Identificación y modo' />
+					<div className='flex flex-wrap gap-2 items-center'>
+						<TextField
+							label='Nombre'
+							value={form.name}
+							onChange={(e) => handleChange('name', e.target.value)}
+							required
+							size='small'
+							sx={{ flex: '2 1 240px' }}
+						/>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.type === 'combined'}
+									onChange={(e) =>
+										handleChange('type', e.target.checked ? 'combined' : 'single')
+									}
+								/>
+							}
+							label='Alarma combinada'
+							sx={{ ml: 0.5 }}
+						/>
+						<TextField
+							type='number'
+							label='Repetición (min)'
+							value={form.repeatInterval || ''}
+							onChange={(e) => handleChange('repeatInterval', e.target.value)}
+							required
+							inputProps={{ min: 0 }}
+							size='small'
+							sx={{ flex: '1 1 160px' }}
+						/>
+					</div>
+				</Box>
 
-                <form onSubmit={handleSubmit} className="p-5 flex flex-col h-full gap-3 justify-start items-center">
-                    <Typography variant="h5">
-                        {alarmData?.id ? 'Editar alarma' : 'Crear nueva alarma'}
-                    </Typography>
+				{/* CONDICIÓN PRINCIPAL */}
+				<Box sx={sectionBoxSx}>
+					<SectionHeader eyebrow='Condición principal' title='Variable y umbral a monitorear' />
+					<div className='flex flex-wrap gap-2'>
+						<TextField
+							label='Variable'
+							select
+							value={form.id_influxvars}
+							onChange={(e) => handleChange('id_influxvars', e.target.value)}
+							required
+							size='small'
+							sx={{ flex: '2 1 220px' }}
+						>
+							<MenuItem value=''>Seleccioná una variable</MenuItem>
+							{variables.map((v) => (
+								<MenuItem key={v.id} value={v.id}>
+									{v.name}
+								</MenuItem>
+							))}
+						</TextField>
 
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={form.type === 'combined'}
-                                onChange={(e) => handleChange('type', e.target.checked ? 'combined' : 'single')}
-                            />
-                        }
-                        label="Alarma combinada"
-                    />
+						<TextField
+							label='Condición'
+							select
+							value={form.condition}
+							onChange={(e) => handleChange('condition', e.target.value)}
+							required
+							size='small'
+							sx={{ flex: '1 1 150px' }}
+						>
+							<MenuItem value='>'>Mayor que</MenuItem>
+							<MenuItem value='<'>Menor que</MenuItem>
+							<MenuItem value='='>Igual a</MenuItem>
+							<MenuItem value='>='>Mayor o igual</MenuItem>
+							<MenuItem value='<='>Menor o igual</MenuItem>
+							<MenuItem value='entre'>Entre</MenuItem>
+						</TextField>
 
-                    <div className="flex flex-wrap w-full gap-3 justify-center mb-4">
-                        <TextField
-                            label="Nombre"
-                            className="w-64"
-                            value={form.name}
-                            onChange={(e) => handleChange('name', e.target.value)}
-                            required
-                            size='small'
-                        />
+						<TextField
+							type='number'
+							label='Valor'
+							value={form.value}
+							onChange={(e) => handleChange('value', e.target.value)}
+							required
+							size='small'
+							sx={{ flex: '1 1 120px' }}
+						/>
 
-                        <TextField
-                            label="Variable"
-                            className="w-64"
-                            select
-                            value={form.id_influxvars}
-                            onChange={(e) => handleChange('id_influxvars', e.target.value)}
-                            required
-                            size='small'
-                        >
-                            <MenuItem value="">Selecciona una variable</MenuItem>
-                            {variables.map((v) => (
-                                <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>
-                            ))}
-                        </TextField>
+						{form.condition === 'entre' && (
+							<TextField
+								type='number'
+								label='Valor 2'
+								value={form.value2}
+								onChange={(e) => handleChange('value2', e.target.value)}
+								required
+								size='small'
+								sx={{ flex: '1 1 120px' }}
+							/>
+						)}
+					</div>
+				</Box>
 
-                        <TextField
-                            label="Condición"
-                            className="w-64"
-                            select
-                            value={form.condition}
-                            onChange={(e) => handleChange('condition', e.target.value)}
-                            required
-                            size='small'
-                        >
-                            <MenuItem value=">">Mayor que</MenuItem>
-                            <MenuItem value="<">Menor que</MenuItem>
-                            <MenuItem value="=">Igual a</MenuItem>
-                            <MenuItem value=">=">Mayor o igual</MenuItem>
-                            <MenuItem value="<=">Menor o igual</MenuItem>
-                            <MenuItem value="entre">Entre</MenuItem>
-                        </TextField>
+				{/* CONDICIÓN SECUNDARIA */}
+				{form.type === 'combined' && (
+					<Box
+						sx={{
+							...sectionBoxSx,
+							borderColor: 'rgba(227, 106, 0, 0.25)',
+							'body.dark &': { borderColor: 'rgba(251, 146, 60, 0.25)' },
+						}}
+					>
+						<SectionHeader
+							eyebrow='Condición secundaria'
+							title='Segunda variable para combinar'
+							hint={`Ambas condiciones se evalúan con el operador ${form.logicOperator}`}
+						/>
+						<div className='flex flex-wrap gap-2'>
+							<TextField
+								label='Operador lógico'
+								select
+								value={form.logicOperator}
+								onChange={(e) => handleChange('logicOperator', e.target.value)}
+								size='small'
+								sx={{ flex: '1 1 140px' }}
+							>
+								<MenuItem value='AND'>AND (y)</MenuItem>
+								<MenuItem value='OR'>OR (o)</MenuItem>
+							</TextField>
 
-                        <TextField
-                            type="number"
-                            className="w-64"
-                            label="Valor"
-                            value={form.value}
-                            onChange={(e) => handleChange('value', e.target.value)}
-                            required
-                            size='small'
-                        />
+							<TextField
+								label='Variable secundaria'
+								select
+								value={form.secondaryVariableId}
+								onChange={(e) => handleChange('secondaryVariableId', e.target.value)}
+								required
+								size='small'
+								sx={{ flex: '2 1 220px' }}
+							>
+								<MenuItem value=''>Seleccioná una variable</MenuItem>
+								{variables.map((v) => (
+									<MenuItem key={v.id} value={v.id}>
+										{v.name}
+									</MenuItem>
+								))}
+							</TextField>
 
-                        {form.condition === 'entre' && (
-                            <TextField
-                                type="number"
-                                className="w-64"
-                                label="Valor 2"
-                                value={form.value2}
-                                onChange={(e) => handleChange('value2', e.target.value)}
-                                required
-                                size='small'
-                            />
-                        )}
+							<TextField
+								label='Condición'
+								select
+								value={form.secondaryCondition}
+								onChange={(e) => handleChange('secondaryCondition', e.target.value)}
+								required
+								size='small'
+								sx={{ flex: '1 1 150px' }}
+							>
+								<MenuItem value='>'>Mayor que</MenuItem>
+								<MenuItem value='<'>Menor que</MenuItem>
+								<MenuItem value='='>Igual a</MenuItem>
+								<MenuItem value='>='>Mayor o igual</MenuItem>
+								<MenuItem value='<='>Menor o igual</MenuItem>
+							</TextField>
 
+							<TextField
+								type='number'
+								label='Valor secundario'
+								value={form.secondaryValue}
+								onChange={(e) => handleChange('secondaryValue', e.target.value)}
+								required
+								size='small'
+								sx={{ flex: '1 1 120px' }}
+							/>
+						</div>
+					</Box>
+				)}
 
-                        {form.type === 'combined' && (
-                            <>
-                                <TextField
-                                    label="Operador lógico"
-                                    className="w-64"
-                                    select
-                                    value={form.logicOperator}
-                                    onChange={(e) => handleChange('logicOperator', e.target.value)}
-                                    size='small'
-                                >
-                                    <MenuItem value="AND">AND (y)</MenuItem>
-                                    <MenuItem value="OR">OR (o)</MenuItem>
-                                </TextField>
-
-                                <TextField
-                                    label="Variable secundaria"
-                                    className="w-64"
-                                    select
-                                    value={form.secondaryVariableId}
-                                    onChange={(e) => handleChange('secondaryVariableId', e.target.value)}
-                                    required
-                                    size='small'
-                                >
-                                    <MenuItem value="">Selecciona una variable</MenuItem>
-                                    {variables.map((v) => (
-                                        <MenuItem key={v.id} value={v.id}>{v.name}</MenuItem>
-                                    ))}
-                                </TextField>
-
-                                <TextField
-                                    label="Condición secundaria"
-                                    className="w-64"
-                                    select
-                                    value={form.secondaryCondition}
-                                    onChange={(e) => handleChange('secondaryCondition', e.target.value)}
-                                    required
-                                    size='small'
-                                >
-                                    <MenuItem value=">">Mayor que</MenuItem>
-                                    <MenuItem value="<">Menor que</MenuItem>
-                                    <MenuItem value="=">Igual a</MenuItem>
-                                    <MenuItem value=">=">Mayor o igual</MenuItem>
-                                    <MenuItem value="<=">Menor o igual</MenuItem>
-                                </TextField>
-
-                                <TextField
-                                    type="number"
-                                    className="w-64"
-                                    label="Valor secundario"
-                                    value={form.secondaryValue}
-                                    onChange={(e) => handleChange('secondaryValue', e.target.value)}
-                                    required
-                                    size='small'
-                                />
-                            </>
-                        )}
-
-                        <TextField
-                            type="number"
-                            className="w-64"
-                            label="Intervalo de repetición (minutos)"
-                            value={form.repeatInterval || ''}
-                            onChange={(e) => handleChange('repeatInterval', e.target.value)}
-                            required
-                            inputProps={{ min: 0 }}
-                            size='small'
-                        />
-
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={form.hasTimeRange}
-                                    onChange={(e) => {
-                                        const checked = e.target.checked
-                                        setForm(prev => ({
-                                            ...prev,
-                                            hasTimeRange: checked,
-                                            startime: checked ? (prev.startime || '00:00') : '',
-                                            endtime: checked ? (prev.endtime || '23:59') : '',
-                                        }))
-                                    }}
-                                    
-                                />
-                            }
-                            label="Restringir alarma a un rango horario"
-                            className='w-full justify-center text-center'
-                        />
-
-                        {form.hasTimeRange && (
-                            <>
-                                <TextField
-                                    type="time"
-                                    className="w-40"
-                                    label="Hora de inicio"
-                                    value={form.startime}
-                                    onChange={(e) => handleChange('startime', e.target.value)}
-                                    required
-                                    size="small"
-                                />
-
-                                <TextField
-                                    type="time"
-                                    className="w-40"
-                                    label="Hora de fin"
-                                    value={form.endtime}
-                                    onChange={(e) => handleChange('endtime', e.target.value)}
-                                    required
-                                    size="small"
-                                />
-                            </>
-                        )}
-                    </div>
-
-                    <Button
-                        type="submit"
-                        variant="contained"
-                        color="primary"
-                        disabled={loading}
-                        startIcon={loading && <CircularProgress size={20} color="inherit" />}
-                    >
-                        {loading
-                            ? 'Guardando...'
-                            : alarmData?.id
-                                ? 'Guardar cambios'
-                                : 'Crear alarma'}
-                    </Button>
-                </form>
-            </Box>
-        </Modal>
-    )
+				{/* HORARIO */}
+				<Box sx={sectionBoxSx}>
+					<SectionHeader
+						eyebrow='Horario'
+						title='Restringir a un rango horario (opcional)'
+					/>
+					<div className='flex flex-wrap gap-2 items-center'>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.hasTimeRange}
+									onChange={(e) => {
+										const checked = e.target.checked
+										setForm((prev) => ({
+											...prev,
+											hasTimeRange: checked,
+											startime: checked ? prev.startime || '00:00' : '',
+											endtime: checked ? prev.endtime || '23:59' : '',
+										}))
+									}}
+								/>
+							}
+							label='Activar rango horario'
+						/>
+						{form.hasTimeRange && (
+							<>
+								<TextField
+									type='time'
+									label='Desde'
+									value={form.startime}
+									onChange={(e) => handleChange('startime', e.target.value)}
+									required
+									size='small'
+									sx={{ flex: '1 1 140px' }}
+								/>
+								<TextField
+									type='time'
+									label='Hasta'
+									value={form.endtime}
+									onChange={(e) => handleChange('endtime', e.target.value)}
+									required
+									size='small'
+									sx={{ flex: '1 1 140px' }}
+								/>
+							</>
+						)}
+					</div>
+				</Box>
+			</form>
+		</ModalShell>
+	)
 }
 
 export default ModalAlarm

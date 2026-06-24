@@ -1,26 +1,101 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import VarsProvider from '../../../components/DataGenerator/ProviderVars'
 import {
+  Box,
   Button,
-  Card,
-  Divider,
-  IconButton,
-  TextField,
-  Typography,
+  Container,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
+  TextField,
+  Typography,
 } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
 import { useEffect, useMemo, useState, Suspense, lazy } from 'react'
 import { useForm } from 'react-hook-form'
 import Swal from 'sweetalert2'
 import { request } from '../../../utils/js/request'
 import { backend } from '../../../utils/routes/app.routes'
 import SelectVars from '../components/SelectVars.jsx'
+import HeaderForms from '../components/HeaderForms'
 
 const BoardChart = lazy(() => import('../components/BoardChart.jsx'))
+
+const shellSx = {
+  borderRadius: '16px',
+  backgroundColor: '#ffffff',
+  border: '1px solid rgba(15, 42, 68, 0.06)',
+  boxShadow:
+    '0 2px 6px rgba(15, 42, 68, 0.05), 0 12px 32px -12px rgba(15, 42, 68, 0.12)',
+  p: { xs: 2, sm: 2.5 },
+  'body.dark &': {
+    backgroundColor: 'rgba(17, 24, 39, 0.85)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+  },
+}
+
+const sectionSx = {
+  borderRadius: '14px',
+  border: '1px solid rgba(15, 42, 68, 0.06)',
+  backgroundColor: 'transparent',
+  p: { xs: 1.75, sm: 2 },
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1.5,
+  'body.dark &': { border: '1px solid rgba(255, 255, 255, 0.06)' },
+}
+
+const subCardSx = {
+  borderRadius: '12px',
+  backgroundColor: '#ffffff',
+  border: '1px solid rgba(15, 42, 68, 0.08)',
+  borderLeft: '3px solid #e36a00',
+  p: 1.5,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 1,
+  'body.dark &': {
+    backgroundColor: 'rgba(17, 24, 39, 0.7)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+    borderLeft: '3px solid #e36a00',
+  },
+}
+
+const previewCardSx = {
+  borderRadius: '16px',
+  overflow: 'hidden',
+  border: '1px solid rgba(15, 42, 68, 0.08)',
+  boxShadow:
+    '0 2px 6px rgba(15, 42, 68, 0.05), 0 12px 32px -12px rgba(15, 42, 68, 0.14)',
+  backgroundColor: '#ffffff',
+  'body.dark &': {
+    backgroundColor: 'rgba(17, 24, 39, 0.85)',
+    border: '1px solid rgba(255, 255, 255, 0.06)',
+  },
+}
+
+const submitPillSx = {
+  borderRadius: '999px',
+  textTransform: 'none',
+  fontWeight: 500,
+  px: 3,
+  py: 1,
+  minHeight: 0,
+  background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+  boxShadow: '0 4px 14px rgba(227, 106, 0, 0.35)',
+  transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+  '&:hover': {
+    background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+    boxShadow: '0 8px 24px rgba(227, 106, 0, 0.45)',
+    transform: 'translateY(-1px)',
+  },
+}
+
+const SectionTitle = ({ children }) => (
+  <div className='text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-gray-400 px-1 -mt-0.5'>
+    {children}
+  </div>
+)
 
 const ConfigBoardChart = () => {
   const { id = false } = useParams()
@@ -403,9 +478,13 @@ const ConfigBoardChart = () => {
 
   if (loader) {
     return (
-      <div className="w-full p-5 flex justify-center">
-        <Typography variant="h5">Cargando...</Typography>
-      </div>
+      <Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+        <Box sx={shellSx}>
+          <Typography variant='body1' align='center' color='textSecondary'>
+            Cargando...
+          </Typography>
+        </Box>
+      </Container>
     )
   }
 
@@ -414,295 +493,152 @@ const ConfigBoardChart = () => {
   const selectedRightChart =
     charts.find((c) => String(c.id) === String(watch('topRightChartId'))) || null
 
+  const PumpingSlot = ({ label, varField, labelField }) => (
+    <Box sx={subCardSx}>
+      <TextField
+        label={label}
+        size='small'
+        {...register(labelField)}
+        fullWidth
+      />
+      <SelectVars
+        initialVar={watch(varField)}
+        setValue={(v) => setValue(varField, v?.id ?? null)}
+        label='-Seleccionar variable-'
+      />
+    </Box>
+  )
+
   return (
     <VarsProvider>
-      <div className="w-full bg-white p-5 rounded-lg shadow-md">
-        <div className="grid grid-cols-3 items-center mb-5">
-          <div />
-          <Typography variant="h4" align="center" className="justify-self-center">
-            {id ? 'Edición del Tablero' : 'Configuración del Tablero'}
-          </Typography>
-          <IconButton
-            className="justify-self-end"
-            onClick={() => navigate('/config/allGraphic')}
+      <Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+        <HeaderForms
+          idChart={id}
+          chart={{ name: watch('title') }}
+          backTo='/config/allGraphic'
+        />
+
+        <Box sx={shellSx}>
+          <form
+            onSubmit={handleSubmit(send)}
+            className='flex flex-col lg:flex-row gap-4 w-full'
           >
-            <ArrowBack />
-          </IconButton>
-        </div>
+            <div className='flex flex-col gap-3 w-full lg:w-7/12'>
+              <Box sx={sectionSx}>
+                <SectionTitle>Información</SectionTitle>
+                <div className='flex flex-wrap gap-2'>
+                  <div style={{ flex: '2 1 260px' }}>
+                    <TextField
+                      fullWidth
+                      size='small'
+                      label='Título del tablero'
+                      {...register('title')}
+                    />
+                  </div>
+                  <div style={{ flex: '1 1 140px' }}>
+                    <TextField
+                      fullWidth
+                      size='small'
+                      label='Orden'
+                      {...register('order')}
+                    />
+                  </div>
+                </div>
+              </Box>
 
+              <Box sx={sectionSx}>
+                <SectionTitle>Gráficos superiores</SectionTitle>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+                  <FormControl size='small' fullWidth>
+                    <InputLabel>Gráfico superior izquierdo</InputLabel>
+                    <Select
+                      label='Gráfico superior izquierdo'
+                      value={watch('topLeftChartId')}
+                      onChange={(e) => setValue('topLeftChartId', e.target.value)}
+                    >
+                      <MenuItem value=''><em>Ninguno</em></MenuItem>
+                      {charts.map((c) => (
+                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-        <form
-          onSubmit={handleSubmit(send)}
-          className="flex gap-3 max-sm:flex-col"
-        >
-          {/* CONFIG */}
-          <Card className="w-1/2 max-sm:w-full p-3 flex flex-col gap-3 !rounded-lg shadow-lg ">
-            <TextField
-              label="Título del tablero"
-              size="small"
-              {...register('title')}
-            />
+                  <FormControl size='small' fullWidth>
+                    <InputLabel>Gráfico superior derecho</InputLabel>
+                    <Select
+                      label='Gráfico superior derecho'
+                      value={watch('topRightChartId')}
+                      onChange={(e) => setValue('topRightChartId', e.target.value)}
+                    >
+                      <MenuItem value=''><em>Ninguno</em></MenuItem>
+                      {charts.map((c) => (
+                        <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+              </Box>
 
-            <TextField
-              label="Orden en el dashboard"
-              size="small"
-              {...register('order')}
-            />
-
-            <Divider />
-
-            {/* Top charts */}
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Gráficos
-            </Typography>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <FormControl size="small" fullWidth>
-                <InputLabel>Gráfico superior izquierdo</InputLabel>
-                <Select
-                  label="Gráfico superior izquierdo"
-                  value={watch('topLeftChartId')}
-                  onChange={(e) => setValue('topLeftChartId', e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Ninguno</em>
-                  </MenuItem>
-
-                  {charts.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl size="small" fullWidth>
-                <InputLabel>Gráfico superior derecho</InputLabel>
-                <Select
-                  label="Gráfico superior derecho"
-                  value={watch('topRightChartId')}
-                  onChange={(e) => setValue('topRightChartId', e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>Ninguno</em>
-                  </MenuItem>
-
-                  {charts.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-
-            <Divider />
-
-            {/* BOMBEO */}
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Bombeo
-            </Typography>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className='md:col-span-2'>
-                <div className="!bg-white">
+              <Box sx={sectionSx}>
+                <SectionTitle>Bombeo</SectionTitle>
+                <div>
                   <SelectVars
                     initialVar={watch('pumpingStatusVarId')}
-
-                    setValue={(v) =>
-                      setValue('pumpingStatusVarId', v?.id ?? null)
-                    }
-                    label="-Seleccionar variable-"
+                    setValue={(v) => setValue('pumpingStatusVarId', v?.id ?? null)}
+                    label='Variable de estado'
                   />
                 </div>
-              </div>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+                  <PumpingSlot label='Label tiempo' varField='pumpingRuntimeVarId' labelField='pumpingRuntimeLabel' />
+                  <PumpingSlot label='Label arranques' varField='pumpingStartsVarId' labelField='pumpingStartsLabel' />
+                  <PumpingSlot label='Label I_L1' varField='pumpingCurrentL1VarId' labelField='pumpingCurrentL1Label' />
+                  <PumpingSlot label='Label I_L2' varField='pumpingCurrentL2VarId' labelField='pumpingCurrentL2Label' />
+                  <PumpingSlot label='Label I_L3' varField='pumpingCurrentL3VarId' labelField='pumpingCurrentL3Label' />
+                </div>
+              </Box>
 
-              <div className='md:col-span-1'>
-                <Card className='p-2 mb-2 border-2 !shadow-sm'>
-                  <div className="!bg-white">
+              <Box sx={sectionSx}>
+                <SectionTitle>Sala</SectionTitle>
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className='grid grid-cols-1 md:grid-cols-2 gap-2'>
                     <TextField
-                      label="Label Tiempo"
-                      size="small"
-                      {...register('pumpingRuntimeLabel')}
-                      fullWidth
-                      className='!mb-2'
+                      label={`Label item ${i + 1}`}
+                      size='small'
+                      {...register(`roomItem${i}Label`)}
                     />
                     <SelectVars
-                      initialVar={watch('pumpingRuntimeVarId')}
-                      setValue={(v) =>
-                        setValue('pumpingRuntimeVarId', v?.id ?? null)
-                      }
-                      label="-Seleccionar variable-"
+                      initialVar={watch(`roomItem${i}VarId`)}
+                      setValue={(v) => setValue(`roomItem${i}VarId`, v?.id ?? null)}
+                      label='-Seleccionar variable-'
                     />
                   </div>
-                </Card>
+                ))}
+              </Box>
 
-                <Card className='p-2 border-2 !shadow-sm'>
-                  <div className="!bg-white">
-                    <TextField
-                      label="Label Arranques"
-                      size="small"
-                      {...register('pumpingStartsLabel')}
-                      fullWidth
-                      className='!mb-2'
-                    />
-                    <SelectVars
-                      initialVar={watch('pumpingStartsVarId')}
-                      setValue={(v) =>
-                        setValue('pumpingStartsVarId', v?.id ?? null)
-                      }
-                      label="-Seleccionar variable-"
-                    />
-                  </div>
-                </Card>
-              </div>
-
-              <div className='col-span-1'>
-                <Card className='p-2 mb-2 border-2 !shadow-sm'>
-                  <div className="!bg-white">
-                    <TextField
-                      label="Label I_L1"
-                      size="small"
-                      {...register('pumpingCurrentL1Label')}
-                      fullWidth
-                      className='!mb-2'
-                    />
-                    <SelectVars
-                      initialVar={watch('pumpingCurrentL1VarId')}
-                      setValue={(v) =>
-                        setValue('pumpingCurrentL1VarId', v?.id ?? null)
-                      }
-                      label="-Seleccionar variable-"
-                    />
-                  </div>
-                </Card>
-
-                <Card className='p-2 mb-2 border-2 !shadow-sm'>
-                  <div className="!bg-white">
-                    <TextField
-                      label="Label I_L2"
-                      size="small"
-                      {...register('pumpingCurrentL2Label')}
-                      fullWidth
-                      className='!mb-2'
-                    />
-                    <SelectVars
-                      initialVar={watch('pumpingCurrentL2VarId')}
-                      setValue={(v) =>
-                        setValue('pumpingCurrentL2VarId', v?.id ?? null)
-                      }
-                      label="-Seleccionar variable-"
-                    />
-                  </div>
-                </Card>
-
-                <Card className='p-2 mb-2 border-2 !shadow-sm'>
-                  <div className="!bg-white">
-                    <TextField
-                      label="Label I_L3"
-                      size="small"
-                      {...register('pumpingCurrentL3Label')}
-                      fullWidth
-                    />
-                    <SelectVars
-                      initialVar={watch('pumpingCurrentL3VarId')}
-                      setValue={(v) =>
-                        setValue('pumpingCurrentL3VarId', v?.id ?? null)
-                      }
-                      label="-Seleccionar variable-"
-                    />
-                  </div>
-                </Card>
+              <div className='flex justify-end pt-1'>
+                <Button type='submit' variant='contained' disableElevation sx={submitPillSx}>
+                  Guardar
+                </Button>
               </div>
             </div>
 
-            <Divider />
-
-            {/* SALA */}
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              Sala
-            </Typography>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <TextField
-                label="Label item 1"
-                size="small"
-                {...register('roomItem0Label')}
-              />
-              <div className="!bg-white">
-                <SelectVars
-                  initialVar={watch('roomItem0VarId')}
-                  setValue={(v) => setValue('roomItem0VarId', v?.id ?? null)}
-                  label="-Seleccionar variable-"
-                />
-              </div>
+            <div className='w-full lg:w-5/12'>
+              <Box sx={previewCardSx}>
+                <Suspense fallback={<div className='p-3 text-sm text-slate-500'>Cargando preview...</div>}>
+                  <BoardChart
+                    title={getValues('title')}
+                    ChartData={previewChartData}
+                    ChartConfig={buildChartConfig()}
+                    topLeftChart={selectedLeftChart}
+                    topRightChart={selectedRightChart}
+                    inflValues={previewInflValues}
+                  />
+                </Suspense>
+              </Box>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <TextField
-                label="Label item 2"
-                size="small"
-                {...register('roomItem1Label')}
-              />
-              <div className="!bg-white">
-                <SelectVars
-                  initialVar={watch('roomItem1VarId')}
-                  setValue={(v) => setValue('roomItem1VarId', v?.id ?? null)}
-                  label="-Seleccionar variable-"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <TextField
-                label="Label item 3"
-                size="small"
-                {...register('roomItem2Label')}
-              />
-              <div className="!bg-white">
-                <SelectVars
-                  initialVar={watch('roomItem2VarId')}
-                  setValue={(v) => setValue('roomItem2VarId', v?.id ?? null)}
-                  label="-Seleccionar variable-"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <TextField
-                label="Label item 4"
-                size="small"
-                {...register('roomItem3Label')}
-              />
-              <div className="!bg-white">
-                <SelectVars
-                  initialVar={watch('roomItem3VarId')}
-                  setValue={(v) => setValue('roomItem3VarId', v?.id ?? null)}
-                  label="-Seleccionar variable-"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" variant="contained">
-              Guardar
-            </Button>
-          </Card>
-
-          {/* PREVIEW */}
-          <Card className="w-1/2 max-sm:w-full h-fit !rounded-lg">
-            <Suspense fallback={<div className="p-3">Cargando preview...</div>}>
-              <BoardChart
-                title={getValues('title')}
-                ChartData={previewChartData}
-                ChartConfig={buildChartConfig()}
-                topLeftChart={selectedLeftChart}
-                topRightChart={selectedRightChart}
-                inflValues={previewInflValues}
-              />
-            </Suspense>
-          </Card>
-        </form>
-      </div>
+          </form>
+        </Box>
+      </Container>
     </VarsProvider>
   )
 }

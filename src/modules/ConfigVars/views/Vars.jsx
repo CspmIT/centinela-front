@@ -1,5 +1,6 @@
-import { Box, Button, Container, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
+import { Button, Container, FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import TableCustom from '../../../components/TableCustom'
+import { ActionsRow, DeleteChip, EditChip } from '../../../components/TableActions'
 import { useEffect, useState } from 'react'
 import { getVarsInflux } from '../../DrawDiagram/components/Fields/actions'
 import ModalVar from '../../../components/DataGenerator/ModalVar'
@@ -9,6 +10,7 @@ import Swal from 'sweetalert2'
 import CardCustom from '../../../components/CardCustom'
 import { Controller, useForm } from 'react-hook-form'
 import LoaderComponent from '../../../components/Loader'
+import PageHeader from '../../../components/PageHeader'
 
 const Vars = () => {
     const [loading, setLoading] = useState(true)
@@ -68,31 +70,17 @@ const Vars = () => {
         {
             header: 'Acciones',
             accessorKey: 'options',
-            Cell: ({ row }) => {
-                return (
-                    <div className="flex gap-2">
-                        <Button
-                            size="small"
-                            color="primary"
-                            variant="contained"
-                            onClick={() => {
-                                setDetailVar(row.original)
-                                setModal(true)
-                            }}
-                        >
-                            Editar
-                        </Button>
-                        <Button
-                            size="small"
-                            color="error"
-                            variant="contained"
-                            onClick={() => deleteVar(row.original.id)}
-                        >
-                            Eliminar
-                        </Button>
-                    </div>
-                )
-            },
+            Cell: ({ row }) => (
+                <ActionsRow>
+                    <EditChip
+                        onClick={() => {
+                            setDetailVar(row.original)
+                            setModal(true)
+                        }}
+                    />
+                    <DeleteChip onClick={() => deleteVar(row.original.id)} />
+                </ActionsRow>
+            ),
         },
     ])
 
@@ -147,25 +135,15 @@ const Vars = () => {
     }, [])
 
     return (
-        <Container className='w-full'>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
-                <Typography className='w-full text-center md:!ms-40' variant="h4" align="center">
-                    Variables
-                </Typography>
-                <div className='flex justify-center sm:justify-end'>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => {
-                            setDetailVar(null)
-                            setModal(true)
-                        }}
-                        className="sm:mx-10 whitespace-nowrap"
-                    >
-                        Crear Variable
-                    </Button>
-                </div>
-            </div>
+        <Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+            <PageHeader
+                title='Variables'
+                createLabel='Crear variable'
+                onCreate={() => {
+                    setDetailVar(null)
+                    setModal(true)
+                }}
+            />
 
             {!loading ? (
                 <>
