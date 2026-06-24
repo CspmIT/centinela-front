@@ -1,19 +1,20 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import VarsProvider from '../../../components/DataGenerator/ProviderVars'
 import {
+    Box,
     Button,
-    Card,
-    IconButton,
+    Container,
     TextField,
     Typography,
 } from '@mui/material'
-import { ArrowBack } from '@mui/icons-material'
+import { AddCircleOutline, DeleteOutline } from '@mui/icons-material'
 import { useEffect, useState, Suspense, lazy } from 'react'
 import { useForm } from 'react-hook-form'
 import SelectVars from '../components/SelectVars.jsx'
 import Swal from 'sweetalert2'
 import { request } from '../../../utils/js/request'
 import { backend } from '../../../utils/routes/app.routes'
+import HeaderForms from '../components/HeaderForms'
 
 const MultipleBooleanChart = lazy(() =>
     import('../components/MultipleBooleanChart.jsx')
@@ -28,6 +29,119 @@ const emptyLed = () => ({
     colorOff: '#444444',
     idVar: null,
 })
+
+const shellSx = {
+    borderRadius: '16px',
+    backgroundColor: '#ffffff',
+    border: '1px solid rgba(15, 42, 68, 0.06)',
+    boxShadow:
+        '0 2px 6px rgba(15, 42, 68, 0.05), 0 12px 32px -12px rgba(15, 42, 68, 0.12)',
+    p: { xs: 2, sm: 2.5 },
+    'body.dark &': {
+        backgroundColor: 'rgba(17, 24, 39, 0.85)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+    },
+}
+
+const sectionSx = {
+    borderRadius: '14px',
+    border: '1px solid rgba(15, 42, 68, 0.06)',
+    backgroundColor: 'transparent',
+    p: { xs: 1.75, sm: 2 },
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1.5,
+    'body.dark &': { border: '1px solid rgba(255, 255, 255, 0.06)' },
+}
+
+const ledCardSx = (index = 0) => ({
+    position: 'relative',
+    borderRadius: '12px',
+    backgroundColor: '#ffffff',
+    border: '1px solid rgba(15, 42, 68, 0.08)',
+    borderLeft: '3px solid #e36a00',
+    p: 1.75,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1.25,
+    opacity: 0,
+    transform: 'translateY(6px)',
+    animation: `ledConfigIn 0.3s ${index * 0.03}s cubic-bezier(0.22, 1, 0.36, 1) forwards`,
+    '@keyframes ledConfigIn': {
+        '0%': { opacity: 0, transform: 'translateY(6px)' },
+        '100%': { opacity: 1, transform: 'translateY(0)' },
+    },
+    transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+    '&:hover': {
+        boxShadow: '0 4px 14px -4px rgba(15, 42, 68, 0.14)',
+        borderColor: 'rgba(227, 106, 0, 0.3)',
+        borderLeftColor: '#e36a00',
+    },
+    'body.dark &': {
+        backgroundColor: 'rgba(17, 24, 39, 0.7)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        borderLeft: '3px solid #e36a00',
+    },
+})
+
+const previewCardSx = {
+    borderRadius: '16px',
+    overflow: 'hidden',
+    border: '1px solid rgba(15, 42, 68, 0.08)',
+    boxShadow:
+        '0 2px 6px rgba(15, 42, 68, 0.05), 0 12px 32px -12px rgba(15, 42, 68, 0.14)',
+    backgroundColor: '#ffffff',
+    display: 'flex',
+    flexDirection: 'column',
+    'body.dark &': {
+        backgroundColor: 'rgba(17, 24, 39, 0.85)',
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+    },
+}
+
+const submitPillSx = {
+    borderRadius: '999px',
+    textTransform: 'none',
+    fontWeight: 500,
+    px: 3,
+    py: 1,
+    minHeight: 0,
+    background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+    boxShadow: '0 4px 14px rgba(227, 106, 0, 0.35)',
+    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+    '&:hover': {
+        background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+        boxShadow: '0 8px 24px rgba(227, 106, 0, 0.45)',
+        transform: 'translateY(-1px)',
+    },
+    '&:active': { transform: 'translateY(0)' },
+}
+
+const addPillSx = {
+    borderRadius: '999px',
+    textTransform: 'none',
+    fontWeight: 500,
+    px: 2.5,
+    py: 0.75,
+    minHeight: 0,
+    borderColor: 'rgba(227, 106, 0, 0.4)',
+    color: '#e36a00',
+    backgroundColor: 'rgba(227, 106, 0, 0.04)',
+    '&:hover': {
+        borderColor: '#e36a00',
+        backgroundColor: 'rgba(227, 106, 0, 0.1)',
+    },
+    '&.Mui-disabled': { opacity: 0.5 },
+}
+
+const SectionTitle = ({ children, right }) => (
+    <div className='flex items-center justify-between px-1 -mt-0.5'>
+        <div className='text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-gray-400'>
+            {children}
+        </div>
+        {right}
+    </div>
+)
 
 const ConfigMultipleBooleanChart = () => {
     const { id = false } = useParams()
@@ -140,7 +254,7 @@ const ConfigMultipleBooleanChart = () => {
                 'error'
             )
             return
-        }        
+        }
 
         for (const led of leds) {
             if (!led.idVar) {
@@ -213,158 +327,180 @@ const ConfigMultipleBooleanChart = () => {
 
     if (loader) {
         return (
-            <div className="w-full p-5 flex justify-center">
-                <Typography variant="h5">Cargando...</Typography>
-            </div>
+            <Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+                <Box sx={shellSx}>
+                    <Typography variant='body1' align='center' color='textSecondary'>
+                        Cargando...
+                    </Typography>
+                </Box>
+            </Container>
         )
     }
 
     return (
         <VarsProvider>
-            <div className="w-full bg-white p-5 rounded-lg shadow-md">
-                <div className="flex justify-end">
-                    <IconButton onClick={() => navigate('/config/allGraphic')}>
-                        <ArrowBack />
-                    </IconButton>
-                </div>
+            <Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+                <HeaderForms idChart={id} chart={{ name: watch('title') }} />
 
-                <Typography variant="h4" align="center" className="mb-5">
-                    {id ? 'Edición de LEDs Múltiples' : 'Configuración de LEDs Múltiples'}
-                </Typography>
-
-                <form onSubmit={handleSubmit(send)} className="flex gap-3 max-sm:flex-col">
-                    {/* CONFIG */}
-                    <Card className="w-2/3 max-sm:w-full p-3 flex flex-col gap-3">
-                        <TextField
-                            label="Título del grupo"
-                            size="small"
-                            {...register('title')}
-                        />
-
-                        <TextField
-                            label="Orden en el dashboard"
-                            size='small'
-                            {...register('order')}
-                        />
-
-                        {leds.map((led, index) => (
-                            <Card key={led.key} className="p-3 border flex flex-col gap-3 mx-2 !rounded-xl !bg-slate-50 text-center ">
-                                <Typography variant="subtitle1">
-                                    LED {index + 1}
-                                </Typography>
-                                <div className='!bg-white'>
-                                    <TextField
-                                        label="Nombre del LED"
-                                        value={led.title}
-                                        onChange={e =>
-                                            updateLed(index, 'title', e.target.value)
-                                        }
-                                        size="small"
-                                        fullWidth
-                                    />
-                                </div>
-                                <div className="flex gap-4 max-sm:flex-col">
-                                    <div className='w-1/2 max-sm:w-full'>
-                                        <div className='!bg-white mb-3'>
-                                            {/* ON */}
-                                            <TextField
-                                                label="Texto ON"
-                                                value={led.textOn}
-                                                onChange={e =>
-                                                    updateLed(index, 'textOn', e.target.value)
-                                                }
-                                                size="small"
-                                                fullWidth
-                                            />
-                                        </div>
-                                        <div className='!bg-white'>
-                                            <TextField
-                                                type="color"
-                                                label="Color ON"
-                                                value={led.colorOn}
-                                                onChange={e =>
-                                                    updateLed(index, 'colorOn', e.target.value)
-                                                }
-                                                size="small"
-                                                fullWidth
-                                            />
-                                        </div>
+                <Box sx={shellSx}>
+                    <form onSubmit={handleSubmit(send)} className='flex flex-col lg:flex-row gap-4 w-full'>
+                        <div className='flex flex-col gap-3 w-full lg:w-7/12'>
+                            <Box sx={sectionSx}>
+                                <SectionTitle>Información</SectionTitle>
+                                <div className='flex flex-wrap gap-2'>
+                                    <div style={{ flex: '2 1 260px' }}>
+                                        <TextField
+                                            fullWidth
+                                            size='small'
+                                            label='Título del grupo'
+                                            {...register('title')}
+                                        />
                                     </div>
-                                    <div className='w-1/2 max-sm:w-full'>
-                                        <div className='!bg-white mb-3'>
-                                            {/* OFF */}
-                                            <TextField
-                                                label="Texto OFF"
-                                                value={led.textOff}
-                                                onChange={e =>
-                                                    updateLed(index, 'textOff', e.target.value)
-                                                }
-                                                size="small"
-                                                fullWidth
-                                            />
-                                        </div>
-                                        <div className='!bg-white'>
-                                            <TextField
-                                                type="color"
-                                                label="Color OFF"
-                                                value={led.colorOff}
-                                                onChange={e =>
-                                                    updateLed(index, 'colorOff', e.target.value)
-                                                }
-                                                size="small"
-                                                fullWidth
-                                            />
-                                        </div>
+                                    <div style={{ flex: '1 1 140px' }}>
+                                        <TextField
+                                            fullWidth
+                                            size='small'
+                                            label='Orden'
+                                            {...register('order')}
+                                        />
                                     </div>
                                 </div>
-                                
-                                <div className='!bg-white'>
-                                    <SelectVars
-                                        setValueState={v => setLedVar(index, v)}
-                                        label="Variable del LED"
-                                    />
+                            </Box>
+
+                            <Box sx={sectionSx}>
+                                <SectionTitle
+                                    right={
+                                        <span className='text-[11px] font-semibold text-slate-500 dark:text-gray-400'>
+                                            {leds.length} {leds.length === 1 ? 'LED' : 'LEDs'}
+                                        </span>
+                                    }
+                                >
+                                    LEDs configurados
+                                </SectionTitle>
+
+                                <div className='flex flex-col gap-2.5'>
+                                    {leds.map((led, index) => (
+                                        <Box key={led.key} sx={ledCardSx(index)}>
+                                            <div className='flex items-center justify-between gap-2'>
+                                                <div className='inline-flex items-center gap-2'>
+                                                    <span className='text-[10px] font-bold uppercase tracking-[0.14em] text-white bg-[#e36a00] px-2 py-0.5 rounded-full'>
+                                                        LED {index + 1}
+                                                    </span>
+                                                </div>
+                                                <Button
+                                                    size='small'
+                                                    variant='text'
+                                                    color='error'
+                                                    startIcon={<DeleteOutline sx={{ fontSize: 16 }} />}
+                                                    onClick={() => removeLed(index)}
+                                                    sx={{
+                                                        textTransform: 'none',
+                                                        fontWeight: 500,
+                                                        minHeight: 0,
+                                                        px: 1,
+                                                        py: 0.25,
+                                                    }}
+                                                >
+                                                    Eliminar
+                                                </Button>
+                                            </div>
+
+                                            <TextField
+                                                fullWidth
+                                                size='small'
+                                                label='Nombre del LED'
+                                                value={led.title}
+                                                onChange={e => updateLed(index, 'title', e.target.value)}
+                                            />
+
+                                            <div className='flex flex-wrap gap-2'>
+                                                <div style={{ flex: '2 1 200px' }}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size='small'
+                                                        label='Texto ON'
+                                                        value={led.textOn}
+                                                        onChange={e => updateLed(index, 'textOn', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: '1 1 120px' }}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size='small'
+                                                        type='color'
+                                                        label='Color ON'
+                                                        value={led.colorOn}
+                                                        onChange={e => updateLed(index, 'colorOn', e.target.value)}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className='flex flex-wrap gap-2'>
+                                                <div style={{ flex: '2 1 200px' }}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size='small'
+                                                        label='Texto OFF'
+                                                        value={led.textOff}
+                                                        onChange={e => updateLed(index, 'textOff', e.target.value)}
+                                                    />
+                                                </div>
+                                                <div style={{ flex: '1 1 120px' }}>
+                                                    <TextField
+                                                        fullWidth
+                                                        size='small'
+                                                        type='color'
+                                                        label='Color OFF'
+                                                        value={led.colorOff}
+                                                        onChange={e => updateLed(index, 'colorOff', e.target.value)}
+                                                        InputLabelProps={{ shrink: true }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <SelectVars
+                                                setValueState={v => setLedVar(index, v)}
+                                                label='Variable del LED'
+                                            />
+                                        </Box>
+                                    ))}
                                 </div>
 
                                 <Button
-                                    color="error"
-                                    className='!bg-white w-[25%]'
-                                    size='small'
-                                    variant="outlined"
-                                    onClick={() => removeLed(index)}
+                                    variant='outlined'
+                                    sx={addPillSx}
+                                    startIcon={<AddCircleOutline sx={{ fontSize: 18 }} />}
+                                    onClick={addLed}
+                                    disabled={leds.length >= MAX_LEDS}
                                 >
-                                    Eliminar LED
+                                    Agregar LED ({leds.length}/{MAX_LEDS})
                                 </Button>
+                            </Box>
 
-                            </Card>
-                        ))}
+                            <div className='flex justify-end pt-1'>
+                                <Button type='submit' variant='contained' disableElevation sx={submitPillSx}>
+                                    Guardar
+                                </Button>
+                            </div>
+                        </div>
 
-                        <Button
-                            variant="outlined"
-                            onClick={addLed}
-                            disabled={leds.length >= MAX_LEDS}
-                        >
-                            Agregar LED ({leds.length}/{MAX_LEDS})
-                        </Button>
-
-                        <Button type="submit" variant="contained">
-                            Guardar
-                        </Button>
-                    </Card>
-
-                    {/* PREVIEW */}
-                    <Card className="w-2/5 max-sm:w-full !rounded-lg h-[42dvh] 2xl:h-[35dvh]">
-                        <Suspense fallback={<div>Cargando preview...</div>}>
-                            <MultipleBooleanChart
-                                title={getValues('title')}
-                                items={leds.map(l => ({
-                                    ...l,
-                                    value: false,
-                                }))}
-                            />
-                        </Suspense>
-                    </Card>
-                </form>
-            </div>
+                        <div className='w-full lg:w-5/12'>
+                            <Box sx={{ ...previewCardSx, minHeight: 340 }}>
+                                <Suspense fallback={<div className='p-3 text-sm text-slate-500'>Cargando preview...</div>}>
+                                    <MultipleBooleanChart
+                                        title={getValues('title') || 'Vista previa'}
+                                        items={leds.map(l => ({
+                                            ...l,
+                                            value: false,
+                                        }))}
+                                    />
+                                </Suspense>
+                            </Box>
+                        </div>
+                    </form>
+                </Box>
+            </Container>
         </VarsProvider>
     )
 }
