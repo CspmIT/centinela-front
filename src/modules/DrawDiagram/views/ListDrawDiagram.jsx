@@ -1,17 +1,45 @@
-import { useEffect, useState } from 'react';
-import { Box, Button, Container, Typography } from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Container, useMediaQuery } from '@mui/material';
+import { Add } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { request } from '../../../utils/js/request';
 import { backend } from '../../../utils/routes/app.routes';
 import TableCustom from '../../../components/TableCustom';
 import Swal from 'sweetalert2';
 import LoaderComponent from '../../../components/Loader';
+import PageHeader from '../../../components/PageHeader';
+import { ActionsRow, EditChip, StatusPill, StatusToggleChip, ToneChip } from '../../../components/TableActions';
+
+const primaryActionSx = {
+	borderRadius: '999px',
+	textTransform: 'none',
+	fontWeight: 500,
+	letterSpacing: '0.01em',
+	px: 2.5,
+	py: 1,
+	minHeight: 0,
+	background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+	boxShadow: '0 4px 14px rgba(227, 106, 0, 0.35)',
+	transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+	'&:hover': {
+		background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+		boxShadow: '0 8px 24px rgba(227, 106, 0, 0.45)',
+		transform: 'translateY(-1px)',
+	},
+	'&:active': { transform: 'translateY(0)' },
+};
 
 const ListDrawDiagram = () => {
 	const navigate = useNavigate();
 	const [listDiagram, setListDiagram] = useState([]);
 	const [columnsTable, setColumnsTable] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const isMobile = useMediaQuery('(max-width: 768px)');
+
+	const columnVisibility = useMemo(
+		() => (isMobile ? { id: false } : {}),
+		[isMobile]
+	);
 
 	const fetchDiagrams = async () => {
 		const url = backend[import.meta.env.VITE_APP_NAME];
@@ -32,37 +60,19 @@ const ListDrawDiagram = () => {
 				{
 					header: 'Estado',
 					accessorKey: 'status',
-					Cell: ({ row }) => (
-						<span className={`text-sm font-semibold ${row.original.status ? 'text-green-600' : 'text-red-600'}`}>
-							{row.original.status ? 'Activo' : 'Inactivo'}
-						</span>
-					),
+					Cell: ({ row }) => <StatusPill active={!!row.original.status} />,
 				},
 				{
 					header: 'Acciones',
 					accessorKey: 'actions',
 					Cell: ({ row }) => (
-						<Box display="flex" gap={1}>
-							<Button
-								variant="contained"
-								color="primary"
-								size="small"
-								onClick={() => navigate(`/newDiagram/${row.original.id}`)}
-							>
-								Editar
-							</Button>
-							<Button
-								variant="contained"
-								color="secondary"
-								size="small"
-								onClick={() => navigate(`/viewDiagram/${row.original.id}`)}
-							>
+						<ActionsRow>
+							<EditChip onClick={() => navigate(`/newDiagram/${row.original.id}`)} />
+							<ToneChip tone='info' onClick={() => navigate(`/viewDiagram/${row.original.id}`)}>
 								Ver
-							</Button>
-							<Button
-								variant="outlined"
-								color={row.original.status ? 'error' : 'success'}
-								size="small"
+							</ToneChip>
+							<StatusToggleChip
+								active={!!row.original.status}
 								onClick={async (e) => {
 									e.preventDefault();
 									const confirm = await Swal.fire({
@@ -104,10 +114,8 @@ const ListDrawDiagram = () => {
 										});
 									}
 								}}
-							>
-								{row.original.status ? 'Desactivar' : 'Activar'}
-							</Button>
-						</Box>
+							/>
+						</ActionsRow>
 					),
 				},
 			];
@@ -131,40 +139,33 @@ const ListDrawDiagram = () => {
 	}, []);
 
 	return (
-		<Container className="w-full">
-			{/* Header responsivo */}
-			<div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center mb-4">
-	
-				{/* Título */}
-				<Typography
-					className='w-full text-center md:!ms-40'
-					variant="h4"
-					align="center"
-				>
-					Diagramas
-				</Typography>
-	
-				{/* Botón */}
-				<div className='flex justify-center sm:justify-end'>
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={() => navigate('/newDiagram')}
-						className="sm:mx-10 whitespace-nowrap"
-					>
-						Crear Diagrama
-					</Button>
-				</div>
-			</div>
-	
-			{/* Tabla o Loader */}
+		<Container maxWidth={false} disableGutters className='w-full px-3 sm:px-5 pt-2 pb-4'>
+			<PageHeader
+				title='Diagramas'
+				action={
+					<div className='flex w-full justify-center sm:w-auto sm:justify-end'>
+						<Button
+							onClick={() => navigate('/newDiagram')}
+							variant='contained'
+							disableElevation
+							startIcon={<Add sx={{ fontSize: 18 }} />}
+							sx={primaryActionSx}
+						>
+							Crear diagrama
+						</Button>
+					</div>
+				}
+			/>
+
 			{!loading ? (
-				<div className="w-full overflow-x-auto mb-5">
+				<div className='w-full overflow-x-auto'>
 					<TableCustom
 						columns={columnsTable}
 						data={listDiagram.length ? listDiagram : []}
 						pagination={true}
 						pageSize={10}
+						columnVisibility={columnVisibility}
+						density={isMobile ? 'compact' : undefined}
 					/>
 				</div>
 			) : (
@@ -172,7 +173,7 @@ const ListDrawDiagram = () => {
 			)}
 		</Container>
 	)
-	
+
 };
 
 export default ListDrawDiagram;
