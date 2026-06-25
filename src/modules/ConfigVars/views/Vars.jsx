@@ -1,4 +1,5 @@
-import { Button, Container, FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import { Box, Button, Container, FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import { FilterAltOutlined, RestartAltOutlined } from '@mui/icons-material'
 import TableCustom from '../../../components/TableCustom'
 import { ActionsRow, DeleteChip, EditChip } from '../../../components/TableActions'
 import { useEffect, useState } from 'react'
@@ -7,10 +8,60 @@ import ModalVar from '../../../components/DataGenerator/ModalVar'
 import { backend } from '../../../utils/routes/app.routes'
 import { request } from '../../../utils/js/request'
 import Swal from 'sweetalert2'
-import CardCustom from '../../../components/CardCustom'
 import { Controller, useForm } from 'react-hook-form'
 import LoaderComponent from '../../../components/Loader'
 import PageHeader from '../../../components/PageHeader'
+
+const filtersShellSx = {
+    borderRadius: '12px',
+    border: '1px solid rgba(15, 42, 68, 0.06)',
+    backgroundColor: '#ffffff',
+    p: 1,
+    mb: 1.5,
+    'body.dark &': {
+        border: '1px solid rgba(255, 255, 255, 0.06)',
+        backgroundColor: 'rgba(17, 24, 39, 0.6)',
+    },
+}
+
+const filterPillSx = {
+    borderRadius: '999px',
+    textTransform: 'none',
+    fontWeight: 500,
+    px: 1.75,
+    py: 0.5,
+    minHeight: 0,
+    fontSize: '0.78rem',
+    background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+    boxShadow: '0 4px 14px rgba(227, 106, 0, 0.35)',
+    transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+    '&:hover': {
+        background: 'linear-gradient(135deg, #e36a00 0%, #a14b00 100%)',
+        boxShadow: '0 8px 24px rgba(227, 106, 0, 0.45)',
+        transform: 'translateY(-1px)',
+    },
+    '&:active': { transform: 'translateY(0)' },
+}
+
+const ghostPillSx = {
+    borderRadius: '999px',
+    textTransform: 'none',
+    fontWeight: 500,
+    px: 1.75,
+    py: 0.5,
+    minHeight: 0,
+    fontSize: '0.78rem',
+    borderColor: 'rgba(15, 42, 68, 0.14)',
+    color: '#475569',
+    '&:hover': {
+        borderColor: '#e36a00',
+        backgroundColor: 'rgba(227, 106, 0, 0.06)',
+    },
+    'body.dark &': {
+        borderColor: 'rgba(255,255,255,0.14)',
+        color: '#cbd5e1',
+    },
+}
 
 const Vars = () => {
     const [loading, setLoading] = useState(true)
@@ -20,7 +71,12 @@ const Vars = () => {
     const [varsOriginal, setVarsOriginal] = useState([]);
     const [processList, setProcessList] = useState([]);
     const [unitList, setUnitList] = useState([]);
-    const { control, handleSubmit } = useForm({ defaultValues: { process: '', calc: '', unit: '' } });
+    const { control, handleSubmit, reset } = useForm({ defaultValues: { process: '', calc: '', unit: '' } });
+
+    const onResetFilters = () => {
+        reset({ process: '', calc: '', unit: '' })
+        setVars(varsOriginal)
+    }
     const deleteVar = async (id) => {
         const url = `${backend[import.meta.env.VITE_APP_NAME]}/deleteVar/${id}`
         const aprovationUser = await Swal.fire({
@@ -147,15 +203,14 @@ const Vars = () => {
 
             {!loading ? (
                 <>
-                    <CardCustom className={'p-2 my-5 rounded-md bg-grey-100'}>
-                        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-wrap relative w-full justify-center items-end mt-2'>
-                            <div className='md:w-1/6 p-1 w-full'>
-                                <FormControl fullWidth size="small" className='shadow-sm'>
+                    <Box sx={filtersShellSx}>
+                        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-wrap items-center gap-1.5'>
+                            <div className='flex-1 min-w-[180px]'>
+                                <FormControl fullWidth size="small">
                                     <InputLabel id="unit_label">Unidad</InputLabel>
                                     <Controller
                                         name="unit"
                                         control={control}
-                                        size="small"
                                         render={({ field }) => (
                                             <Select {...field} labelId="unit_label" label="Unidad">
                                                 <MenuItem value="">Todos</MenuItem>
@@ -169,34 +224,28 @@ const Vars = () => {
                                     />
                                 </FormControl>
                             </div>
-                            <div className='md:w-1/6 p-1 w-full'>
-                                <FormControl fullWidth size="small" className='shadow-sm'>
+                            <div className='flex-1 min-w-[180px]'>
+                                <FormControl fullWidth size="small">
                                     <InputLabel id="calc_label">Cálculo</InputLabel>
                                     <Controller
                                         name="calc"
                                         control={control}
                                         render={({ field }) => (
-                                            <Select
-                                                labelId="calc_label"
-                                                label="Cálculo"
-                                                {...field}
-                                            >
+                                            <Select labelId="calc_label" label="Cálculo" {...field}>
                                                 <MenuItem value="">Todas</MenuItem>
                                                 <MenuItem value="true">Sí</MenuItem>
                                                 <MenuItem value="false">No</MenuItem>
                                             </Select>
-
                                         )}
                                     />
                                 </FormControl>
                             </div>
-                            <div className='md:w-1/4 p-1 w-full'>
-                                <FormControl fullWidth size="small" className='shadow-sm'>
+                            <div className='flex-1 min-w-[180px]'>
+                                <FormControl fullWidth size="small">
                                     <InputLabel id="process_label">Proceso</InputLabel>
                                     <Controller
                                         name="process"
                                         control={control}
-                                        size="small"
                                         render={({ field }) => (
                                             <Select {...field} labelId="process_label" label="Proceso">
                                                 <MenuItem value="">Todos</MenuItem>
@@ -211,18 +260,27 @@ const Vars = () => {
                                 </FormControl>
                             </div>
 
-
-                            <div className='p-1 w-full justify-center flex'>
-                                <Button variant="contained" color="primary" size="small"
-                                    onClick={() => {
-                                        handleSubmit(onSubmit)()
-                                    }}
+                            <div className='flex gap-1.5 w-full justify-center sm:w-auto sm:justify-start shrink-0'>
+                                <Button
+                                    type='submit'
+                                    variant='contained'
+                                    disableElevation
+                                    startIcon={<FilterAltOutlined sx={{ fontSize: 15 }} />}
+                                    sx={filterPillSx}
                                 >
                                     Filtrar
                                 </Button>
+                                <Button
+                                    variant='outlined'
+                                    startIcon={<RestartAltOutlined sx={{ fontSize: 15 }} />}
+                                    sx={ghostPillSx}
+                                    onClick={onResetFilters}
+                                >
+                                    Limpiar
+                                </Button>
                             </div>
                         </form>
-                    </CardCustom >
+                    </Box>
                     <TableCustom
                         data={vars.length > 0 ? vars : []}
                         columns={columns}
