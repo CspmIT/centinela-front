@@ -1,5 +1,5 @@
 export const getDesktopDownloads = async () => {
-	const res = await fetch('https://api.github.com/repos/CspmIT/mas-agua-front/releases/latest')
+	const res = await fetch('https://api.github.com/repos/CspmIT/centinela-front/releases/latest')
 
 	if (!res.ok) {
 		throw new Error('No se pudo obtener el último release')
