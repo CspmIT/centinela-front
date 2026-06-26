@@ -1,7 +1,7 @@
 {
-	"productName": "Mas Agua",
+	"productName": "Centinela",
 	"version": "1.0.4",
-	"identifier": "com.masagua.desktop",
+	"identifier": "com.centinela.desktop",
 	"build": {
 		"beforeDevCommand": "npm run dev",
 		"beforeBuildCommand": "npm run build",
@@ -17,7 +17,7 @@
 	"app": {
 		"windows": [
 			{
-				"title": "Mas Agua",
+				"title": "Centinela",
 				"width": 1024,
 				"height": 768,
 				"resizable": true,
@@ -38,9 +38,9 @@
 	"plugins": {
 		"updater": {
 			"active": true,
-			"endpoints": ["https://github.com/CspmIT/mas-agua-front/releases/latest/download/latest.json"],
+			"endpoints": ["https://github.com/CspmIT/centinela-front/releases/latest/download/latest.json"],
 			"dialog": true,
-			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENFOUE0OEYyMDA5NDkyNEQKUldSTmtwUUE4a2lhenBraVNOd2cwOU1ZbkxWdVJTU0lEbUZiTkp0VTFRenhtdndVZ1VwUlQ4OG0K"
+			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE3OTk5QzdDNzhGQ0YwRkEKUldUNjhQeDRmSnlaRit2MnIxWjc2dkU3OHBCN0pSZ0o1eHlkbXBCaStQMTJHNVNKakFPa3dqaGQK"
 		}
 	}
 }
