@@ -117,6 +117,17 @@ export default function SmartOutletChart({ title, topic, location, ...rest }) {
     // Replica el original: toast "Acción en progreso" y refresco a los 10s.
     const sendAction = async (cmd) => {
         if (!selected || sending) return
+
+        const confirm = await Swal.fire({
+            icon: 'question',
+            title: '¿Estás seguro que querés realizar esta acción?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#e36a00',
+        })
+        if (!confirm.isConfirmed) return
+
         setSending(true)
         try {
             await request(
@@ -152,7 +163,7 @@ export default function SmartOutletChart({ title, topic, location, ...rest }) {
     return (
         <div className='flex flex-col w-full h-full min-h-0 py-1.5 px-1 gap-1 overflow-y-auto'>
             {/* Cabecera: ubicación (negrita) + estado online/offline */}
-            <div className='flex items-center justify-between gap-2 py-2 shrink-0'>
+            <div className='flex items-center justify-between gap-2 py-1 shrink-0'>
                 <p className='text-sm font-bold text-slate-800 dark:text-gray-100 truncate'>
                     {location || '—'}
                 </p>
@@ -192,7 +203,7 @@ export default function SmartOutletChart({ title, topic, location, ...rest }) {
                                     className={`w-full rounded-xl transition-all duration-300 ease-out ${
                                         selected ? 'max-w-[38px]' : 'max-w-[180px]'
                                     }`}
-                                    style={{ boxShadow: `0 0 0 3px ${isSelected ? '#e36a00' : c.ring}` }}
+                                    style={{ boxShadow: `0 0 0 3px ${c.ring}` }}
                                 >
                                     <SocketIcon color={c.socket} />
                                 </div>
@@ -224,23 +235,18 @@ export default function SmartOutletChart({ title, topic, location, ...rest }) {
                 {selected && (
                     <div className='rounded-xl border border-orange-200 dark:border-orange-500/30 bg-orange-50/50 dark:bg-orange-500/5 px-3 py-1'>
                         <div className='flex items-center justify-between gap-1'>
-                            <p className='text-[13px] font-semibold text-slate-700 dark:text-gray-100'>
-                                Tomacorriente N° {selected}
+                            <p className='text-[14px] font-semibold text-slate-700 dark:text-gray-100 truncate'>
+                                {channels[selected - 1] || (
+                                    <span className='italic font-normal text-slate-400'>Sin equipo conectado</span>
+                                )}
                             </p>
-                            <span className={`text-[12px] font-bold ${STATE_LABEL[selectedState].cls}`}>
+                            <span className={`text-[14px] font-bold ${STATE_LABEL[selectedState].cls}`}>
                                 {STATE_LABEL[selectedState].text}
                             </span>
                         </div>
-                        <p className='text-[12px] text-slate-600 dark:text-gray-300 truncate'>
-                            {channels[selected - 1] ? (
-                                <>Equipo: <b>{channels[selected - 1]}</b></>
-                            ) : (
-                                <span className='italic text-slate-400'>Sin equipo conectado</span>
-                            )}
-                        </p>
 
                         {/* Acciones (solo íconos): encendida -> Apagar + Reiniciar; apagada -> Encender */}
-                        <div className='no-drag flex items-center justify-center gap-1'>
+                        <div className='no-drag flex items-center justify-center gap-1 mt-1'>
                             {selectedState === 'on' ? (
                                 <>
                                     <ActionButton
