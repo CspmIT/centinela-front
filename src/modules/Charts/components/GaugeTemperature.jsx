@@ -147,14 +147,14 @@ const GaugeTemperature = ({
         // 🌡️ Lectura real
         detail: {
           valueAnimation: false,
-          offsetCenter: [0, '75%'],
+          offsetCenter: [0, '85%'],
           formatter: () =>
             hasValue
               ? `{value|${safeValue.toFixed(1)}${unidad}}\n{sub|${description}}`
               : `{value|Sin datos}\n{sub|${description}}`,
           rich: {
             value: {
-              fontSize: 26,
+              fontSize: 24,
               fontWeight: 'bold',
               color: hasValue ? '#0f172a' : '#9ca3af',
             },
