@@ -80,8 +80,15 @@ const chartTypes = [
     {
         id: 12,
         title: 'Indicador de temperatura',
-        image: '/assets/img/charts/gauge-speed.png?height=200&width=200',
+        image: '/assets/img/charts/GaugeTemperature.png?height=200&width=200',
         description: 'Arco con zonas de color (frío / templado / caliente). Se define la temperatura mínima y máxima del rango, y muestra la temperatura real tomada de Influx.',
+    },
+    {
+        id: 13,
+        title: 'Smart Outlet',
+        image: '/assets/img/charts/SmartOulet.png?height=200&width=200',
+        description: 'Zapatilla inteligente de 5 tomas. Muestra en tiempo real el estado (encendido/apagado) de cada toma leído desde Influx a partir de su tópico.',
+        smartoutlet: true,
     },
 ]
 
@@ -151,6 +158,7 @@ function SelectType() {
         if (chart?.multipleBoolean) return navigate('/config/graphic/multipleBoolean')
         if (chart?.pie) return navigate('/config/graphic/pie')
         if (chart?.board) return navigate('/config/graphic/board')
+        if (chart?.smartoutlet) return navigate('/config/graphic/smartoutlet')
         navigate(`/config/graphic/${chart.id}`)
     }
 

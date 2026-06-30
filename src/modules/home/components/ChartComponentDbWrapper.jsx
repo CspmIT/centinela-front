@@ -8,6 +8,7 @@ import MultipleBooleanChart from '../../Charts/components/MultipleBooleanChart'
 import CirclePorcentaje from '../../Charts/components/CirclePorcentaje'
 import GaugeSpeed from '../../Charts/components/GaugeSpeed'
 import GaugeTemperature from '../../Charts/components/GaugeTemperature'
+import SmartOutletChart from '../../Charts/components/SmartOutletChart'
 
 const BOTTOM_KEYS = ['bottom1', 'bottom2', 'bottom3', 'bottom4', 'bottom5', 'bottom6']
 
@@ -131,6 +132,11 @@ export const ChartComponentDbWrapper = ({
 
     }, [inflValues])
 
+    // SmartOutlet es autocontenido: consulta su propio estado a Influx
+    // (no depende de inflValues ni del gate de carga compartido).
+    if (ChartComponent === SmartOutletChart) {
+        return <ChartComponent {...initialProps} />
+    }
 
     if (loading) {
         return (

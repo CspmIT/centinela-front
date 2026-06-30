@@ -13,6 +13,7 @@ import GaugeSpeed from '../../Charts/components/GaugeSpeed'
 import GaugeTemperature from '../../Charts/components/GaugeTemperature'
 import BooleanChart from '../../Charts/components/BooleanChart'
 import MultipleBooleanChart from '../../Charts/components/MultipleBooleanChart'
+import SmartOutletChart from '../../Charts/components/SmartOutletChart'
 import { ChartComponentDbWrapper } from '../components/ChartComponentDbWrapper'
 import AddChartDialog from '../components/AddChartDialog'
 import EmptyDashboard from '../components/EmptyDashboard'
@@ -53,7 +54,8 @@ const chartComponents = {
     GaugeSpeed,
     GaugeTemperature,
     BooleanChart,
-    MultipleBooleanChart
+    MultipleBooleanChart,
+    SmartOutlet: SmartOutletChart
 }
 
 const BREAKPOINTS = { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }

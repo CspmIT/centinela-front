@@ -150,6 +150,7 @@ const ChartsTable = () => {
                 if (type === 'MultipleBooleanChart') { navigate(`/config/graphic/multipleBoolean/${row.original.id}`); return }
                 if (type === 'PumpControl') { navigate('/config/pumps'); return }
                 if (type === 'BoardChart') { navigate(`/config/graphic/board/${row.original.id}`); return }
+                if (type === 'SmartOutlet') { navigate(`/config/graphic/smartoutlet/${row.original.id}`); return }
 
                 const matchingConfig = Object.values(configs).find(
                   (config) => config.typeGraph === type
