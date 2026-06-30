@@ -31,6 +31,7 @@ import ConfigPie from './modules/Charts/views/ConfigPie'
 import Alert from './modules/alert/views'
 import ConfigAlarms from './modules/ConfigAlarms/views/index'
 import ConfigMultipleBooleanChart from './modules/Charts/views/ConfigMultipleBooleanChart'
+import ConfigSmartOutlet from './modules/Charts/views/ConfigSmartOutlet'
 
 import ExternalUser from './modules/ExternalUsers/views/index'
 import { isTauri } from '@tauri-apps/api/core'
@@ -80,6 +81,8 @@ function App() {
 		{ path: '/config/graphic/multipleBoolean/:id', element: <ConfigMultipleBooleanChart /> },
 		{ path: '/config/graphic/board', element: <ConfigBoardChart /> },
 		{ path: '/config/graphic/board/:id', element: <ConfigBoardChart /> },
+		{ path: '/config/graphic/smartoutlet', element: <ConfigSmartOutlet /> },
+		{ path: '/config/graphic/smartoutlet/:id', element: <ConfigSmartOutlet /> },
 		{ path: '/config/vars', element: <Vars /> },
 		{ path: '/alert', element: <Alert /> },
 		{ path: '/config/alarm', element: <ConfigAlarms /> },
