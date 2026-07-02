@@ -1,7 +1,7 @@
 function Footer() {
 	return (
 		<footer
-			className='absolute bottom-0 h-10 flex justify-center items-center w-full z-50 px-4'
+			className='absolute bottom-0 h-10 hidden sm:flex justify-center items-center w-full z-50 px-4'
 			style={{
 				background: 'linear-gradient(150deg, #e36a00 0%, #a14b00 75%, #a14b00 100%)',
 			}}
