@@ -49,5 +49,5 @@ jobs:
               with:
                   tagName: v__VERSION__
                   releaseName: 'Centinela v__VERSION__'
-                  releaseBody: 'Modulo de Tableros y cambios en gráficos lineales.'
+                  releaseBody: 'feat(smart-outlets): nuevo gráfico de zapatilla inteligente en el dashboard'
                   prerelease: false
