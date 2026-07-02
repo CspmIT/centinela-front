@@ -38,13 +38,13 @@ const MainContent = () => {
 	}, [location])
 	return (
 		<>
-			<div className={`pt-16 !min-h-screen absolute w-full bg-gray-200 dark:bg-gray-700`}>
+			<div className={`pt-[3.25rem] !min-h-screen absolute w-full bg-gray-200 dark:bg-gray-700`}>
 				<NavBarCustom setLoading={setLoading} />
 				{!loading ? (
 					<LoaderComponent />
 				) : (
 					<>
-						<div className={`sm:pl-20 pl-4 pr-4 pb-20 z-10 flex relative ${style.boxMain}`}>
+						<div className={`sm:pl-[4rem] pl-4 pr-4 sm:pr-2 pb-20 sm:pb-12 z-10 flex relative ${style.boxMain}`}>
 							<Outlet />
 						</div>
 						<Footer />
