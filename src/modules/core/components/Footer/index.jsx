@@ -1,8 +1,15 @@
 function Footer() {
 	return (
-		<div className='absolute bottom-0 !h-10 flex justify-center items-center w-full z-50 bg-gradient-to-r from-[#e36a00] via-[#c85800] to-[#873300] text-gray-200'>
-			<h6>Copyright © IT & Development - COOPMORTEROS {new Date().getFullYear()}</h6>
-		</div>
+		<footer
+			className='absolute bottom-0 h-10 flex justify-center items-center w-full z-50 px-4'
+			style={{
+				background: 'linear-gradient(150deg, #e36a00 0%, #a14b00 75%, #a14b00 100%)',
+			}}
+		>
+			<p className='text-[10.5px] font-semibold uppercase tracking-[0.14em] text-white/80 truncate'>
+				Copyright © IT & Development - COOPMORTEROS {new Date().getFullYear()}
+			</p>
+		</footer>
 	)
 }
 

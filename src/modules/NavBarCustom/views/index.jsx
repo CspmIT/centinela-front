@@ -138,24 +138,26 @@ function NavBarCustom({ setLoading }) {
 	return (
 		<>
 			<AppBarCustom className='!max-h-11 flex justify-center' position='fixed' open={open}>
-				<Toolbar className='!pl-[1.1rem]'>
-					<IconButton
-						color='inherit'
-						aria-label='open drawer'
-						onClick={handleDrawerOpen}
-						edge='start'
-						size='small'
-						sx={{
-							marginRight: 4,
-							boxShadow: 'none',
-							...(isMobile && { display: 'none' }),
-							...(open && { display: 'none' }),
-						}}
-					>
-						<MenuIcon />
-					</IconButton>
+				<Toolbar className='!pl-0'>
+					{!isMobile && !open && (
+						<div className='w-[57px] flex justify-center shrink-0'>
+							<IconButton
+								color='inherit'
+								aria-label='open drawer'
+								onClick={handleDrawerOpen}
+								size='small'
+								sx={{ boxShadow: 'none' }}
+							>
+								<MenuIcon />
+							</IconButton>
+						</div>
+					)}
 
-					<img onClick={() => navigate('home')} className='max-h-10 cursor-pointer' src={Logo} />
+					<img
+						onClick={() => navigate('home')}
+						className={`max-h-10 cursor-pointer ${isMobile || open ? 'ml-4' : ''}`}
+						src={Logo}
+					/>
 					<div className='absolute right-5 flex flex-row items-center'>
 						<span className={`inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-3.5 py-1 mr-2 text-white/95 text-sm font-medium tracking-wide select-none ${isMobile ? 'hidden' : ''}`}>
 							{nameCoop}
@@ -178,34 +180,40 @@ function NavBarCustom({ setLoading }) {
 						position: 'fixed',
 						bottom: 0,
 						width: '100%',
-						height: '9vh',
+						height: 64,
 						zIndex: 1200,
 						'& .MuiDrawer-paper': {
 							position: 'absolute',
 							bottom: 0,
 							width: '100%',
-							height: '9vh',
+							height: 64,
 							display: 'flex',
 							flexDirection: 'row',
 							justifyContent: 'space-around',
-							padding: '0',
+							padding: 0,
+							paddingBottom: 'env(safe-area-inset-bottom)',
+							borderRadius: '18px 18px 0 0',
+							overflow: 'hidden',
+							boxShadow: '0 -8px 24px -12px rgba(15, 42, 68, 0.28)',
+							borderTop: '1px solid rgba(15, 42, 68, 0.06)',
 						},
 					}),
 				}}
 			>
-				<div className='bg-white dark:bg-gray-800 h-full w-full flex flex-col border-r border-slate-200 dark:border-slate-700'>
+				<div className='bg-white dark:bg-gray-800 h-full w-full flex flex-col sm:border-r border-slate-200 dark:border-slate-700'>
 					<DrawerHeaderCustom className='!min-h-11 !h-11 shrink-0' style={{ display: isMobile ? 'none' : '' }}>
 						<IconButton onClick={handleDrawerClose}>
 							<ChevronLeftIcon className='dark:text-white' />
 						</IconButton>
 					</DrawerHeaderCustom>
-					<Divider className='shrink-0' />
+					<Divider className='shrink-0 hidden sm:block' />
 
 					<List
 						className='navbar-scroll'
 						sx={{
 							flex: 1,
 							minHeight: 0,
+							py: 0.5,
 							overflowY: 'auto',
 							overflowX: 'hidden',
 							'&::-webkit-scrollbar': { width: 6 },
@@ -217,7 +225,8 @@ function NavBarCustom({ setLoading }) {
 							...(isMobile && {
 								display: 'flex',
 								flexDirection: 'row',
-								justifyContent: 'center',
+								justifyContent: 'space-around',
+								alignItems: 'center',
 								width: '100%',
 								height: '100%',
 								padding: 0,
@@ -233,6 +242,7 @@ function NavBarCustom({ setLoading }) {
 							}
 							const listIcon = ListIcon()
 							const componentIcon = listIcon.filter((icono) => icono.name === item.icon)?.[0] || ''
+							const isActive = buttonActive?.includes(item.link)
 
 							return (
 								<ListItem
@@ -260,9 +270,38 @@ function NavBarCustom({ setLoading }) {
 											<ListItemButton
 												sx={{
 													minHeight: 32,
+													position: 'relative',
 													justifyContent: !isMobile && open ? 'initial' : 'center',
 													padding: !isMobile ? '1rem' : '0.2rem',
-													py: 1.2
+													py: 1.2,
+													transition: 'background-color 180ms ease',
+													backgroundColor: isActive
+														? 'rgba(208, 94, 0, 0.08)'
+														: 'transparent',
+													'&:hover': {
+														backgroundColor: isActive
+															? 'rgba(208, 94, 0, 0.12)'
+															: 'rgba(208, 94, 0, 0.05)',
+													},
+													...(!isMobile &&
+														isActive && {
+															'&::before': {
+																content: '""',
+																position: 'absolute',
+																left: 0,
+																top: '22%',
+																bottom: '22%',
+																width: '3px',
+																borderRadius: '0 3px 3px 0',
+																background:
+																	'linear-gradient(180deg, #e36a00 0%, #a14b00 100%)',
+																boxShadow: '0 0 6px rgba(227, 106, 0, 0.45)',
+															},
+														}),
+													...(isMobile && {
+														borderRadius: '10px',
+														mx: 0.5,
+													}),
 												}}
 												className={`!w-full ${item.link === '/Alert' && newEvent ? styles.backgroundAlert : ''
 													}`}
@@ -276,7 +315,15 @@ function NavBarCustom({ setLoading }) {
 														zIndex: 2000,
 														minWidth: 0,
 														justifyContent: 'center',
-														color: buttonActive?.includes(item.link) ? '#d05e00' : '',
+														color: isActive ? '#d05e00' : '#64748b',
+														transition: 'color 180ms ease, filter 180ms ease',
+														'& svg': { fontSize: 24 },
+														filter: isActive
+															? 'drop-shadow(0 2px 5px rgba(227, 106, 0, 0.35))'
+															: 'none',
+														'body.dark &': {
+															color: isActive ? '#d05e00' : '#94a3b8',
+														},
 													}}
 												>
 													{item.link === 'alert' ? (
@@ -302,10 +349,13 @@ function NavBarCustom({ setLoading }) {
 
 												<ListItemText
 													primary={item.name}
+													primaryTypographyProps={{
+														fontSize: '0.95rem',
+														fontWeight: isActive ? 600 : 500,
+													}}
 													sx={{
-														opacity: !isMobile && open ? 1 : 0,
-														color: buttonActive?.includes(item.link) ? '#d05e00' : '',
-														display: isMobile ? 'none !important' : 'block',
+														color: isActive ? '#d05e00' : '',
+														display: !isMobile && open ? 'block' : 'none',
 													}}
 												/>
 											</ListItemButton>
@@ -327,7 +377,7 @@ function NavBarCustom({ setLoading }) {
 									}),
 								}}
 							>
-								<Link to={'/tabs'} className={` text-black dark:text-white`}>
+								<Link to={'/tabs'} className={`!w-full text-black dark:text-white`}>
 									<ListItemButton
 										sx={{
 											minHeight: 48,
@@ -341,9 +391,14 @@ function NavBarCustom({ setLoading }) {
 										<ListItemIcon
 											sx={{
 												minWidth: 0,
-												mr: !isMobile && open ? 3 : 'auto',
+												mr: !isMobile && open ? 3 : 0,
 												justifyContent: 'center',
-												color: buttonActive == '/tabs' ? '#d05e00' : '',
+												color: buttonActive == '/tabs' ? '#d05e00' : '#64748b',
+												transition: 'color 180ms ease',
+												'& svg': { fontSize: 24 },
+												'body.dark &': {
+													color: buttonActive == '/tabs' ? '#d05e00' : '#94a3b8',
+												},
 											}}
 										>
 											<Badge badgeContent={tabActive} color='primary'>
@@ -353,9 +408,8 @@ function NavBarCustom({ setLoading }) {
 										<ListItemText
 											primary={'Paginas'}
 											sx={{
-												opacity: !isMobile && open ? 1 : 0,
 												color: buttonActive == '/tabs' ? '#d05e00' : '',
-												display: isMobile ? 'none !important' : 'block',
+												display: !isMobile && open ? 'block' : 'none',
 											}}
 										/>
 									</ListItemButton>
